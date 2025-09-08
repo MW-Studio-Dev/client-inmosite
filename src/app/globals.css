@@ -1,26 +1,181 @@
 @import "tailwindcss";
 
+
+
+/* Variables de colores globales */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Colores primarios */
+  --color-primary-50: #faf5ff;
+  --color-primary-100: #f3e8ff;
+  --color-primary-200: #e9d5ff;
+  --color-primary-300: #d8b4fe;
+  --color-primary-400: #c084fc;
+  --color-primary-500: #a855f7;
+  --color-primary-600: #9333ea;
+  --color-primary-700: #7c3aed;
+  --color-primary-800: #6b21a8;
+  --color-primary-900: #581c87;
+
+  /* Colores de fondo */
+  --color-background: #ffffff;
+  --color-background-secondary: #f8fafc;
+  --color-background-tertiary: #f1f5f9;
+  
+  /* Colores de superficie (cards, etc) */
+  --color-surface: #ffffff;
+  --color-surface-hover: #f8fafc;
+  --color-surface-border: #e2e8f0;
+  
+  /* Colores de texto */
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-tertiary: #64748b;
+  --color-text-muted: #94a3b8;
+  
+  /* Colores de acento */
+  --color-accent: #10b981;
+  --color-accent-hover: #059669;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-success: #10b981;
+  
+  /* Sombras */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  
+  /* Border radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Variables para tema oscuro */
+[data-theme="dark"] {
+  /* Colores de fondo oscuros */
+  --color-background: #0f172a;
+  --color-background-secondary: #1e293b;
+  --color-background-tertiary: #334155;
+  
+  /* Colores de superficie oscuros */
+  --color-surface: #1e293b;
+  --color-surface-hover: #334155;
+  --color-surface-border: #475569;
+  
+  /* Colores de texto oscuros */
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #cbd5e1;
+  --color-text-tertiary: #94a3b8;
+  --color-text-muted: #64748b;
+  
+  /* Sombras oscuras */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.2);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.3), 0 8px 10px -6px rgb(0 0 0 / 0.2);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Clases de utilidad personalizadas */
+@layer components {
+  .bg-gradient-primary {
+    background: var(--gradient-primary, linear-gradient(135deg, var(--color-primary-600), var(--color-primary-700)));
+  }
+  
+  .bg-gradient-primary-hover {
+    background: var(--gradient-primary-hover, linear-gradient(135deg, var(--color-primary-700), var(--color-primary-800)));
+  }
+  
+  .text-primary {
+    color: var(--color-primary-600);
+  }
+  
+  .text-primary-hover {
+    color: var(--color-primary-700);
+  }
+  
+  .border-primary {
+    border-color: var(--color-primary-600);
+  }
+  
+  .surface {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-surface-border);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .surface-hover {
+    background-color: var(--color-surface-hover);
+    box-shadow: var(--shadow-md);
   }
 }
 
+/* Estilos base */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Fuentes personalizadas */
+.font-display-black {
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.font-display-bold {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.font-elegant {
+  font-weight: 400;
+}
+
+.font-elegant-medium {
+  font-weight: 500;
+}
+
+.font-elegant-semibold {
+  font-weight: 600;
+}
+
+.font-elegant-bold {
+  font-weight: 700;
+}
+
+/* Animaciones personalizadas */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-fade-in-scale {
+  animation: fadeInScale 0.4s ease-out;
 }
