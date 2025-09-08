@@ -1,4 +1,4 @@
-// middleware.ts - Middleware actualizado
+// middleware.ts
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function middleware(request: NextRequest) {
@@ -11,7 +11,7 @@ export async function middleware(request: NextRequest) {
   // Solo procesar si hay un subdominio y no es 'www'
   if (hostParts.length > 2 && subdomain !== 'www') {
     
-    // Si la ruta es /admin, manejar la autenticación en el cliente
+    // Si la ruta es /admin, manejar la autenticación
     if (pathname.startsWith('/admin')) {
       
       // Verificar si hay token en las cookies
@@ -25,12 +25,12 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(loginUrl)
       }
       
-      // Si hay token, verificar que sea válido (opcional: hacer request a API)
-      // Por ahora, dejamos que el cliente maneje la validación
+      // CORRECCIÓN: Rewrite a la ruta correcta del dashboard
+      // Extraer la ruta después de /admin
+      const dashboardPath = pathname.replace('/admin', '') || '/'
       
-      // Añadir headers para que el cliente sepa el subdominio
       const response = NextResponse.rewrite(
-        new URL(`/dashboard${pathname.replace('/admin', '')}`, request.url)
+        new URL(`/dashboard${dashboardPath}`, request.url)
       )
       
       response.headers.set('x-subdomain', subdomain)
@@ -39,15 +39,17 @@ export async function middleware(request: NextRequest) {
       return response
     }
     
-    // Para otras rutas del subdominio, servir el sitio público
+    // CORRECCIÓN: Para otras rutas del subdominio, servir desde /website
     if (!pathname.startsWith('/api') && 
         !pathname.startsWith('/_next') && 
         !pathname.startsWith('/static')) {
       
-      const rewriteUrl = new URL(`/site/${subdomain}${pathname}`, request.url)
-      const response = NextResponse.rewrite(rewriteUrl)
+      // Rewrite a la página del website con el subdominio en headers
+      const response = NextResponse.rewrite(
+        new URL(`/website${pathname}`, request.url)
+      )
       
-      // Añadir header del subdominio para el sitio público también
+      // Añadir header del subdominio para que el componente lo use
       response.headers.set('x-subdomain', subdomain)
       
       return response
@@ -66,15 +68,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     * - manifest.json, robots.txt, etc.
-     */
     '/((?!api|_next/static|_next/image|favicon.ico|public|manifest.json|robots.txt|sitemap.xml).*)',
   ],
 }
