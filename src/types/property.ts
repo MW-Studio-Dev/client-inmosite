@@ -11,9 +11,15 @@ export interface Property {
   location_display: string;
   main_features: string;
   featured_image_url: string | null;
+  
   images_count: number;
+  bathrooms: number;
+  bedrooms: number;
+  rooms: number;
+  surface_total: string;
   is_featured: boolean;
   is_published: boolean;
+  is_development:boolean;
   views_count: number;
   created_at: string;
   updated_at: string;
@@ -31,6 +37,7 @@ export interface PropertyFilters {
   status?: 'disponible' | 'vendido' | 'reservado' | 'no_disponible';
   is_featured?: boolean;
   is_published?: boolean;
+  is_development?: boolean;
 }
 
 export interface CreatePropertyForm {
@@ -42,6 +49,7 @@ export interface CreatePropertyForm {
   // Precios
   price_usd: number | '';
   price_ars: number | '';
+  expenses: number | '';
   
   // Tipo y estado
   operation_type: 'venta' | 'alquiler' | '';

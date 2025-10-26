@@ -15,38 +15,56 @@ export const usePropertyDetail = (propertyId: string): UsePropertyDetailReturn =
   const [error, setError] = useState<string | null>(null);
 
   const fetchProperty = useCallback(async () => {
+    console.log('useDetailProperty - fetchProperty called with propertyId:', propertyId);
     try {
       setLoading(true);
       setError(null);
 
-      const response = await axiosInstance.get<PropertyDetailResponse>(
-        `/properties/properties/${propertyId}`
-      );
+      const url = `/properties/properties/${propertyId}`;
+      console.log('useDetailProperty - Fetching URL:', url);
+
+      const response = await axiosInstance.get<PropertyDetailResponse>(url);
+
+      console.log('useDetailProperty - Response:', response.data);
 
       if (response.data.success) {
         setProperty(response.data.data);
+        console.log('useDetailProperty - Property set:', response.data.data);
       } else {
-        setError(response.data.message || 'Error al obtener la propiedad');
+        const errorMsg = response.data.message || 'Error al obtener la propiedad';
+        console.error('useDetailProperty - API returned success=false:', errorMsg);
+        setError(errorMsg);
       }
     } catch (err) {
-      console.error('Error fetching property:', err);
+      console.error('useDetailProperty - Error fetching property:', err);
       if (axios.isAxiosError(err)) {
         // Tipar correctamente la respuesta de error
         const errorData = err.response?.data as ErrorResponse | undefined;
-        setError(errorData?.message || err.message || 'Error de conexión al servidor');
+        const errorMsg = errorData?.message || err.message || 'Error de conexión al servidor';
+        console.error('useDetailProperty - Axios error:', errorMsg, err.response);
+        setError(errorMsg);
       } else {
-        setError(err instanceof Error ? err.message : 'Error de conexión al servidor');
+        const errorMsg = err instanceof Error ? err.message : 'Error de conexión al servidor';
+        console.error('useDetailProperty - Unknown error:', errorMsg);
+        setError(errorMsg);
       }
     } finally {
+      console.log('useDetailProperty - Setting loading to false');
       setLoading(false);
     }
   }, [propertyId]); // Incluir propertyId como dependencia
 
   useEffect(() => {
+    console.log('useDetailProperty - useEffect triggered, propertyId:', propertyId);
     if (propertyId) {
+      console.log('useDetailProperty - Calling fetchProperty');
       fetchProperty();
+    } else {
+      console.log('useDetailProperty - No propertyId, skipping fetch');
+      setLoading(false);
     }
-  }, [propertyId, fetchProperty]); // Incluir fetchProperty como dependencia
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [propertyId]); // Solo dependemos de propertyId, no de fetchProperty para evitar loops
 
   return {
     property,

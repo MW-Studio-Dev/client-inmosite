@@ -17,18 +17,20 @@ interface ErrorResponse {
   message?: string;
 }
 
-export const useProperties = (filters?: PropertyFilters): UsePropertiesReturn => {
+export const useProperties = ({filters,subdomain}:{filters?:PropertyFilters,subdomain?:string}): UsePropertiesReturn => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [totalProperties, setTotalProperties] = useState<number>(0);
-
+ 
 
 
   const fetchProperties = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
+
+      console.log('useProperties - fetchProperties called with subdomain:', subdomain);
 
       // Construir query params si hay filtros
       const queryParams = new URLSearchParams();
@@ -41,11 +43,17 @@ export const useProperties = (filters?: PropertyFilters): UsePropertiesReturn =>
       }
 
       const queryString = queryParams.toString();
-      const endpoint = queryString 
-        ? `/properties/properties/?${queryString}` 
-        : '/properties/properties/';
+      // Para el dashboard admin, usar el endpoint completo de propiedades
+      const endpoint = queryString
+        ? `/properties/public/${subdomain}/properties/?${queryString}`
+        : `/properties/public/${subdomain}/properties/featured/`;  // Cambio: siempre mostrar todas las propiedades en dashboard
+
+      console.log('useProperties - fetching from endpoint:', endpoint);
+      console.log('useProperties - baseURL:', axiosInstance.defaults.baseURL);
 
       const response = await axiosInstance.get<PropertyResponse>(endpoint);
+
+      console.log('useProperties - response:', response.data);
 
       if (response.data.success) {
         setProperties(response.data.data);
@@ -65,7 +73,7 @@ export const useProperties = (filters?: PropertyFilters): UsePropertiesReturn =>
     } finally {
       setLoading(false);
     }
-  }, [filters]); // Incluir filters como dependencia
+  }, [filters, subdomain]); // Incluir filters y subdomain como dependencias
 
   useEffect(() => {
     fetchProperties();

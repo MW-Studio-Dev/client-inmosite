@@ -3,8 +3,35 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Formik, Form, FormikHelpers } from 'formik';
 import { useCreateProperty } from '@/hooks/useCreateProperty';
 import { CreatePropertyForm as FormData } from '@/types/property';
+import { propertyValidationSchema } from './validation/propertySchema';
+import {
+  TextInput,
+  NumberInput,
+  SelectInput,
+  TextAreaInput,
+  CheckboxInput,
+  FeatureSelector
+} from './form-fields';
+import {
+  HiHome,
+  HiCurrencyDollar,
+  HiLocationMarker,
+  HiCheckCircle,
+  HiX,
+  HiChevronLeft,
+  HiChevronRight,
+  HiOutlineOfficeBuilding,
+  HiOutlineHome,
+  HiPlus,
+  HiExclamationCircle,
+  HiCog,
+  HiPhotograph,
+  HiUpload,
+  HiTrash
+} from 'react-icons/hi';
 
 interface CreatePropertyFormProps {
   onSuccess?: (propertyId: string) => void;
@@ -20,6 +47,7 @@ const initialFormData: FormData = {
   // Precios
   price_usd: '',
   price_ars: '',
+  expenses: '',
   
   // Tipo y estado
   operation_type: '',
@@ -118,56 +146,67 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
   onCancel
 }) => {
   const router = useRouter();
-  const [formData, setFormData] = useState<FormData>(initialFormData);
   const [currentSection, setCurrentSection] = useState(0);
-  const [newFeature, setNewFeature] = useState('');
-  
-  const { loading, error, fieldErrors, createProperty, clearErrors } = useCreateProperty();
+  const [featuredImage, setFeaturedImage] = useState<File | null>(null);
+  const [additionalImages, setAdditionalImages] = useState<File[]>([]);
+  const [featuredPreview, setFeaturedPreview] = useState<string | null>(null);
+  const [additionalPreviews, setAdditionalPreviews] = useState<string[]>([]);
+
+  const { loading, error, createProperty } = useCreateProperty();
 
   const sections = [
-    { id: 0, title: 'Información Básica', icon: '📝' },
-    { id: 1, title: 'Precios', icon: '💰' },
-    { id: 2, title: 'Ubicación', icon: '📍' },
-    { id: 3, title: 'Características', icon: '🏠' },
-    { id: 4, title: 'Configuración', icon: '⚙️' }
+    { id: 0, title: 'Información Básica', icon: HiOutlineOfficeBuilding },
+    { id: 1, title: 'Precios', icon: HiCurrencyDollar },
+    { id: 2, title: 'Ubicación', icon: HiLocationMarker },
+    { id: 3, title: 'Características', icon: HiOutlineHome },
+    { id: 4, title: 'Imágenes', icon: HiPhotograph },
+    { id: 5, title: 'Configuración', icon: HiCog }
   ];
 
-  const updateField = <K extends keyof FormData>(field: K, value: FormData[K]) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    clearErrors();
-  };
-
-  const addFeature = () => {
-    if (newFeature.trim() && !formData.features.includes(newFeature.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        features: [...prev.features, newFeature.trim()]
-      }));
-      setNewFeature('');
+  const handleFeaturedImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFeaturedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFeaturedPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const removeFeature = (feature: string) => {
-    setFormData(prev => ({
-      ...prev,
-      features: prev.features.filter(f => f !== feature)
-    }));
+  const removeFeaturedImage = () => {
+    setFeaturedImage(null);
+    setFeaturedPreview(null);
   };
 
-  const addCommonFeature = (feature: string) => {
-    if (!formData.features.includes(feature)) {
-      setFormData(prev => ({
-        ...prev,
-        features: [...prev.features, feature]
-      }));
+  const handleAdditionalImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const remainingSlots = 10 - additionalImages.length;
+    const filesToAdd = files.slice(0, remainingSlots);
+
+    if (filesToAdd.length > 0) {
+      setAdditionalImages(prev => [...prev, ...filesToAdd]);
+
+      // Generate previews
+      filesToAdd.forEach(file => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setAdditionalPreviews(prev => [...prev, reader.result as string]);
+        };
+        reader.readAsDataURL(file);
+      });
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const result = await createProperty(formData);
-    
+  const removeAdditionalImage = (index: number) => {
+    setAdditionalImages(prev => prev.filter((_, i) => i !== index));
+    setAdditionalPreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async (values: FormData, actions: FormikHelpers<FormData>) => {
+    const result = await createProperty(values);
+
     if (result.success && result.propertyId) {
       if (onSuccess) {
         onSuccess(result.propertyId);
@@ -175,125 +214,40 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
         router.push('/dashboard/propiedades');
       }
     }
+
+    actions.setSubmitting(false);
   };
 
-  const InputField = ({ 
-    label, 
-    field, 
-    type = 'text', 
-    required = false, 
-    placeholder = '',
-    className = ''
-  }: {
-    label: string;
-    field: keyof FormData;
-    type?: string;
-    required?: boolean;
-    placeholder?: string;
-    className?: string;
-  }) => (
-    <div className={className}>
-      <label className="block text-sm font-medium text-text-secondary mb-2">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      <input
-        type={type}
-        value={formData[field] as string | number}
-        onChange={(e) => updateField(field, type === 'number' ? Number(e.target.value) || '' : e.target.value)}
-        placeholder={placeholder}
-        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
-          fieldErrors[field as string] ? 'border-red-500' : 'border-surface-border'
-        }`}
-      />
-      {fieldErrors[field as string] && (
-        <p className="text-red-500 text-sm mt-1">{fieldErrors[field as string]}</p>
-      )}
-    </div>
-  );
-
-  const SelectField = ({ 
-    label, 
-    field, 
-    options, 
-    required = false,
-    placeholder = 'Seleccionar...',
-    className = ''
-  }: {
-    label: string;
-    field: keyof FormData;
-    options: string[] | { value: string; label: string }[];
-    required?: boolean;
-    placeholder?: string;
-    className?: string;
-  }) => (
-    <div className={className}>
-      <label className="block text-sm font-medium text-text-secondary mb-2">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      <select
-        value={formData[field] as string}
-        onChange={(e) => updateField(field, e.target.value)}
-        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
-          fieldErrors[field as string] ? 'border-red-500' : 'border-surface-border'
-        }`}
-      >
-        <option value="">{placeholder}</option>
-        {options.map((option) => {
-          const value = typeof option === 'string' ? option : option.value;
-          const label = typeof option === 'string' ? option.charAt(0).toUpperCase() + option.slice(1) : option.label;
-          return (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          );
-        })}
-      </select>
-      {fieldErrors[field as string] && (
-        <p className="text-red-500 text-sm mt-1">{fieldErrors[field as string]}</p>
-      )}
-    </div>
-  );
-
-  const renderSection = () => {
+  const renderSection = (values: FormData, setFieldValue: (field: string, value: any) => void) => {
     switch (currentSection) {
       case 0: // Información Básica
         return (
           <div className="space-y-6">
-            <InputField
+            <TextInput
               label="Título de la propiedad"
-              field="title"
+              name="title"
               required
               placeholder="Ej: Departamento 2 ambientes en Palermo con balcón"
             />
-            
-            <div>
-              <label className="block text-sm font-medium text-text-secondary mb-2">
-                Descripción <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => updateField('description', e.target.value)}
-                placeholder="Describe la propiedad, sus características y ubicación..."
-                rows={6}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
-                  fieldErrors.description ? 'border-red-500' : 'border-surface-border'
-                }`}
-              />
-              {fieldErrors.description && (
-                <p className="text-red-500 text-sm mt-1">{fieldErrors.description}</p>
-              )}
-            </div>
+
+            <TextAreaInput
+              label="Descripción"
+              name="description"
+              required
+              placeholder="Describe la propiedad, sus características y ubicación..."
+              rows={5}
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputField
+              <TextInput
                 label="Código interno"
-                field="internal_code"
+                name="internal_code"
                 placeholder="Ej: PAL001"
               />
-              
-              <SelectField
+
+              <SelectInput
                 label="Tipo de operación"
-                field="operation_type"
+                name="operation_type"
                 options={[
                   { value: 'venta', label: 'Venta' },
                   { value: 'alquiler', label: 'Alquiler' }
@@ -303,16 +257,16 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <SelectField
+              <SelectInput
                 label="Tipo de propiedad"
-                field="property_type"
+                name="property_type"
                 options={PROPERTY_TYPES}
                 required
               />
-              
-              <SelectField
+
+              <SelectInput
                 label="Estado"
-                field="status"
+                name="status"
                 options={[
                   { value: 'disponible', label: 'Disponible' },
                   { value: 'reservado', label: 'Reservado' },
@@ -327,40 +281,56 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
 
       case 1: // Precios
         return (
-          <div className="space-y-6">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h4 className="font-semibold text-blue-800 mb-2">💡 Información sobre precios</h4>
-              <p className="text-blue-700 text-sm">
-                Puedes especificar el precio en dólares, en pesos argentinos, o ambos. 
-                Al menos uno de los campos es requerido.
+          <div className="space-y-4">
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-3">
+              <p className="text-blue-800 dark:text-blue-300 text-xs flex items-center gap-1.5">
+                <HiCurrencyDollar className="h-4 w-4" />
+                Especifica al menos un precio (USD o ARS)
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputField
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <NumberInput
                 label="Precio en USD"
-                field="price_usd"
-                type="number"
+                name="price_usd"
                 placeholder="150000"
               />
-              
-              <InputField
+
+              <NumberInput
                 label="Precio en ARS"
-                field="price_ars"
-                type="number"
+                name="price_ars"
                 placeholder="120000000"
               />
             </div>
 
-            {(formData.price_usd || formData.price_ars) && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <h4 className="font-semibold text-green-800 mb-2">💰 Vista previa del precio</h4>
-                <div className="text-green-700">
-                  {formData.price_usd && (
-                    <p>USD: ${Number(formData.price_usd).toLocaleString('es-AR')}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <NumberInput
+                label="Expensas (ARS)"
+                name="expenses"
+                placeholder="50000"
+              />
+            </div>
+
+            {(values.price_usd || values.price_ars || values.expenses) && (
+              <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-md p-3">
+                <div className="text-sm text-emerald-800 dark:text-emerald-300">
+                  {values.price_usd && (
+                    <p className="flex items-center gap-1.5">
+                      <HiCheckCircle className="h-4 w-4" />
+                      USD: ${values.price_usd}
+                    </p>
                   )}
-                  {formData.price_ars && (
-                    <p>ARS: ${Number(formData.price_ars).toLocaleString('es-AR')}</p>
+                  {values.price_ars && (
+                    <p className="flex items-center gap-1.5 mt-1">
+                      <HiCheckCircle className="h-4 w-4" />
+                      ARS: ${values.price_ars}
+                    </p>
+                  )}
+                  {values.expenses && (
+                    <p className="flex items-center gap-1.5 mt-1">
+                      <HiCheckCircle className="h-4 w-4" />
+                      Expensas: ${values.expenses}
+                    </p>
                   )}
                 </div>
               </div>
@@ -370,50 +340,49 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
 
       case 2: // Ubicación
         return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputField
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <TextInput
                 label="Provincia"
-                field="province"
+                name="province"
                 required
                 placeholder="Buenos Aires"
               />
-              
-              <InputField
+
+              <TextInput
                 label="Ciudad"
-                field="city"
+                name="city"
                 required
                 placeholder="CABA"
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputField
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <TextInput
                 label="Barrio"
-                field="neighborhood"
+                name="neighborhood"
                 required
                 placeholder="Palermo"
               />
-              
-              <InputField
+
+              <TextInput
                 label="Dirección"
-                field="address"
+                name="address"
                 required
                 placeholder="Av. Santa Fe 3456"
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputField
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <NumberInput
                 label="Piso"
-                field="floor"
-                type="number"
+                name="floor"
                 placeholder="3"
               />
-              
-              <InputField
+
+              <TextInput
                 label="Unidad/Depto"
-                field="unit"
+                name="unit"
                 placeholder="A"
               />
             </div>
@@ -422,37 +391,36 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
 
       case 3: // Características
         return (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Ambientes y habitaciones */}
             <div>
-              <h4 className="text-lg font-semibold text-text-primary mb-4">🏠 Ambientes y habitaciones</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <InputField
+              <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                <HiOutlineHome className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                Ambientes y habitaciones
+              </h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <NumberInput
                   label="Ambientes"
-                  field="rooms"
-                  type="number"
+                  name="rooms"
                   required
                   placeholder="2"
                 />
-                
-                <InputField
+
+                <NumberInput
                   label="Dormitorios"
-                  field="bedrooms"
-                  type="number"
+                  name="bedrooms"
                   placeholder="1"
                 />
-                
-                <InputField
+
+                <NumberInput
                   label="Baños"
-                  field="bathrooms"
-                  type="number"
+                  name="bathrooms"
                   placeholder="1"
                 />
-                
-                <InputField
+
+                <NumberInput
                   label="Toilettes"
-                  field="half_bathrooms"
-                  type="number"
+                  name="half_bathrooms"
                   placeholder="0"
                 />
               </div>
@@ -460,34 +428,30 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
 
             {/* Superficies */}
             <div>
-              <h4 className="text-lg font-semibold text-text-primary mb-4">📐 Superficies (m²)</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <InputField
+              <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Superficies (m²)</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <NumberInput
                   label="Superficie total"
-                  field="surface_total"
-                  type="number"
+                  name="surface_total"
                   required
                   placeholder="45.50"
                 />
-                
-                <InputField
+
+                <NumberInput
                   label="Superficie cubierta"
-                  field="surface_covered"
-                  type="number"
+                  name="surface_covered"
                   placeholder="42.00"
                 />
-                
-                <InputField
+
+                <NumberInput
                   label="Superficie semicubierta"
-                  field="surface_semicovered"
-                  type="number"
+                  name="surface_semicovered"
                   placeholder="3.50"
                 />
-                
-                <InputField
+
+                <NumberInput
                   label="Superficie descubierta"
-                  field="surface_uncovered"
-                  type="number"
+                  name="surface_uncovered"
                   placeholder="80.00"
                 />
               </div>
@@ -495,171 +459,182 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
 
             {/* Otras características */}
             <div>
-              <h4 className="text-lg font-semibold text-text-primary mb-4">🚗 Otras características</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <InputField
+              <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Otras características</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <NumberInput
                   label="Antigüedad (años)"
-                  field="age_years"
-                  type="number"
+                  name="age_years"
                   placeholder="15"
                 />
-                
-                <SelectField
+
+                <SelectInput
                   label="Orientación"
-                  field="orientation"
+                  name="orientation"
                   options={ORIENTATIONS}
                   placeholder="Seleccionar orientación"
                 />
-                
-                <InputField
+
+                <NumberInput
                   label="Cocheras"
-                  field="garage_spaces"
-                  type="number"
+                  name="garage_spaces"
                   placeholder="0"
                 />
-                
-                <InputField
+
+                <NumberInput
                   label="Bauleras"
-                  field="storage_spaces"
-                  type="number"
+                  name="storage_spaces"
                   placeholder="1"
                 />
               </div>
             </div>
 
             {/* Características adicionales */}
+            <FeatureSelector name="features" commonFeatures={COMMON_FEATURES} />
+          </div>
+        );
+
+      case 4: // Imágenes
+        return (
+          <div className="space-y-4">
+            {/* Imagen destacada */}
             <div>
-              <h4 className="text-lg font-semibold text-text-primary mb-4">✨ Características adicionales</h4>
-              
-              {/* Características comunes */}
-              <div className="mb-4">
-                <p className="text-sm text-text-secondary mb-2">Selecciona características comunes:</p>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                  {COMMON_FEATURES.map((feature) => (
-                    <button
-                      key={feature}
-                      type="button"
-                      onClick={() => addCommonFeature(feature)}
-                      disabled={formData.features.includes(feature)}
-                      className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                        formData.features.includes(feature)
-                          ? 'bg-green-100 text-green-800 cursor-not-allowed'
-                          : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      {formData.features.includes(feature) ? '✓ ' : '+ '}{feature}
-                    </button>
+              <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                <HiPhotograph className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                Imagen destacada
+              </h4>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">Esta imagen se mostrará como principal en el listado de propiedades</p>
+
+              {!featuredPreview ? (
+                <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 dark:border-slate-600 border-dashed rounded-md cursor-pointer hover:border-red-500 dark:hover:border-red-500 transition-colors bg-gray-50 dark:bg-slate-900 hover:bg-gray-100 dark:hover:bg-slate-800">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <HiUpload className="h-10 w-10 text-gray-400 dark:text-gray-500 mb-3" />
+                    <p className="mb-2 text-sm text-gray-600 dark:text-gray-400">
+                      <span className="font-medium">Click para subir</span> o arrastra y suelta
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-500">PNG, JPG o WEBP (MAX. 5MB)</p>
+                  </div>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleFeaturedImageChange}
+                  />
+                </label>
+              ) : (
+                <div className="relative w-full h-48 border-2 border-gray-300 dark:border-slate-600 rounded-md overflow-hidden">
+                  <img
+                    src={featuredPreview}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={removeFeaturedImage}
+                    className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-md transition-colors"
+                  >
+                    <HiTrash className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Imágenes adicionales */}
+            <div>
+              <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                <HiPhotograph className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                Imágenes adicionales ({additionalImages.length}/10)
+              </h4>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">Puedes agregar hasta 10 imágenes adicionales</p>
+
+              {additionalImages.length < 10 && (
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 dark:border-slate-600 border-dashed rounded-md cursor-pointer hover:border-red-500 dark:hover:border-red-500 transition-colors bg-gray-50 dark:bg-slate-900 hover:bg-gray-100 dark:hover:bg-slate-800 mb-3">
+                  <div className="flex flex-col items-center justify-center pt-3 pb-3">
+                    <HiPlus className="h-8 w-8 text-gray-400 dark:text-gray-500 mb-2" />
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <span className="font-medium">Agregar imágenes</span>
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-500">Puedes seleccionar múltiples archivos</p>
+                  </div>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    multiple
+                    onChange={handleAdditionalImagesChange}
+                  />
+                </label>
+              )}
+
+              {additionalPreviews.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                  {additionalPreviews.map((preview, index) => (
+                    <div key={index} className="relative aspect-square border-2 border-gray-300 dark:border-slate-600 rounded-md overflow-hidden group">
+                      <img
+                        src={preview}
+                        alt={`Additional ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeAdditionalImage(index)}
+                        className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <HiTrash className="h-3 w-3" />
+                      </button>
+                    </div>
                   ))}
                 </div>
-              </div>
+              )}
 
-              {/* Agregar característica personalizada */}
-              <div className="flex gap-2 mb-4">
-                <input
-                  type="text"
-                  value={newFeature}
-                  onChange={(e) => setNewFeature(e.target.value)}
-                  placeholder="Agregar característica personalizada..."
-                  className="flex-1 px-3 py-2 border border-surface-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
-                />
-                <button
-                  type="button"
-                  onClick={addFeature}
-                  className="px-4 py-2 bg-primary hover:bg-primary-600 text-white rounded-lg transition-colors"
-                >
-                  Agregar
-                </button>
-              </div>
-
-              {/* Características seleccionadas */}
-              {formData.features.length > 0 && (
-                <div>
-                  <p className="text-sm text-text-secondary mb-2">Características seleccionadas:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.features.map((feature, index) => (
-                      <span
-                        key={index}
-                        className="bg-primary-50 text-primary px-3 py-1 rounded-full text-sm flex items-center gap-2"
-                      >
-                        {feature}
-                        <button
-                          type="button"
-                          onClick={() => removeFeature(feature)}
-                          className="text-primary-400 hover:text-primary-600"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))}
-                  </div>
+              {additionalImages.length === 0 && (
+                <div className="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
+                  No hay imágenes adicionales agregadas
                 </div>
               )}
             </div>
           </div>
         );
 
-      case 4: // Configuración
+      case 5: // Configuración
         return (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Configuración de publicación */}
             <div>
-              <h4 className="text-lg font-semibold text-text-primary mb-4">⚙️ Configuración de publicación</h4>
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="is_featured"
-                    checked={formData.is_featured}
-                    onChange={(e) => updateField('is_featured', e.target.checked)}
-                    className="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded"
-                  />
-                  <label htmlFor="is_featured" className="ml-2 text-text-primary">
-                    ⭐ Propiedad destacada
-                  </label>
-                </div>
+              <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                <HiCog className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                Configuración de publicación
+              </h4>
+              <div className="space-y-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-md p-3">
+                <CheckboxInput
+                  label="Propiedad destacada"
+                  name="is_featured"
+                />
 
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="is_published"
-                    checked={formData.is_published}
-                    onChange={(e) => updateField('is_published', e.target.checked)}
-                    className="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded"
-                  />
-                  <label htmlFor="is_published" className="ml-2 text-text-primary">
-                    🌐 Publicar propiedad
-                  </label>
-                </div>
+                <CheckboxInput
+                  label="Publicar propiedad"
+                  name="is_published"
+                />
               </div>
             </div>
 
             {/* SEO */}
             <div>
-              <h4 className="text-lg font-semibold text-text-primary mb-4">🔍 SEO (Opcional)</h4>
-              <div className="space-y-4">
-                <InputField
+              <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">SEO (Opcional)</h4>
+              <div className="space-y-3">
+                <TextInput
                   label="Título SEO"
-                  field="meta_title"
+                  name="meta_title"
                   placeholder="Ej: Departamento en Palermo - 2 ambientes con balcón"
                 />
-                
-                <div>
-                  <label className="block text-sm font-medium text-text-secondary mb-2">
-                    Descripción SEO
-                  </label>
-                  <textarea
-                    value={formData.meta_description}
-                    onChange={(e) => updateField('meta_description', e.target.value)}
-                    placeholder="Descripción breve para motores de búsqueda..."
-                    rows={3}
-                    maxLength={160}
-                    className="w-full px-3 py-2 border border-surface-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                  <p className="text-xs text-text-secondary mt-1">
-                    {formData.meta_description.length}/160 caracteres
-                  </p>
-                </div>
+
+                <TextAreaInput
+                  label="Descripción SEO"
+                  name="meta_description"
+                  placeholder="Descripción breve para motores de búsqueda..."
+                  rows={3}
+                  maxLength={160}
+                  showCounter
+                />
               </div>
             </div>
           </div>
@@ -671,119 +646,143 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
   };
 
   return (
-    <div className="max-w-6xl mx-auto bg-surface rounded-custom-xl border border-surface-border">
-      {/* Header */}
-      <div className="px-6 py-4 border-b border-surface-border">
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold text-text-primary">Nueva Propiedad</h2>
-            <p className="text-text-secondary">Completa la información de la nueva propiedad</p>
-          </div>
-          {onCancel && (
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-4 py-2 text-text-secondary hover:text-text-primary transition-colors"
-            >
-              ✕ Cancelar
-            </button>
-          )}
-        </div>
-      </div>
+    <Formik
+      initialValues={initialFormData}
+      validationSchema={propertyValidationSchema}
+      onSubmit={handleSubmit}
+      validateOnChange={true}
+      validateOnBlur={true}
+    >
+      {({ values, setFieldValue, isSubmitting }) => (
+        <Form>
+          <div className="max-w-6xl mx-auto bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <HiHome className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                    Nueva Propiedad
+                  </h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">Completa la información de la nueva propiedad</p>
+                </div>
+                {onCancel && (
+                  <button
+                    type="button"
+                    onClick={onCancel}
+                    className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-1"
+                  >
+                    <HiX className="h-4 w-4" />
+                    Cancelar
+                  </button>
+                )}
+              </div>
+            </div>
 
-      {/* Progress bar */}
-      <div className="px-6 py-4 bg-gray-50">
-        <div className="flex justify-between items-center mb-2">
-          {sections.map((section) => (
-            <button
-              key={section.id}
-              type="button"
-              onClick={() => setCurrentSection(section.id)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-                currentSection === section.id
-                  ? 'bg-primary text-white'
-                  : currentSection > section.id
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-white text-text-secondary hover:bg-gray-100'
-              }`}
-            >
-              <span>{section.icon}</span>
-              <span className="hidden sm:block">{section.title}</span>
-            </button>
-          ))}
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div 
-            className="bg-primary h-2 rounded-full transition-all duration-300"
-            style={{ width: `${((currentSection + 1) / sections.length) * 100}%` }}
-          />
-        </div>
-      </div>
+            {/* Progress bar */}
+            <div className="px-6 py-3 bg-gray-50 dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700">
+              <div className="flex justify-between items-center mb-2">
+                {sections.map((section) => {
+                  const IconComponent = section.icon;
+                  return (
+                    <button
+                      key={section.id}
+                      type="button"
+                      onClick={() => setCurrentSection(section.id)}
+                      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                        currentSection === section.id
+                          ? 'bg-red-600 text-white'
+                          : currentSection > section.id
+                          ? 'bg-emerald-50 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700'
+                          : 'bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-600 border border-gray-200 dark:border-slate-600'
+                      }`}
+                    >
+                      <IconComponent className="h-3.5 w-3.5" />
+                      <span className="hidden sm:block">{section.title}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-1.5">
+                <div
+                  className="bg-red-600 h-1.5 rounded-full transition-all duration-300"
+                  style={{ width: `${((currentSection + 1) / sections.length) * 100}%` }}
+                />
+              </div>
+            </div>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="px-6 py-6">
-        {/* Error general */}
-        {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex items-center gap-2">
-              <span className="text-red-500">❌</span>
-              <span className="text-red-800">{error}</span>
+            {/* Form content */}
+            <div className="px-6 py-5">
+              {/* Error general */}
+              {error && (
+                <div className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3">
+                  <div className="flex items-center gap-2">
+                    <HiExclamationCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                    <span className="text-sm text-red-800 dark:text-red-300">{error}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Current section */}
+              {renderSection(values, setFieldValue)}
+
+              {/* Navigation buttons */}
+              <div className="flex justify-between items-center mt-6 pt-5 border-t border-gray-200 dark:border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => setCurrentSection(Math.max(0, currentSection - 1))}
+                  disabled={currentSection === 0}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                    currentSection === 0
+                      ? 'bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-slate-500 cursor-not-allowed'
+                      : 'bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200'
+                  }`}
+                >
+                  <HiChevronLeft className="h-4 w-4" />
+                  Anterior
+                </button>
+
+                <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                  {currentSection + 1} de {sections.length}
+                </span>
+
+                {currentSection < sections.length - 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => setCurrentSection(Math.min(sections.length - 1, currentSection + 1))}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition-colors flex items-center gap-1.5"
+                  >
+                    Siguiente
+                    <HiChevronRight className="h-4 w-4" />
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={isSubmitting || loading}
+                    className={`px-6 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
+                      isSubmitting || loading
+                        ? 'bg-gray-400 cursor-not-allowed text-white'
+                        : 'bg-red-600 hover:bg-red-700 text-white'
+                    }`}
+                  >
+                    {isSubmitting || loading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        Creando...
+                      </>
+                    ) : (
+                      <>
+                        <HiCheckCircle className="h-4 w-4" />
+                        Crear Propiedad
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-        )}
-
-        {/* Current section */}
-        {renderSection()}
-
-        {/* Navigation buttons */}
-        <div className="flex justify-between items-center mt-8 pt-6 border-t border-surface-border">
-          <button
-            type="button"
-            onClick={() => setCurrentSection(Math.max(0, currentSection - 1))}
-            disabled={currentSection === 0}
-            className={`px-6 py-2 rounded-lg transition-colors ${
-              currentSection === 0
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-            }`}
-          >
-            ← Anterior
-          </button>
-
-          <span className="text-text-secondary">
-            {currentSection + 1} de {sections.length}
-          </span>
-
-          {currentSection < sections.length - 1 ? (
-            <button
-              type="button"
-              onClick={() => setCurrentSection(Math.min(sections.length - 1, currentSection + 1))}
-              className="px-6 py-2 bg-primary hover:bg-primary-600 text-white rounded-lg transition-colors"
-            >
-              Siguiente →
-            </button>
-          ) : (
-            <button
-              type="submit"
-              disabled={loading}
-              className={`px-8 py-3 rounded-lg font-semibold transition-all ${
-                loading
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-gradient-primary hover:scale-105'
-              } text-white`}
-            >
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  Creando...
-                </span>
-              ) : (
-                '🏠 Crear Propiedad'
-              )}
-            </button>
-          )}
-        </div>
-      </form>
-    </div>
+        </Form>
+      )}
+    </Formik>
   );
 };

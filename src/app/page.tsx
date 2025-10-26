@@ -4,7 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 // Components
-import Header from '@/components/layout/Header';
+import  Header from '@/components/layout/Header';
 import Hero from '@/components/landing/Hero';
 import Features from '@/components/landing/Features';
 import HowItWorks from '@/components/landing/HowItWorks';
@@ -13,6 +13,7 @@ import Testimonials from '@/components/landing/Testimonials';
 import CTA from '@/components/landing/CTA';
 import Contact from '@/components/landing/Contact';
 import Footer from '@/components/layout/Footer';
+import WhatsAppButton from '@/components/landing/WhatsAppButton'; // Importar el nuevo componente
 
 const LandingPage: React.FC = () => {
   return (
@@ -135,6 +136,12 @@ const LandingPage: React.FC = () => {
           </div>
         </main>
       </div>
+
+      {/* WhatsApp Button - Flotante y siempre visible */}
+      <WhatsAppButton 
+        phoneNumber="5491123456789" // Reemplaza con tu número real
+        message="¡Hola! Quiero más información sobre Inmosite 🏠✨"
+      />
     </div>
   );
 };

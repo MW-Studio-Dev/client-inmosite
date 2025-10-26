@@ -99,7 +99,7 @@ const Testimonials: React.FC = () => {
 
               {/* Testimonial Text */}
               <p className="text-gray-300 italic leading-relaxed font-light text-sm group-hover:text-gray-200 transition-colors duration-300 relative z-10">
-              `&quot;`{testimonial.text}`&quot;`
+              &quot;{testimonial.text}&quot;
               </p>
               
               {/* Corner accents */}

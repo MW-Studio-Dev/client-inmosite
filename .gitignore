@@ -69,3 +69,13 @@ coverage/
 # Production
 build/
 dist/
+./next
+.env.example
+.env.local
+.env
+
+*.md
+nul
+
+.env.*
+/logs

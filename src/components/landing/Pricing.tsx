@@ -182,7 +182,7 @@ const Pricing: React.FC = () => {
         <div className="text-center mt-12">
           <p className="text-gray-400 text-sm font-light">
             Todos los planes incluyen{" "}
-            <span className="text-red-400 font-normal">14 días de prueba gratuita</span>{" "}
+            <span className="text-red-400 font-normal">30 días de prueba gratuita</span>{" "}
             • Sin compromiso de permanencia
           </p>
         </div>

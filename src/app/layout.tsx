@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins, Inter } from "next/font/google";
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { ThemeProvider } from "@/context/ThemeContext";
 import "./globals.css";
 
 // Poppins para textos generales
@@ -34,7 +34,7 @@ export default function RootLayout({
        
       </head>
       <body
-        className={`${poppins.variable} ${inter.variable} antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 font-poppins`}
+        className={`${poppins.variable} ${inter.variable} antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 font-sans`}
         suppressHydrationWarning
       >
         <ThemeProvider>

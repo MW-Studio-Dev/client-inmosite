@@ -1,228 +1,306 @@
-// app/dashboard/layout.tsx - Layout protegido
+// pages/admin/layout.tsx - Layout profesional actualizado
 'use client'
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { 
-  HiHome, 
-  HiOfficeBuilding, 
-  HiGlobe, 
+import { useState } from 'react'
+import { usePathname } from 'next/navigation'
+import {
+  HiMenuAlt3,
+  HiHome,
+  HiUsers,
+  HiOfficeBuilding,
   HiCog,
-  HiMenu,
-  HiX,
-  HiLogout,
+  HiCurrencyDollar,
   HiBell,
-  HiEye
+  HiSupport,
+  HiSearch,
+  HiLogout,
+  HiUserCircle,
+  HiMail,
+  HiChartBar,
+  HiMoon,
+  HiSun
 } from 'react-icons/hi'
-import { AdminProtectedRoute } from '@/components/auth/ProtectedRoute'
-import { useAuth } from '@/hooks/useAuth'
-import { IconBaseProps } from 'react-icons/lib'
-import { User } from '@/interfaces'
-import type { Company } from '@/interfaces/company'
-import Image from 'next/image'
+import { HiComputerDesktop } from 'react-icons/hi2'
+import { AdminSidebar } from '@/components/dashboard/admin/AdminSideBar'
+import { MenuItem } from '@/types/dashboard'
+import { useAuth } from '@/hooks'
+import { DashboardThemeProvider, useDashboardTheme } from '@/context/DashboardThemeContext'
 
-interface MenuItem {
-  name: string
-  href: string
-  icon: React.ComponentType<IconBaseProps>
-  description: string
-}
-
+// Configuración del menú principal
 const menuItems: MenuItem[] = [
+  {
+    name: 'Dashboard',
+    href: '/dashboard',
+    icon: HiHome,
+    description: 'Vista general del sistema',
+  },
   {
     name: 'Propiedades',
     href: '/dashboard/properties',
-    icon: HiHome,
-    description: 'Gestiona tu catálogo de propiedades'
+    icon: HiOfficeBuilding,
+    description: 'Gestionar inmuebles',
+    subItems: [
+      { name: 'Todas', href: '/dashboard/properties' },
+      { name: 'En Venta', href: '/dashboard/properties/sale' },
+      { name: 'En Alquiler', href: '/dashboard/properties/rent' },
+    ]
   },
   {
     name: 'Sitio Web',
     href: '/dashboard/website',
-    icon: HiGlobe,
-    description: 'Personaliza tu página web'
+    icon: HiComputerDesktop,
+    description: 'Administrar sitio web',
+    subItems: [
+      { name: 'Configuración', href: '/dashboard/website' },
+      { name: 'Preview', href: '/dashboard/website/preview' },
+    ]
   },
+  {
+    name: 'Clientes',
+    href: '/dashboard/clients',
+    icon: HiUsers,
+    description: 'Base de datos de clientes',
+    subItems: [
+      { name: 'Inquilinos', href: '/dashboard/clients/tenants' },
+      { name: 'Propietarios', href: '/dashboard/clients/owners' },
+      { name: 'Otros', href: '/dashboard/clients/others' },
+    ]
+  },
+  {
+    name: 'Alquileres',
+    href: '/dashboard/rents',
+    icon: HiCurrencyDollar,
+    description: 'Información de alquileres',
+    subItems: [
+      { name: 'Alquileres', href: '/dashboard/rents' },
+      { name: 'Contratos', href: '/dashboard/rents/contracts' },
+      { name: 'Planes de Pago', href: '/dashboard/rents/payment-plans' },
+    ]
+  },
+  {
+    name: 'Ventas',
+    href: '/dashboard/sales',
+    icon: HiChartBar,
+    description: 'Gestión de ventas',
+    subItems: [
+      { name: 'Todas', href: '/dashboard/sales' },
+      { name: 'Boletos', href: '/dashboard/sales/receipts' },
+    ]
+  },
+  {
+    name: 'Contacto',
+    href: '/dashboard/contact',
+    icon: HiMail,
+    description: 'Consultas del formulario',
+    badge: 'NEW'
+  },
+]
+
+// Menú inferior (Configuración y Soporte)
+const bottomMenuItems: MenuItem[] = [
   {
     name: 'Configuración',
-    href: '/dashboard/config',
+    href: '/dashboard/settings',
     icon: HiCog,
-    description: 'Ajustes generales de tu cuenta'
+    description: 'Ajustes del sistema',
   },
   {
-    name: 'Inmobiliaria',
-    href: '/dashboard/profile',
-    icon: HiOfficeBuilding,
-    description: 'Información de tu empresa'
+    name: 'Soporte',
+    href: '/dashboard/support',
+    icon: HiSupport,
+    description: 'Ayuda y asistencia',
   }
 ]
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <AdminProtectedRoute>
-      <AdminLayoutContent>
-        {children}
-      </AdminLayoutContent>
-    </AdminProtectedRoute>
-  )
-}
-
-function AdminLayoutContent({ children }: { children: React.ReactNode }) {
+function DashboardContent({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const { user, company, logout } = useAuth()
+  const { theme, toggleTheme } = useDashboardTheme()
   const pathname = usePathname()
-  const router = useRouter()
-  const { user, logout, company } = useAuth()
-  const [subdomain, setSubdomain] = useState<string>('')
 
-  // Obtener subdomain del middleware
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const hostname = window.location.hostname
-      const hostParts = hostname.split('.')
-      if (hostParts.length > 2) {
-        setSubdomain(hostParts[0])
-      }
-    }
-  }, [])
+  const isDark = theme === 'dark'
 
-  const handleLogout = async () => {
-    await logout()
-    router.push('/login')
-  }
-
-  const handleViewSite = () => {
-    if (subdomain) {
-      const siteUrl = `${window.location.protocol}//${subdomain}.${window.location.host}`
-      window.open(siteUrl, '_blank')
-    }
+  const handleLogout = () => {
+    logout()
+    window.location.href = '/login'
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Sidebar móvil */}
-      <div className={`fixed inset-0 flex z-40 md:hidden ${sidebarOpen ? '' : 'pointer-events-none'}`}>
-        <div className={`fixed inset-0 bg-black/50 transition-opacity ${sidebarOpen ? 'opacity-100' : 'opacity-0'}`} 
-             onClick={() => setSidebarOpen(false)} />
-        
-        <div className={`relative flex-1 flex flex-col max-w-xs w-full bg-surface transform transition-transform ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}>
-          <div className="absolute top-0 right-0 -mr-12 pt-2">
-            <button
-              type="button"
-              className="ml-1 flex items-center justify-center h-10 w-10 rounded-full text-white hover:bg-white/10"
-              onClick={() => setSidebarOpen(false)}
-            >
-              <HiX className="h-6 w-6" />
-            </button>
-          </div>
-          
-          <SidebarContent 
-            menuItems={menuItems} 
-            pathname={pathname} 
-            user={user}
-            company={company}
-            subdomain={subdomain}
-          />
-        </div>
-      </div>
-
-      {/* Sidebar desktop */}
-      <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
-        <div className="flex-1 flex flex-col min-h-0 bg-surface border-r border-surface-border">
-          <SidebarContent 
-            menuItems={menuItems} 
-            pathname={pathname} 
-            user={user}
-            company={company}
-            subdomain={subdomain}
-          />
-        </div>
-      </div>
+    <div className={`min-h-screen transition-colors duration-300 ${
+      isDark ? 'bg-gray-950' : 'bg-gray-50'
+    }`}>
+      {/* Sidebar */}
+      <AdminSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        isCollapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        menuItems={menuItems}
+        bottomMenuItems={bottomMenuItems}
+        pathname={pathname}
+        user={user}
+        company={company}
+      />
 
       {/* Main content */}
-      <div className="md:pl-64 flex flex-col flex-1">
-        {/* Top header */}
-        <div className="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-surface/95 backdrop-blur-sm border-b border-surface-border shadow-custom-sm">
+      <div className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-72'}`}>
+        {/* Top navigation bar */}
+        <div className={`sticky top-0 z-40 flex h-16 items-center gap-x-4 shadow-sm px-4 sm:gap-x-6 sm:px-6 lg:px-8 transition-colors duration-300 ${
+          isDark
+            ? 'bg-gray-900 border-b border-gray-700'
+            : 'bg-white border-b border-gray-200'
+        }`}>
+          {/* Botón hamburguesa para abrir sidebar en móvil */}
           <button
             type="button"
-            className="px-4 text-text-secondary focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 md:hidden"
+            className={`p-2 rounded-lg lg:hidden transition-all duration-200 ${
+              isDark
+                ? 'text-gray-300 hover:bg-gray-800'
+                : 'text-gray-700 hover:bg-gray-100'
+            }`}
             onClick={() => setSidebarOpen(true)}
           >
-            <HiMenu className="h-6 w-6" />
+            <span className="sr-only">Abrir sidebar</span>
+            <HiMenuAlt3 className="h-6 w-6" />
           </button>
-          
-          <div className="flex-1 px-4 flex justify-between items-center">
-            <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
-              <div>
-                <h1 className="text-xl font-bold text-text-primary">
-                  Panel de Administración
-                </h1>
-                {subdomain && (
-                  <p className="text-sm text-text-muted">
-                    {subdomain}.mwstudiodigital.com
-                  </p>
-                )}
-              </div>
-              
-              <div className="ml-4 flex items-center md:ml-6 gap-2">
-                {/* Ver sitio público */}
-                {subdomain && (
-                  <button 
-                    onClick={handleViewSite}
-                    className="p-2 rounded-custom-lg text-text-secondary hover:text-primary-600 hover:bg-surface-hover transition-all duration-300"
-                    title="Ver sitio público"
-                  >
-                    <HiEye className="h-5 w-5" />
-                  </button>
-                )}
-                
-                {/* Notificaciones */}
-                <button className="p-2 rounded-custom-lg text-text-secondary hover:text-primary-600 hover:bg-surface-hover transition-all duration-300 relative">
-                  <HiBell className="h-5 w-5" />
-                  <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
-                </button>
-                
-                {/* Perfil de usuario */}
-                <div className="flex items-center gap-3">
-                  <div className="hidden sm:block text-right">
-                    <p className="text-sm font-medium text-text-primary">
-                      {user?.first_name} {user?.last_name}
-                    </p>
-                    <p className="text-xs text-text-muted">
-                      {user?.email}
-                    </p>
+
+          {/* Separator */}
+          <div className={`h-6 w-px lg:hidden ${
+            isDark ? 'bg-gray-700' : 'bg-gray-200'
+          }`} aria-hidden="true" />
+
+          <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+            <div className="flex flex-1 items-center gap-3">
+              {/* Botón para colapsar sidebar en desktop */}
+              <button
+                type="button"
+                className={`hidden lg:block p-2 rounded-lg transition-all duration-200 ${
+                  isDark
+                    ? 'text-gray-300 hover:bg-gray-800'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              >
+                <span className="sr-only">
+                  {sidebarCollapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
+                </span>
+                <HiMenuAlt3 className={`h-5 w-5 transition-transform ${sidebarCollapsed ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Buscador */}
+              <div className="flex-1 max-w-2xl">
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <HiSearch className={`h-5 w-5 ${
+                      isDark ? 'text-gray-500' : 'text-gray-400'
+                    }`} />
                   </div>
-                  
-                  <div className="h-8 w-8 rounded-full bg-gradient-primary flex items-center justify-center">
-                    <span className="text-white font-semibold text-sm">
-                      {user?.first_name?.charAt(0)}{user?.last_name?.charAt(0)}
-                    </span>
-                  </div>
+                  <input
+                    type="search"
+                    placeholder="Buscar propiedades, clientes..."
+                    className={`block w-full rounded-lg border py-2 pl-10 pr-3 text-sm transition-all duration-200 ${
+                      isDark
+                        ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder:text-gray-500 focus:border-gray-600 focus:ring-2 focus:ring-gray-700'
+                        : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-gray-500 focus:ring-2 focus:ring-gray-200'
+                    }`}
+                  />
                 </div>
-                
-                {/* Logout */}
-                <button 
-                  onClick={handleLogout}
-                  className="p-2 rounded-custom-lg text-text-secondary hover:text-red-500 hover:bg-surface-hover transition-all duration-300"
-                  title="Cerrar sesión"
-                >
-                  <HiLogout className="h-5 w-5" />
-                </button>
               </div>
+            </div>
+
+            {/* User menu */}
+            <div className="flex items-center gap-x-3 lg:gap-x-4">
+              {/* Botón de modo oscuro/claro */}
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className={`p-2 rounded-lg transition-all duration-200 ${
+                  isDark
+                    ? 'text-yellow-400 hover:bg-gray-800'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+                title={isDark ? 'Modo claro' : 'Modo oscuro'}
+              >
+                <span className="sr-only">Cambiar tema</span>
+                {isDark ? (
+                  <HiSun className="h-6 w-6" />
+                ) : (
+                  <HiMoon className="h-6 w-6" />
+                )}
+              </button>
+
+              {/* Notificaciones */}
+              <button
+                type="button"
+                className={`relative p-2 rounded-lg transition-all duration-200 ${
+                  isDark
+                    ? 'text-gray-300 hover:bg-gray-800'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+                title="Notificaciones"
+              >
+                <span className="sr-only">Ver notificaciones</span>
+                <HiBell className="h-6 w-6" aria-hidden="true" />
+                {/* Badge de notificaciones */}
+                <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
+              </button>
+
+              {/* Separator */}
+              <div className={`hidden lg:block h-6 w-px ${
+                isDark ? 'bg-gray-700' : 'bg-gray-200'
+              }`} aria-hidden="true" />
+
+              {/* Información del usuario */}
+              <div className={`flex items-center gap-x-3 rounded-lg px-3 py-2 border transition-colors duration-200 ${
+                isDark
+                  ? 'bg-gray-800 border-gray-700'
+                  : 'bg-gray-50 border-gray-200'
+              }`}>
+                <HiUserCircle className={`h-8 w-8 ${
+                  isDark ? 'text-gray-400' : 'text-gray-600'
+                }`} />
+                <span className="hidden lg:flex lg:flex-col">
+                  <span className={`text-sm font-semibold ${
+                    isDark ? 'text-gray-200' : 'text-gray-900'
+                  }`}>
+                    {user?.full_name}
+                  </span>
+                  <span className={`text-xs ${
+                    isDark ? 'text-gray-400' : 'text-gray-500'
+                  }`}>
+                    {company?.name || 'Inmobiliaria'}
+                  </span>
+                </span>
+              </div>
+
+              {/* Separator */}
+              <div className={`hidden lg:block h-6 w-px ${
+                isDark ? 'bg-gray-700' : 'bg-gray-200'
+              }`} aria-hidden="true" />
+
+              {/* Botón cerrar sesión */}
+              <button
+                type="button"
+                onClick={handleLogout}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 font-medium text-sm ${
+                  isDark
+                    ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                    : 'bg-gray-900 hover:bg-gray-800 text-white'
+                }`}
+                title="Cerrar sesión"
+              >
+                <HiLogout className="h-5 w-5" />
+                <span className="hidden lg:inline">Salir</span>
+              </button>
             </div>
           </div>
         </div>
 
         {/* Page content */}
-        <main className="flex-1">
-          <div className="py-6">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              {children}
-            </div>
+        <main className="py-10">
+          <div className="px-4 sm:px-6 lg:px-8">
+            {children}
           </div>
         </main>
       </div>
@@ -230,114 +308,14 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   )
 }
 
-function SidebarContent({ 
-  menuItems, 
-  pathname,
-  user,
-  company,
-  subdomain
-}: { 
-  menuItems: MenuItem[]
-  pathname: string
-  user: User | null
-  company: Company | null
-  subdomain: string
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode
 }) {
   return (
-    <>
-      {/* Logo */}
-      <div className="flex items-center h-16 flex-shrink-0 px-4 bg-gradient-primary">
-        <HiOfficeBuilding className="h-8 w-8 text-white" />
-        <span className="ml-2 text-xl font-black text-white">
-          InmoSite
-        </span>
-      </div>
-
-      {/* Info de la inmobiliaria */}
-      {company && (
-        <div className="px-4 py-3 bg-surface-hover/50 border-b border-surface-border">
-          <div className="flex items-center gap-3">
-            {company.logo ? (
-              <Image
-                src={company.logo} 
-                alt={company.name}
-                className="w-8 h-8 rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-                <span className="text-primary-600 font-bold text-sm">
-                  {company.name?.charAt(0)}
-                </span>
-              </div>
-            )}
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-text-primary truncate">
-                {company.name}
-              </p>
-              <p className="text-xs text-text-muted">
-                {subdomain}.mwstudiodigital.com
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Navigation */}
-      <div className="flex-1 flex flex-col overflow-y-auto">
-        <nav className="flex-1 px-2 py-4 space-y-2">
-          {menuItems.map((item) => {
-            const isActive = pathname === item.href
-            const Icon = item.icon
-            
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`group flex items-center px-4 py-3 text-sm font-medium rounded-custom-lg transition-all duration-300 ${
-                  isActive
-                    ? 'bg-gradient-primary text-white shadow-custom-lg'
-                    : 'text-text-secondary hover:bg-surface-hover hover:text-primary-600'
-                }`}
-              >
-                <Icon
-                  className={`mr-3 flex-shrink-0 h-5 w-5 transition-colors ${
-                    isActive ? 'text-white' : 'text-text-tertiary group-hover:text-primary-600'
-                  }`}
-                />
-                <div className="flex-1">
-                  <div className="font-semibold">{item.name}</div>
-                  <div className={`text-xs mt-0.5 ${
-                    isActive ? 'text-white/80' : 'text-text-muted'
-                  }`}>
-                    {item.description}
-                  </div>
-                </div>
-              </Link>
-            )
-          })}
-        </nav>
-
-        {/* Footer con info del usuario */}
-        <div className="flex-shrink-0 flex border-t border-surface-border p-4">
-          <div className="flex items-center w-full">
-            <div className="flex-shrink-0">
-              <div className="h-10 w-10 rounded-full bg-gradient-primary flex items-center justify-center">
-                <span className="text-white font-semibold">
-                  {user?.first_name?.charAt(0)}{user?.last_name?.charAt(0)}
-                </span>
-              </div>
-            </div>
-            <div className="ml-3 flex-1 min-w-0">
-              <p className="text-sm font-medium text-text-primary truncate">
-                {user?.first_name} {user?.last_name}
-              </p>
-              <p className="text-xs text-text-muted truncate">
-                Plan Profesional
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
+    <DashboardThemeProvider>
+      <DashboardContent>{children}</DashboardContent>
+    </DashboardThemeProvider>
   )
 }

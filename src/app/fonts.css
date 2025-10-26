@@ -1,0 +1,58 @@
+/*
+ * General Sans Font Configuration
+ *
+ * NOTA: Para usar General Sans necesitas:
+ * 1. Descargar los archivos de fuente General Sans (.woff2 recomendado)
+ * 2. Colocarlos en /public/fonts/general-sans/
+ * 3. Descomentar las declaraciones @font-face a continuación
+ *
+ * Estructura de archivos esperada:
+ * /public/fonts/general-sans/
+ *   ├── GeneralSans-Regular.woff2
+ *   ├── GeneralSans-Medium.woff2
+ *   ├── GeneralSans-Semibold.woff2
+ *   └── GeneralSans-Bold.woff2
+ */
+
+/* General Sans - Regular */
+@font-face {
+  font-family: 'General Sans';
+  src: url('/fonts/general-sans/GeneralSans-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* General Sans - Medium */
+@font-face {
+  font-family: 'General Sans';
+  src: url('/fonts/general-sans/GeneralSans-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* General Sans - Semibold */
+@font-face {
+  font-family: 'General Sans';
+  src: url('/fonts/general-sans/GeneralSans-Semibold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* General Sans - Bold */
+@font-face {
+  font-family: 'General Sans';
+  src: url('/fonts/general-sans/GeneralSans-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/*
+ * ALTERNATIVA TEMPORAL: Usar Plus Jakarta Sans de Google Fonts
+ * Esta es una fuente similar a General Sans y está disponible gratuitamente
+ * Descomenta la línea siguiente si no tienes acceso a General Sans:
+ */
+/* @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap'); */

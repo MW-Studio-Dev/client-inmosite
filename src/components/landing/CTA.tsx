@@ -4,6 +4,7 @@ import React from 'react';
 import { Button } from "@heroui/react";
 import { HiArrowRight, HiPhone } from "react-icons/hi2";
 
+
 const CTA: React.FC = () => {
   return (
     <section className="py-20 relative">
@@ -54,7 +55,7 @@ const CTA: React.FC = () => {
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-6 text-red-100/80 text-sm font-light">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                <span>14 días de prueba gratuita</span>
+                <span>30 días de prueba gratuita</span>
               </div>
               <div className="hidden sm:block w-px h-4 bg-white/20" />
               <div className="flex items-center gap-2">
