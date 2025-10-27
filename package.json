@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:subdomain": "node scripts/test-subdomain-config.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.8",

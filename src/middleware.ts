@@ -314,10 +314,13 @@ export async function middleware(request: NextRequest) {
   // ✅ MEJORADO: Logging más selectivo
   if (subdomain) {
     console.log(`🔄 Middleware processing subdomain: ${subdomain}, path: ${pathname}`);
+    console.log(`🌐 Full URL: ${request.url}`);
+    console.log(`📍 Host header: ${request.headers.get('host')}`);
   }
 
   // Si no hay subdominio, permitir acceso normal (dominio principal)
   if (!subdomain) {
+    console.log(`🏠 No subdomain detected, serving main domain for path: ${pathname}`);
     return NextResponse.next();
   }
 

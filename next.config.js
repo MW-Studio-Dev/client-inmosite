@@ -86,7 +86,7 @@ const nextConfig = {
   },
 
   // Configuración para producción
-  output: 'standalone', // Solo si planeas usar Docker
+  // output: 'standalone', // Solo si planeas usar Docker - COMENTADO para multi-domain
   
   // Variables de entorno públicas
   env: {
