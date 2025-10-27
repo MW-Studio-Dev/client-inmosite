@@ -93,7 +93,7 @@ export const useWebsiteConfig = (subdomain: string): UseWebsiteConfigReturn => {
       setError(null);
 
       // Usar la URL de tu endpoint
-      const apiUrl = 'http://localhost:8000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_MEDIA;
       const controller = new AbortController();
 
       console.log('Fetching config from:', `${apiUrl}/api/v1/websites/configs/public/${subdomain}/`);

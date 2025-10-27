@@ -14,8 +14,8 @@ export const usePropertyDetail = ( propertyId: string): UsePropertyDetailReturn 
       setError(null);
 
       // Use environment variable for API URL
-      const apiUrl = 'http://localhost:8000/api';
-      const response = await fetch(`${apiUrl}/v1/properties/properties/${propertyId}`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_MEDIA;
+      const response = await fetch(`${apiUrl}/api/v1/properties/properties/${propertyId}`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${tokens?.access}`

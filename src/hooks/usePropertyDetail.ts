@@ -13,8 +13,8 @@ export const usePropertyDetail = (subdomain: string, propertyId: string): UsePro
       setError(null);
 
       // Use environment variable for API URL
-      const apiUrl = 'http://localhost:8000/api';
-      const response = await fetch(`${apiUrl}/v1/properties/public/${subdomain}/properties/${propertyId}`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_MEDIA;
+      const response = await fetch(`${apiUrl}/api/v1/properties/public/${subdomain}/properties/${propertyId}`, {
         headers: {
           'Content-Type': 'application/json',
         },

@@ -63,8 +63,8 @@ export const useProperties = (subdomain: string, baseUrl?: string): UsePropertie
       setError(null);
       
       // Usar baseUrl si se proporciona, sino usar una URL por defecto
-      const apiBaseUrl = 'http://localhost:8000';
-      const url = `${apiBaseUrl}/v1/properties/public/${subdomain}/properties/featured/`;
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_MEDIA;
+      const url = `${apiBaseUrl}/api/v1/properties/public/${subdomain}/properties/featured/`;
       
       const response = await fetch(url, {
         method: 'GET',

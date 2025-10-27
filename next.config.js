@@ -60,10 +60,11 @@ const nextConfig = {
 
   // Reescribir rutas de media para proxear al backend
   async rewrites() {
+    const apiMediaUrl = process.env.NEXT_PUBLIC_API_MEDIA;
     return [
       {
         source: '/media/:path*',
-        destination: 'http://localhost:8000/media/:path*',
+        destination: `${apiMediaUrl}/media/:path*`,
       },
     ];
   },

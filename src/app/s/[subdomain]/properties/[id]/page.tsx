@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: PropertyPageProps): Promise<M
   const { subdomain, id } = await params;
 
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const response = await fetch(`${apiUrl}/api/v1/properties/public/${subdomain}/properties/${id}`);
     
     if (response.ok) {

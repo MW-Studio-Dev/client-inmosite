@@ -18,7 +18,7 @@ const CACHE_DURATION = 5 * 60 * 1000;
 
 // ✅ CORREGIDO: Instancia de axios con headers de seguridad
 const publicAxios = axios.create({
-  baseURL: 'http://localhost:8000/api/v1',
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   timeout: 3000, // Aumentado un poco el timeout
   headers: {
     'Content-Type': 'application/json',

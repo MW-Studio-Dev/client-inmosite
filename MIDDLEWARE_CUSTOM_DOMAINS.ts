@@ -15,8 +15,8 @@ import axios from 'axios';
 // ============================================================================
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
-const DOMAIN_CHECK_SECRET = process.env.DOMAIN_CHECK_SECRET_KEY || 'B@guira2025!+';
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+const DOMAIN_CHECK_SECRET = process.env.DOMAIN_CHECK_SECRET_KEY;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Subdominios reservados del sistema
 const RESERVED_SUBDOMAINS = [

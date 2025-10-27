@@ -55,7 +55,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
 
   const handlePrintPDF = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const pdfUrl = `${apiUrl}/v1/properties/properties/${property.id}/generate_pdf`;
     const response = await fetch(pdfUrl, {
       method: 'GET',
