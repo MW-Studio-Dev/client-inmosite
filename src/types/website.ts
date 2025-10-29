@@ -155,6 +155,7 @@ export interface WebsiteConfig {
   meta_title: string;
   meta_description: string;
   meta_keywords: string;
+  favicon: string;
 
   // Social Media
   facebook_url: string;

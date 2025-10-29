@@ -132,3 +132,45 @@ export function getSubdomain(): string | null {
 
   return null;
 }
+
+export interface WebsiteConfigResponse {
+  success: boolean;
+  message: string;
+  data: any;
+  meta: Record<string, unknown>;
+  timestamp: string;
+  request_id: string;
+}
+
+/**
+ * Fetch website public configuration from the API (server-side)
+ * @param subdomain - The website subdomain
+ * @returns Promise with website configuration
+ */
+export async function fetchPublicWebsiteConfig(
+  subdomain: string
+): Promise<WebsiteConfigResponse | null> {
+  const url = `${API_BASE_URL}/v1/websites/configs/public/${subdomain}/`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store', // Disable caching for real-time data
+      next: { revalidate: 60 }, // Revalidate every 60 seconds
+    });
+
+    if (!response.ok) {
+      console.error(`API request failed: ${response.status} ${response.statusText}`);
+      return null;
+    }
+
+    const data: WebsiteConfigResponse = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching website config:', error);
+    return null;
+  }
+}

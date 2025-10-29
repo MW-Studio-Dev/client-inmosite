@@ -48,6 +48,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ config, adaptiveColors }) => 
           fill
           className={`object-cover transition-opacity duration-500 ${mediaLoaded ? 'opacity-100' : 'opacity-0'}`}
           priority
+          unoptimized
           onLoad={() => setMediaLoaded(true)}
         />
 

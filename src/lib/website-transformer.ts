@@ -101,6 +101,23 @@ export function transformBackendToFrontend(backendData: any): TemplateConfig {
     showSearchBar: backendData.hero?.showSearchBar ?? backendData.hero_show_search_bar ?? true,
   };
 
+  // Transformar SEO
+  const seo = {
+    metaTitle: backendData.seo?.metaTitle || backendData.meta_title || company.name,
+    metaDescription: backendData.seo?.metaDescription || backendData.meta_description || '',
+    metaKeywords: backendData.seo?.metaKeywords || backendData.meta_keywords || '',
+    favicon: backendData.seo?.favicon || backendData.favicon || '/favicon.ico',
+  };
+
+  // Transformar redes sociales
+  const social = {
+    facebook: backendData.social?.facebook || backendData.facebook_url || '',
+    instagram: backendData.social?.instagram || backendData.instagram_url || '',
+    linkedin: backendData.social?.linkedin || backendData.linkedin_url || '',
+    tiktok: backendData.social?.tiktok || backendData.tiktok_url || '',
+    youtube: backendData.social?.youtube || backendData.youtube_url || '',
+  };
+
   // Transformar about us
   const aboutUs = {
     title: backendData.sections?.aboutUs?.title || backendData.about_title || '',
@@ -284,6 +301,8 @@ export function transformBackendToFrontend(backendData: any): TemplateConfig {
     typography,
     company,
     hero,
+    seo,
+    social,
     sections,
     team,
     projects,

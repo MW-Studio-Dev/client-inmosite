@@ -337,6 +337,21 @@ export interface PropertyDetailConfig {
     showVirtualTour: boolean;
   };
 }
+export interface SEOConfig {
+  metaTitle: string;
+  metaDescription: string;
+  metaKeywords: string;
+  favicon: string;
+}
+
+export interface SocialMedia {
+  facebook: string;
+  instagram: string;
+  linkedin: string;
+  tiktok: string;
+  youtube: string;
+}
+
 export interface Sections {
   showRentSale: boolean;
   showTeam: boolean;
@@ -355,6 +370,8 @@ export interface TemplateConfig {
   typography: Typography;
   company: Company;
   hero: Hero;
+  seo: SEOConfig;
+  social: SocialMedia;
   sections: Sections;
   team?: TeamMember[];
   projects?: Project[];

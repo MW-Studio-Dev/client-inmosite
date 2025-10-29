@@ -75,11 +75,12 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({ config, adaptiveColor
       // Es emoji
       return (
         <div className="flex items-center justify-center">
-          <Image 
+          <Image
             src={`${process.env.NEXT_PUBLIC_API_MEDIA}${partner.logo}`}
             alt={partner.name}
             width={400}
             height={400}
+            unoptimized
             />
         </div>
       );
