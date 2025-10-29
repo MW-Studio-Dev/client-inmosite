@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -35,6 +35,8 @@ import { usePropertyDetail } from '@/hooks/usePropertyDetail';
 import { useWebsiteConfig } from '@/hooks/useWebsiteConfig';
 import { PropertyDetail as PropertyDetailType } from '@/types/property';
 import Navbar from '../layout/Header';
+import StructuredData from '@/components/common/StructuredData';
+import { generatePropertySchema, generateBreadcrumbSchema } from '@/lib/seo';
 interface PropertyDetailPageProps {
   subdomain: string;
   propertyId: string;
@@ -448,6 +450,46 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
     alt: property?.title || 'Propiedad',
     isPrimary: true
   }];
+
+  // Structured Data para SEO
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://inmosite.com';
+  const propertyUrl = property ? `${siteUrl}/s/${subdomain}/properties/${propertyId}` : '';
+  
+  const structuredData = useMemo(() => {
+    if (!property) return null;
+
+    const propertyImages = displayImages.map(img => {
+      const imgUrl = img.url.startsWith('http') ? img.url : `${siteUrl}${img.url}`;
+      return imgUrl;
+    });
+
+    const schemas = [
+      generatePropertySchema({
+        name: property.title,
+        description: property.description || property.meta_description || '',
+        image: propertyImages,
+        url: propertyUrl,
+        address: {
+          street: property.address,
+          city: property.city,
+          state: property.province,
+        },
+        rooms: property.bedrooms,
+        area: property.surface_total ? parseFloat(property.surface_total) : undefined,
+        price: property.operation_type === 'venta' 
+          ? (property.price_usd || property.price_ars) 
+          : undefined,
+        currency: property.price_usd ? 'USD' : 'ARS',
+      }),
+      generateBreadcrumbSchema([
+        { name: 'Inicio', url: `${siteUrl}/s/${subdomain}` },
+        { name: 'Propiedades', url: `${siteUrl}/s/${subdomain}/properties` },
+        { name: property.title, url: propertyUrl },
+      ]),
+    ];
+
+    return schemas;
+  }, [property, subdomain, propertyId, siteUrl, propertyUrl, displayImages]);
 
   // Reset image index when property changes
   useEffect(() => {
@@ -1174,8 +1216,9 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
 
   return (
     <>
-    <Navbar config={templateConfig} adaptiveColors={adaptiveColors}/>
-    <div style={{ backgroundColor: templateConfig.colors.background }} className="min-h-screen">
+      {structuredData && <StructuredData data={structuredData} />}
+      <Navbar config={templateConfig} adaptiveColors={adaptiveColors}/>
+      <div style={{ backgroundColor: templateConfig.colors.background }} className="min-h-screen">
       
       {/* Breadcrumb y navegación */}
       <div style={{ backgroundColor: templateConfig.colors.surface }} className="py-4 px-6 border-b">

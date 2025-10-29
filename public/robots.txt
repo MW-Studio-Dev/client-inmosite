@@ -1,0 +1,27 @@
+# Robots.txt para InmoSite
+# Permite a todos los bots indexar el sitio
+
+User-agent: *
+Allow: /
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /preview/
+Disallow: /verify-email
+
+# Permitir acceso a las páginas públicas de propiedades
+Allow: /s/
+Allow: /s/*/properties/
+
+# Sitemap
+Sitemap: https://inmosite.com/sitemap.xml
+
+# Crawl-delay para bots específicos (opcional)
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+

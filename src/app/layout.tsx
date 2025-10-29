@@ -18,9 +18,57 @@ const inter = Inter({
   weight: ["300", "400", "500", "600", "700"],
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://inmosite.com';
+
 export const metadata: Metadata = {
-  title: "InmoSite - Gestión Inmobiliaria",
-  description: "Plataforma completa para la gestión de propiedades inmobiliarias",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "InmoSite - Gestión Inmobiliaria",
+    template: "%s | InmoSite"
+  },
+  description: "Plataforma completa para la gestión de propiedades inmobiliarias. Administra tus propiedades, clientes y sitios web desde un solo lugar.",
+  keywords: ["inmobiliaria", "gestión inmobiliaria", "propiedades", "casas", "departamentos", "alquileres", "ventas", "inmobiliarias"],
+  authors: [{ name: "InmoSite" }],
+  creator: "InmoSite",
+  publisher: "InmoSite",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    type: "website",
+    locale: "es_AR",
+    url: siteUrl,
+    siteName: "InmoSite",
+    title: "InmoSite - Gestión Inmobiliaria",
+    description: "Plataforma completa para la gestión de propiedades inmobiliarias",
+    images: [
+      {
+        url: "/hero-image.webp",
+        width: 1200,
+        height: 630,
+        alt: "InmoSite - Gestión Inmobiliaria",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "InmoSite - Gestión Inmobiliaria",
+    description: "Plataforma completa para la gestión de propiedades inmobiliarias",
+    images: ["/hero-image.webp"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   icons: {
     icon: [
       { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
@@ -29,6 +77,9 @@ export const metadata: Metadata = {
     ],
     shortcut: '/favicon-32x32.png',
     apple: '/favicon-256x256.png',
+  },
+  alternates: {
+    canonical: siteUrl,
   },
 };
 
