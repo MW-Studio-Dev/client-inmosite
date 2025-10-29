@@ -1,7 +1,7 @@
 // components/Toast.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 
 export interface ToastProps {
   message: string;
@@ -9,6 +9,16 @@ export interface ToastProps {
   duration?: number;
   onClose?: () => void;
 }
+
+interface ToastContextType {
+  toasts: (ToastProps & { id: string })[];
+  showSuccess: (message: string) => void;
+  showError: (message: string) => void;
+  showWarning: (message: string) => void;
+  showInfo: (message: string) => void;
+}
+
+const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export const Toast: React.FC<ToastProps> = ({ 
   message, 
@@ -94,8 +104,8 @@ export const Toast: React.FC<ToastProps> = ({
   );
 };
 
-// Hook para manejar múltiples toasts
-export const useToast = () => {
+// Provider para el contexto de Toast
+export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<(ToastProps & { id: string })[]>([]);
 
   const showToast = (props: Omit<ToastProps, 'onClose'>) => {
@@ -118,18 +128,37 @@ export const useToast = () => {
   const showWarning = (message: string) => showToast({ message, type: 'warning' });
   const showInfo = (message: string) => showToast({ message, type: 'info' });
 
-  return {
-    toasts,
-    showSuccess,
-    showError,
-    showWarning,
-    showInfo
-  };
+  return (
+    <ToastContext.Provider value={{ toasts, showSuccess, showError, showWarning, showInfo }}>
+      {children}
+      <ToastContainer toasts={toasts} />
+    </ToastContext.Provider>
+  );
+};
+
+// Hook para manejar múltiples toasts
+export const useToast = () => {
+  const context = useContext(ToastContext);
+  if (!context) {
+    // Fallback para cuando no hay provider
+    console.warn('useToast debe usarse dentro de ToastProvider');
+    return {
+      toasts: [],
+      showSuccess: () => {},
+      showError: () => {},
+      showWarning: () => {},
+      showInfo: () => {}
+    };
+  }
+  return context;
 };
 
 // Componente contenedor para mostrar múltiples toasts
-export const ToastContainer: React.FC = () => {
-  const { toasts } = useToast();
+export const ToastContainer: React.FC<{ toasts?: (ToastProps & { id: string })[] }> = ({ toasts: propToasts }) => {
+  const context = useContext(ToastContext);
+  const toasts = propToasts || context?.toasts || [];
+
+  if (toasts.length === 0) return null;
 
   return (
     <div className="fixed top-4 right-4 z-50 space-y-2">

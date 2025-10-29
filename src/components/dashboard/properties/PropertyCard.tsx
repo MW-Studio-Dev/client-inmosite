@@ -22,13 +22,15 @@ interface PropertyCardProps {
   onEdit?: (property: Property) => void;
   onDelete?: (property: Property) => void;
   onView?: (property: Property) => void;
+  isDeleting?: boolean;
 }
 
 export const PropertyCard: React.FC<PropertyCardProps> = ({
   property,
   onEdit,
   onDelete,
-  onView
+  onView,
+  isDeleting = false
 }) => {
   const {tokens} = useAuth();
   const { theme } = useDashboardTheme();
@@ -56,7 +58,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   const handlePrintPDF = async (e: React.MouseEvent) => {
     e.stopPropagation();
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    const pdfUrl = `${apiUrl}/v1/properties/properties/${property.id}/generate_pdf`;
+    const pdfUrl = `${apiUrl}/properties/properties/${property.id}/generate_pdf`;
     const response = await fetch(pdfUrl, {
       method: 'GET',
       headers: {
@@ -197,14 +199,19 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           {onDelete && (
             <button
               onClick={() => onDelete(property)}
+              disabled={isDeleting}
               className={`col-span-2 py-1.5 px-2 rounded-md text-[10px] font-semibold transition-all duration-200 flex items-center justify-center gap-1 border ${
+                isDeleting
+                  ? 'opacity-50 cursor-not-allowed'
+                  : ''
+              } ${
                 isDark
                   ? 'bg-gray-700 hover:bg-red-900/30 text-red-400 border-gray-600 hover:border-red-800'
                   : 'bg-white hover:bg-red-50 text-red-600 border-red-300 hover:border-red-400'
               }`}
             >
-              <HiTrash className="h-3 w-3" />
-              Eliminar
+              <HiTrash className={`h-3 w-3 ${isDeleting ? 'animate-spin' : ''}`} />
+              {isDeleting ? 'Eliminando...' : 'Eliminar'}
             </button>
           )}
         </div>

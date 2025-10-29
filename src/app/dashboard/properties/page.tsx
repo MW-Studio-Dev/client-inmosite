@@ -21,14 +21,21 @@ import {
   HiTrash,
 } from 'react-icons/hi';
 import { HiHomeModern } from 'react-icons/hi2';
+import axiosInstance from '@/lib/api';
+import { useToast } from '@/components/common/Toast';
+import { ConfirmModal } from '@/components/common/ConfirmModal';
 
 export default function PropiedadesPage() {
   const [filters, setFilters] = useState<PropertyFilters>({});
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid'); // Nuevo estado para controlar la vista
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { company } = useAuth();
   const { theme } = useDashboardTheme();
   const isDark = theme === 'dark';
+  const { showSuccess, showError } = useToast();
   const { properties, loading, error, refetch, totalProperties } = useProperties({
     filters,
     subdomain: company?.subdomain || ''
@@ -43,13 +50,44 @@ export default function PropiedadesPage() {
   };
 
   const handleEdit = (property: Property) => {
-    console.log('Editar propiedad:', property.id);
-    // Aquí implementarías la lógica para editar
+    return window.open(`/dashboard/properties/update/${property.id}`, '_blank');
   };
 
-  const handleDelete = (property: Property) => {
-    console.log('Eliminar propiedad:', property.id);
-    // Aquí implementarías la lógica para eliminar
+  const handleDeleteClick = (property: Property) => {
+    setPropertyToDelete(property);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!propertyToDelete) return;
+
+    try {
+      setDeletingId(propertyToDelete.id);
+      setShowDeleteModal(false);
+      
+      const response = await axiosInstance.delete(`/properties/properties/${propertyToDelete.id}/`);
+      
+      // Mostrar mensaje de éxito
+      showSuccess(response.data?.message || 'Propiedad eliminada correctamente');
+      
+      // Refrescar la lista de propiedades
+      await refetch();
+    } catch (err: any) {
+      console.error('Error al eliminar propiedad:', err);
+      const errorMessage = err.response?.data?.message || 
+                          err.response?.data?.error || 
+                          err.message || 
+                          'Error al eliminar la propiedad';
+      showError(errorMessage);
+    } finally {
+      setDeletingId(null);
+      setPropertyToDelete(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setPropertyToDelete(null);
   };
 
   const handleView = (property: Property) => {
@@ -176,11 +214,12 @@ export default function PropiedadesPage() {
                       <HiPencil className="h-5 w-5" />
                     </button>
                     <button
-                      onClick={() => handleDelete(property)}
-                      className="text-gray-400 hover:text-red-600"
+                      onClick={() => handleDeleteClick(property)}
+                      disabled={deletingId === property.id}
+                      className="text-gray-400 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                       title="Eliminar"
                     >
-                      <HiTrash className="h-5 w-5" />
+                      <HiTrash className={`h-5 w-5 ${deletingId === property.id ? 'animate-spin' : ''}`} />
                     </button>
                   </div>
                 </td>
@@ -440,8 +479,9 @@ export default function PropiedadesPage() {
                       key={property.id}
                       property={property}
                       onEdit={handleEdit}
-                      onDelete={handleDelete}
+                      onDelete={handleDeleteClick}
                       onView={handleView}
+                      isDeleting={deletingId === property.id}
                     />
                   ))}
                 </div>
@@ -512,6 +552,18 @@ export default function PropiedadesPage() {
           )}
         </div>
       </div>
+
+      {/* Modal de confirmación para eliminar */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        title="Eliminar Propiedad"
+        message={`¿Estás seguro de que deseas eliminar la propiedad "${propertyToDelete?.title}"?`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        type="danger"
+      />
     </div>
   );
 }

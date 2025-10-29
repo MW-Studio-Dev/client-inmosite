@@ -7,11 +7,13 @@ import {
   HiEye,
   HiEyeSlash,
   HiCheckCircle,
-  HiXCircle
+  HiXCircle,
+  HiExclamationTriangle
 } from "react-icons/hi2";
 import { useAuth } from '@/hooks';
 import Image from 'next/image';
 import Link from 'next/link';
+import { HouseLoader } from '@/components/auth/HouseLoader';
 
 const LoginForm = () => {
   const { login, isLoading, error, clearError } = useAuth();
@@ -22,8 +24,10 @@ const LoginForm = () => {
   
   // Estados para el formulario
   const [showPassword, setShowPassword] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<'success' | 'error' | null>(null);
+  const [submitStatus, setSubmitStatus] = useState<'success' | 'error' | 'warning' | null>(null);
   const [statusMessage, setStatusMessage] = useState('');
+  const [errorCode, setErrorCode] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   // Estados para login
   const [loginData, setLoginData] = useState({
@@ -37,6 +41,8 @@ const LoginForm = () => {
     // Resetear status previo
     setSubmitStatus(null);
     setStatusMessage('');
+    setErrorCode(null);
+    setFieldErrors({});
 
     // Validaciones básicas
     if (!loginData.email.trim() || !loginData.password.trim()) {
@@ -54,7 +60,7 @@ const LoginForm = () => {
 
     try {
       console.log('Iniciando login...');
-      
+
       // Usar el hook de autenticación
       const result = await login({
         email: loginData.email,
@@ -66,16 +72,28 @@ const LoginForm = () => {
       if (result.success) {
         setSubmitStatus('success');
         setStatusMessage('¡Inicio de sesión exitoso! Redirigiendo...');
-        
+
         // Redireccionar a la URL de callback o dashboard por defecto
         setTimeout(() => {
           console.log('Redirigiendo a:', callbackUrl);
           window.location.href = callbackUrl;
         }, 1500);
-        
+
       } else {
+        // Manejar diferentes tipos de errores
+        const message = result.message || 'Error al iniciar sesión. Verifica tus credenciales.';
+        const code = result.error_code;
+        const errors = result.errors || {};
+
         setSubmitStatus('error');
-        setStatusMessage(result.message || 'Error al iniciar sesión. Verifica tus credenciales.');
+        setStatusMessage(message);
+        setErrorCode(code || null);
+        setFieldErrors(errors);
+
+        // Determinar si es un warning (email no verificado)
+        if (code === 'INVALID_CREDENTIALS' && message.toLowerCase().includes('email no verificado')) {
+          setSubmitStatus('warning');
+        }
       }
 
     } catch (error) {
@@ -153,21 +171,15 @@ const LoginForm = () => {
               <div className="pt-8 pb-6 px-8">
                 {/* Logo y título horizontales */}
                 <div className="flex items-center justify-center gap-6 mb-6">
-                  {/* <div className="relative w-32 h-32 sm:w-24 sm:h-24 md:w-28 md:h-48">
-                    <Image 
-                      src='/logo.png' 
-                      alt="Logo" 
-                      fill
-                      className="object-contain drop-shadow-lg"
-                      priority
-                    />
-                  </div> */}
                   
-
+                  <div className="text-center mb-6">
+                    <h1 className="text-3xl sm:text-2xl md:text-3xl font-bold text-center bg-gradient-to-r from-red-400 via-red-500 to-red-600 bg-clip-text text-transparent mb-2">
+                      Bienvenido de Nuevo
+                    </h1>
+                    <p className="text-gray-400 text-lg">Accede a tu portal inmobiliario</p>
+                  </div>
                 </div>
-                <h1 className="text-xl sm:text-xl md:text-3xl  text-center text-white">
-                    Iniciar Sesión
-                  </h1>
+         
                 
                 {/* Información de callback */}
                 {callbackUrl !== '/dashboard' && (
@@ -181,24 +193,74 @@ const LoginForm = () => {
               
               {/* Card Body */}
               <div className="space-y-6 px-8 pb-8">
+                {/* Loading State con House Loader */}
+                {isLoading && (
+                  <div className="py-8">
+                    <HouseLoader size="md" message="Iniciando sesión..." />
+                  </div>
+                )}
+
                 {/* Status Messages */}
-                {(submitStatus || error) && (
+                {!isLoading && (submitStatus || error) && (
                   <div className={`p-4 rounded-lg border ${
-                    submitStatus === 'success' 
-                      ? 'bg-green-950/30 border-green-800/30' 
+                    submitStatus === 'success'
+                      ? 'bg-green-950/30 border-green-800/30'
+                      : submitStatus === 'warning'
+                      ? 'bg-yellow-950/30 border-yellow-800/30'
                       : 'bg-red-950/30 border-red-800/30'
                   }`}>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-start gap-3">
                       {submitStatus === 'success' ? (
-                        <HiCheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                        <HiCheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                      ) : submitStatus === 'warning' ? (
+                        <HiExclamationTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
                       ) : (
-                        <HiXCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                        <HiXCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
                       )}
-                      <span className={`text-sm font-medium ${
-                        submitStatus === 'success' ? 'text-green-300' : 'text-red-300'
-                      }`}>
-                        {statusMessage || error}
-                      </span>
+                      <div className="flex-1">
+                        <p className={`text-sm font-medium ${
+                          submitStatus === 'success'
+                            ? 'text-green-300'
+                            : submitStatus === 'warning'
+                            ? 'text-yellow-300'
+                            : 'text-red-300'
+                        }`}>
+                          {statusMessage || error}
+                        </p>
+
+                        {/* Mostrar errores adicionales si existen */}
+                        {Object.keys(fieldErrors).length > 0 && (
+                          <ul className="mt-2 space-y-1 text-xs text-red-400">
+                            {Object.entries(fieldErrors).map(([field, messages]) => (
+                              messages.map((msg, idx) => (
+                                <li key={`${field}-${idx}`} className="flex items-start gap-1">
+                                  <span className="text-red-500">•</span>
+                                  <span>{msg}</span>
+                                </li>
+                              ))
+                            ))}
+                          </ul>
+                        )}
+
+                        {/* Agregar link para verificar email si es necesario */}
+                        {submitStatus === 'warning' && statusMessage.toLowerCase().includes('email no verificado') && (
+                          <div className="mt-3">
+                            <Link
+                              href="/verify-email"
+                              className="text-yellow-400 hover:text-yellow-300 text-xs font-medium underline"
+                            >
+                              ¿No recibiste el email? Reenviar verificación
+                            </Link>
+                          </div>
+                        )}
+
+                        {/* Código de error para debugging (solo en desarrollo) */}
+                        {process.env.NODE_ENV === 'development' && errorCode && (
+                          <p className="mt-2 text-xs text-gray-500 font-mono">
+                            Error Code: {errorCode}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -333,13 +395,25 @@ const LoginForm = () => {
                 <button
                   onClick={handleLoginSubmit}
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 disabled:from-red-600/50 disabled:to-red-700/50 text-white font-semibold py-4 px-6 shadow-lg hover:shadow-xl hover:shadow-red-500/30 transition-all duration-200 rounded-lg disabled:cursor-not-allowed border border-red-500/30 flex items-center justify-center gap-3"
+                  className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 disabled:from-red-600/50 disabled:to-red-700/50 disabled:opacity-75 text-white font-semibold py-4 px-6 shadow-lg hover:shadow-xl hover:shadow-red-500/30 transition-all duration-200 rounded-lg disabled:cursor-not-allowed border border-red-500/30 flex items-center justify-center gap-3"
                 >
-                  <span>{isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}</span>
                   {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <>
+                      <svg
+                        viewBox="0 0 100 100"
+                        className="w-5 h-5 animate-pulse"
+                      >
+                        <path d="M50 10 L90 45 L10 45 Z" fill="currentColor" />
+                        <rect x="20" y="45" width="60" height="45" fill="currentColor" />
+                      </svg>
+                      <span>Iniciando sesión...</span>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    </>
                   ) : (
-                    <HiArrowRight className="w-5 h-5" />
+                    <>
+                      <span>Iniciar Sesión</span>
+                      <HiArrowRight className="w-5 h-5" />
+                    </>
                   )}
                 </button>
 

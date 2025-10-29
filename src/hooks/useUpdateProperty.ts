@@ -1,24 +1,24 @@
-// hooks/useCreateProperty.ts
+// hooks/useUpdateProperty.ts
 import { useState } from 'react';
 import axiosInstance, { axiosInstanceMultipart } from '@/lib/api';
 import axios from 'axios';
-import { 
-  CreatePropertyForm, 
-  CreatePropertyPayload, 
+import {
+  CreatePropertyForm,
+  CreatePropertyPayload,
   CreatePropertyResponse,
-  FormValidationErrors 
+  FormValidationErrors
 } from '@/types/property';
 
-interface UseCreatePropertyReturn {
+interface UseUpdatePropertyReturn {
   loading: boolean;
   error: string | null;
   fieldErrors: FormValidationErrors;
-  createProperty: (formData: CreatePropertyForm) => Promise<{ success: boolean; propertyId?: string }>;
+  updateProperty: (propertyId: string, formData: CreatePropertyForm) => Promise<{ success: boolean; propertyId?: string }>;
   validateForm: (formData: CreatePropertyForm) => FormValidationErrors;
   clearErrors: () => void;
 }
 
-export const useCreateProperty = (): UseCreatePropertyReturn => {
+export const useUpdateProperty = (): UseUpdatePropertyReturn => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FormValidationErrors>({});
@@ -110,7 +110,7 @@ export const useCreateProperty = (): UseCreatePropertyReturn => {
     return errors;
   };
 
-  const createProperty = async (formData: CreatePropertyForm): Promise<{ success: boolean; propertyId?: string }> => {
+  const updateProperty = async (propertyId: string, formData: CreatePropertyForm): Promise<{ success: boolean; propertyId?: string }> => {
     try {
       setLoading(true);
       setError(null);
@@ -164,14 +164,14 @@ export const useCreateProperty = (): UseCreatePropertyReturn => {
 
       // Crear FormData para enviar archivos
       const formDataToSend = new FormData();
-      
+
       // Agregar todos los campos del payload como strings o números
       Object.entries(payload).forEach(([key, value]) => {
         if (key === 'featured_image' || key === 'images') {
           // Estas las agregaremos después
           return;
         }
-        
+
         if (value !== null && value !== undefined && value !== '') {
           if (Array.isArray(value)) {
             // Para arrays como features, agregar cada item con el mismo nombre (formato Django)
@@ -189,12 +189,12 @@ export const useCreateProperty = (): UseCreatePropertyReturn => {
         }
       });
 
-      // Agregar featured_image si existe
+      // Agregar featured_image si existe y es un archivo nuevo
       if (payload.featured_image && payload.featured_image instanceof File) {
         formDataToSend.append('featured_image', payload.featured_image);
       }
 
-      // Agregar imágenes adicionales
+      // Agregar imágenes adicionales si existen y son archivos nuevos
       if (payload.images && Array.isArray(payload.images)) {
         payload.images.forEach((image) => {
           if (image instanceof File) {
@@ -203,15 +203,16 @@ export const useCreateProperty = (): UseCreatePropertyReturn => {
         });
       }
 
-      const response = await axiosInstanceMultipart.post<CreatePropertyResponse>(
-        '/properties/properties/',
+      // Usar PATCH o PUT para actualizar (dependiendo de tu API)
+      const response = await axiosInstanceMultipart.patch<CreatePropertyResponse>(
+        `/properties/properties/${propertyId}/`,
         formDataToSend
       );
 
       if (response.data.success) {
-        return { 
-          success: true, 
-          propertyId: response.data.data?.id 
+        return {
+          success: true,
+          propertyId: response.data.data?.id
         };
       } else {
         // Manejar errores de validación del backend
@@ -224,18 +225,18 @@ export const useCreateProperty = (): UseCreatePropertyReturn => {
           });
           setFieldErrors(backendErrors);
         } else {
-          setError(response.data.message || 'Error al crear la propiedad');
+          setError(response.data.message || 'Error al actualizar la propiedad');
         }
         return { success: false };
       }
     } catch (err) {
-      console.error('Error creating property:', err);
+      console.error('Error updating property:', err);
 
       if (axios.isAxiosError(err)) {
         const data = err.response?.data;
         if (data?.errors) {
           const backendErrors: FormValidationErrors = {};
-          Object.entries(data.errors).forEach(([field, messages]: [string,unknown]) => {
+          Object.entries(data.errors).forEach(([field, messages]: [string, unknown]) => {
             if (Array.isArray(messages) && messages.length > 0) {
               backendErrors[field] = messages[0];
             }
@@ -263,7 +264,7 @@ export const useCreateProperty = (): UseCreatePropertyReturn => {
     loading,
     error,
     fieldErrors,
-    createProperty,
+    updateProperty,
     validateForm,
     clearErrors
   };

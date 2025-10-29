@@ -51,6 +51,20 @@ export interface User {
     website_url?: string;
   }
   
+// Interfaz para respuesta de errores de la API
+export interface ApiErrorResponse {
+  success: boolean;
+  message?: string;
+  error_code?: string;
+  errors?: Record<string, string[]>;
+}
+
+// Interfaz para respuesta de login
+export interface LoginResponse extends ApiErrorResponse {
+  user?: User;
+  onboarding_required?: boolean;
+}
+
 export interface AuthState {
     // Estado
     user: User | null;
@@ -58,15 +72,16 @@ export interface AuthState {
     isAuthenticated: boolean;
     isLoading: boolean;
     error: string | null;
-    
-  
+
+
     // Acciones
-    login: (credentials: LoginCredentials) => Promise<{ success: boolean; message?: string; onboarding_required?: boolean }>;
-    register: (data: RegisterData) => Promise<{ success: boolean; message?: string }>;
+    login: (credentials: LoginCredentials) => Promise<LoginResponse>;
+    register: (data: RegisterData) => Promise<ApiErrorResponse>;
     logout: () => void;
-    verifyEmail: (token: string) => Promise<{ success: boolean; message?: string }>;
+    verifyEmail: (token: string) => Promise<ApiErrorResponse>;
+    resendVerification: (email: string) => Promise<ApiErrorResponse>;
     clearError: () => void;
     checkAuth: () => Promise<void>;
-    refreshTokens: () => Promise<{ success: boolean; message?: string }>;
+    refreshTokens: () => Promise<ApiErrorResponse>;
     updateUser: (userData: Partial<User>) => void;
   }

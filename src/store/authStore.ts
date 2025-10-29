@@ -3,7 +3,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import axiosInstance from '@/lib/api';
-import { User, LoginCredentials, RegisterData, AuthState } from '@/interfaces';
+import { User, LoginCredentials, RegisterData, AuthState, LoginResponse, ApiErrorResponse } from '@/interfaces';
 import axios from 'axios';
 
 // Extender la interfaz AuthState para incluir isHydrated
@@ -31,7 +31,7 @@ export const useAuthStore = create<ExtendedAuthState>()(
       // Acción de login
       login: async (credentials: LoginCredentials) => {
         set({ isLoading: true, error: null });
-        
+
         try {
           const response = await axiosInstance.post('/auth/login/', credentials);
           const { data } = response.data;
@@ -48,31 +48,53 @@ export const useAuthStore = create<ExtendedAuthState>()(
             error: null
           });
 
-          return { 
-            success: true, 
+          return {
+            success: true,
             user: data.user,
-            onboarding_required: data.onboarding_required 
-          };
+            onboarding_required: data.onboarding_required
+          } as LoginResponse;
 
         } catch (error) {
           let errorMessage = 'Error al iniciar sesión';
-          if (axios.isAxiosError(error)) {
-            errorMessage = (error.response?.data)?.message || error.message || errorMessage;
+          let errorCode = 'UNKNOWN_ERROR';
+          let errors: Record<string, string[]> = {};
+
+          if (axios.isAxiosError(error) && error.response?.data) {
+            const errorData = error.response.data;
+
+            // Extraer mensaje principal
+            errorMessage = errorData.message || error.message || errorMessage;
+
+            // Extraer código de error
+            errorCode = errorData.error_code || errorCode;
+
+            // Extraer errores específicos de campos
+            if (errorData.errors) {
+              errors = errorData.errors;
+
+              // Si hay errores en non_field_errors, usar el primero como mensaje principal
+              if (errors.non_field_errors && errors.non_field_errors.length > 0) {
+                errorMessage = errors.non_field_errors[0];
+              }
+            }
           } else if (error instanceof Error) {
             errorMessage = error.message;
           }
-          set({ 
-            isLoading: false, 
+
+          set({
+            isLoading: false,
             error: errorMessage,
             isAuthenticated: false,
             user: null,
             tokens: null
           });
-          
-          return { 
-            success: false, 
-            message: errorMessage 
-          };
+
+          return {
+            success: false,
+            message: errorMessage,
+            error_code: errorCode,
+            errors: errors
+          } as LoginResponse;
         }
       },
 
@@ -123,30 +145,96 @@ export const useAuthStore = create<ExtendedAuthState>()(
       // Verificación de email
       verifyEmail: async (token: string) => {
         set({ isLoading: true, error: null });
-        
+
         try {
-          await axiosInstance.post('/auth/verify-email/', { token });
-          
+          const response = await axiosInstance.post('/auth/verify-email/', { token });
+
           set({ isLoading: false, error: null });
-          
-          return { 
-            success: true, 
-            message: 'Email verificado exitosamente.' 
-          };
+
+          return {
+            success: true,
+            message: response.data?.message || 'Email verificado exitosamente.'
+          } as ApiErrorResponse;
 
         } catch (error) {
-          const errorMessage = axios.isAxiosError(error)
-            ? ((error.response?.data)?.message || error.message || 'Error al verificar el email')
-            : (error instanceof Error ? error.message : 'Error al verificar el email');
-          set({ 
-            isLoading: false, 
-            error: errorMessage 
+          let errorMessage = 'Error al verificar el email';
+          let errorCode = 'UNKNOWN_ERROR';
+          let errors: Record<string, string[]> = {};
+
+          if (axios.isAxiosError(error) && error.response?.data) {
+            const errorData = error.response.data;
+            errorMessage = errorData.message || error.message || errorMessage;
+            errorCode = errorData.error_code || errorCode;
+
+            if (errorData.errors) {
+              errors = errorData.errors;
+              if (errors.non_field_errors && errors.non_field_errors.length > 0) {
+                errorMessage = errors.non_field_errors[0];
+              }
+            }
+          } else if (error instanceof Error) {
+            errorMessage = error.message;
+          }
+
+          set({
+            isLoading: false,
+            error: errorMessage
           });
-          
-          return { 
-            success: false, 
-            message: errorMessage 
-          };
+
+          return {
+            success: false,
+            message: errorMessage,
+            error_code: errorCode,
+            errors: errors
+          } as ApiErrorResponse;
+        }
+      },
+
+      // Reenviar verificación de email
+      resendVerification: async (email: string) => {
+        set({ isLoading: true, error: null });
+
+        try {
+          const response = await axiosInstance.post('/auth/resend-verification/', { email });
+
+          set({ isLoading: false, error: null });
+
+          return {
+            success: true,
+            message: response.data?.message || 'Email de verificación enviado exitosamente.'
+          } as ApiErrorResponse;
+
+        } catch (error) {
+          let errorMessage = 'Error al reenviar el email de verificación';
+          let errorCode = 'UNKNOWN_ERROR';
+          let errors: Record<string, string[]> = {};
+
+          if (axios.isAxiosError(error) && error.response?.data) {
+            const errorData = error.response.data;
+            errorMessage = errorData.message || error.message || errorMessage;
+            errorCode = errorData.error_code || errorCode;
+
+            if (errorData.errors) {
+              errors = errorData.errors;
+              if (errors.non_field_errors && errors.non_field_errors.length > 0) {
+                errorMessage = errors.non_field_errors[0];
+              }
+            }
+          } else if (error instanceof Error) {
+            errorMessage = error.message;
+          }
+
+          set({
+            isLoading: false,
+            error: errorMessage
+          });
+
+          return {
+            success: false,
+            message: errorMessage,
+            error_code: errorCode,
+            errors: errors
+          } as ApiErrorResponse;
         }
       },
 

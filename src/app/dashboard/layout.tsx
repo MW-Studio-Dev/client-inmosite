@@ -25,6 +25,7 @@ import { AdminSidebar } from '@/components/dashboard/admin/AdminSideBar'
 import { MenuItem } from '@/types/dashboard'
 import { useAuth } from '@/hooks'
 import { DashboardThemeProvider, useDashboardTheme } from '@/context/DashboardThemeContext'
+import { ToastProvider } from '@/components/common/Toast'
 
 // Configuración del menú principal
 const menuItems: MenuItem[] = [
@@ -315,7 +316,9 @@ export default function AdminLayout({
 }) {
   return (
     <DashboardThemeProvider>
-      <DashboardContent>{children}</DashboardContent>
+      <ToastProvider>
+        <DashboardContent>{children}</DashboardContent>
+      </ToastProvider>
     </DashboardThemeProvider>
   )
 }

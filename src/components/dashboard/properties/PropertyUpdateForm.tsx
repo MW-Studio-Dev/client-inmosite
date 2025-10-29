@@ -1,11 +1,11 @@
-// components/CreatePropertyForm.tsx
+// components/PropertyUpdateForm.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Formik, Form, FormikHelpers } from 'formik';
-import { useCreateProperty } from '@/hooks/useCreateProperty';
-import { CreatePropertyForm as FormData } from '@/types/property';
+import { useUpdateProperty } from '@/hooks/useUpdateProperty';
+import { CreatePropertyForm as FormData, PropertyDetail } from '@/types/property';
 import { propertyValidationSchema } from './validation/propertySchema';
 import { useDashboardTheme } from '@/context/DashboardThemeContext';
 import {
@@ -34,63 +34,11 @@ import {
   HiTrash
 } from 'react-icons/hi';
 
-interface CreatePropertyFormProps {
+interface PropertyUpdateFormProps {
+  property: PropertyDetail;
   onSuccess?: (propertyId: string) => void;
   onCancel?: () => void;
 }
-
-const initialFormData: FormData = {
-  // Información básica
-  title: '',
-  description: '',
-  internal_code: '',
-  
-  // Precios
-  price_usd: '',
-  price_ars: '',
-  expenses: '',
-  
-  // Tipo y estado
-  operation_type: '',
-  property_type: '',
-  status: '',
-  
-  // Ubicación
-  province: 'Buenos Aires',
-  city: '',
-  neighborhood: '',
-  address: '',
-  floor: '',
-  unit: '',
-  
-  // Características físicas
-  bedrooms: '',
-  bathrooms: '',
-  half_bathrooms: '',
-  rooms: '',
-  surface_total: '',
-  surface_covered: '',
-  surface_semicovered: '',
-  surface_uncovered: '',
-  age_years: '',
-  orientation: '',
-  garage_spaces: '',
-  storage_spaces: '',
-  
-  // Configuración
-  is_featured: false,
-  is_published: false,
-  
-  // SEO
-  meta_title: '',
-  meta_description: '',
-  
-  // Características adicionales
-  features: [],
-  //imagenes
-  featured_image: null,
-  images: []
-};
 
 const PROPERTY_TYPES = [
   'departamento',
@@ -145,7 +93,8 @@ const COMMON_FEATURES = [
   'a estrenar'
 ];
 
-export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
+export const PropertyUpdateForm: React.FC<PropertyUpdateFormProps> = ({
+  property,
   onSuccess,
   onCancel
 }) => {
@@ -153,10 +102,14 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
   const [currentSection, setCurrentSection] = useState(0);
   const [featuredImage, setFeaturedImage] = useState<File | null>(null);
   const [additionalImages, setAdditionalImages] = useState<File[]>([]);
-  const [featuredPreview, setFeaturedPreview] = useState<string | null>(null);
-  const [additionalPreviews, setAdditionalPreviews] = useState<string[]>([]);
+  const [featuredPreview, setFeaturedPreview] = useState<string | null>(
+    property.featured_image_url || null
+  );
+  const [additionalPreviews, setAdditionalPreviews] = useState<string[]>(
+    property.images || []
+  );
 
-  const { loading, error, createProperty } = useCreateProperty();
+  const { loading, error, updateProperty } = useUpdateProperty();
   const { theme } = useDashboardTheme();
   const isDark = theme === 'dark';
 
@@ -168,6 +121,44 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
     { id: 4, title: 'Imágenes', icon: HiPhotograph },
     { id: 5, title: 'Configuración', icon: HiCog }
   ];
+
+  // Convertir PropertyDetail a FormData inicial
+  const initialFormData: FormData = {
+    title: property.title || '',
+    description: property.description || '',
+    internal_code: property.internal_code || '',
+    price_usd: property.price_usd ? parseFloat(property.price_usd) : '',
+    price_ars: property.price_ars ? parseFloat(property.price_ars) : '',
+    expenses: property.expenses_ars ? parseFloat(property.expenses_ars) : '',
+    operation_type: property.operation_type || '',
+    property_type: property.property_type || '',
+    status: property.status || '',
+    province: property.province || 'Buenos Aires',
+    city: property.city || '',
+    neighborhood: property.neighborhood || '',
+    address: property.address || '',
+    floor: property.floor ? parseInt(property.floor) : '',
+    unit: property.unit || '',
+    bedrooms: property.bedrooms || '',
+    bathrooms: property.bathrooms || '',
+    half_bathrooms: property.half_bathrooms || '',
+    rooms: property.rooms || '',
+    surface_total: property.surface_total ? parseFloat(property.surface_total) : '',
+    surface_covered: property.surface_covered ? parseFloat(property.surface_covered) : '',
+    surface_semicovered: property.surface_semicovered ? parseFloat(property.surface_semicovered) : '',
+    surface_uncovered: property.surface_uncovered ? parseFloat(property.surface_uncovered) : '',
+    age_years: property.age_years || '',
+    orientation: property.orientation || '',
+    garage_spaces: property.garage_spaces || '',
+    storage_spaces: property.storage_spaces || '',
+    is_featured: property.is_featured || false,
+    is_published: property.is_published || false,
+    meta_title: property.meta_title || '',
+    meta_description: property.meta_description || '',
+    features: property.features || [],
+    featured_image: null,
+    images: []
+  };
 
   const handleFeaturedImageChange = (e: React.ChangeEvent<HTMLInputElement>, setFieldValue: (field: string, value: any) => void) => {
     const file = e.target.files?.[0];
@@ -184,7 +175,7 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
 
   const removeFeaturedImage = (setFieldValue: (field: string, value: any) => void) => {
     setFeaturedImage(null);
-    setFeaturedPreview(null);
+    setFeaturedPreview(property.featured_image_url);
     setFieldValue('featured_image', null);
   };
 
@@ -229,14 +220,14 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
       featured_image: featuredImage,
       images: additionalImages
     };
-    
-    const result = await createProperty(formDataWithImages);
+
+    const result = await updateProperty(property.id, formDataWithImages);
 
     if (result.success && result.propertyId) {
       if (onSuccess) {
         onSuccess(result.propertyId);
       } else {
-        router.push('/dashboard/propiedades');
+        router.push('/dashboard/properties');
       }
     }
 
@@ -597,13 +588,13 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
                 <HiPhotograph className={`h-4 w-4 ${
                   isDark ? 'text-gray-400' : 'text-gray-600'
                 }`} />
-                Imágenes adicionales ({additionalImages.length}/10)
+                Imágenes adicionales ({additionalPreviews.length}/10)
               </h4>
               <p className={`text-xs mb-3 ${
                 isDark ? 'text-gray-400' : 'text-gray-600'
               }`}>Puedes agregar hasta 10 imágenes adicionales</p>
 
-              {additionalImages.length < 10 && (
+              {additionalPreviews.length < 10 && (
                 <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-md cursor-pointer hover:border-red-500 transition-colors mb-3 ${
                   isDark
                     ? 'border-slate-600 bg-slate-900 hover:bg-slate-800'
@@ -655,7 +646,7 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
                 </div>
               )}
 
-              {additionalImages.length === 0 && (
+              {additionalPreviews.length === 0 && (
                 <div className={`text-center py-8 text-sm ${
                   isDark ? 'text-gray-400' : 'text-gray-500'
                 }`}>
@@ -746,6 +737,7 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
       onSubmit={handleSubmit}
       validateOnChange={false}
       validateOnBlur={false}
+      enableReinitialize
     >
       {({ values, setFieldValue, isSubmitting }) => (
         <Form onKeyDown={handleFormKeyDown}>
@@ -766,11 +758,11 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
                     <HiHome className={`h-5 w-5 ${
                       isDark ? 'text-gray-400' : 'text-gray-600'
                     }`} />
-                    Nueva Propiedad
+                    Editar Propiedad
                   </h2>
                   <p className={`text-sm mt-0.5 ${
                     isDark ? 'text-gray-400' : 'text-gray-600'
-                  }`}>Completa la información de la nueva propiedad</p>
+                  }`}>Actualiza la información de la propiedad</p>
                 </div>
                 {onCancel && (
                   <button
@@ -904,12 +896,12 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
                     {isSubmitting || loading ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                        Creando...
+                        Actualizando...
                       </>
                     ) : (
                       <>
                         <HiCheckCircle className="h-4 w-4" />
-                        Crear Propiedad
+                        Actualizar Propiedad
                       </>
                     )}
                   </button>

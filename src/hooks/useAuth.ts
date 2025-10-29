@@ -78,12 +78,13 @@ export const useAuth = () => {
     error: authStore.error,
     tokens: authStore.tokens,
     isHydrated: authStore.isHydrated,
-    
+
     // Acciones
     login: authStore.login,
     register: authStore.register,
     logout: authStore.logout,
     verifyEmail: authStore.verifyEmail,
+    resendVerification: authStore.resendVerification,
     clearError: authStore.clearError,
     updateUser: authStore.updateUser,
     refreshToken: authStore.refreshTokens,

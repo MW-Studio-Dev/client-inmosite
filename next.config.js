@@ -44,7 +44,7 @@ const nextConfig = {
       {
         protocol: 'http',
         hostname: 'localhost',
-        port: '8000', // Puerto de tu Django server
+        port: '8002', // Puerto de tu Django server
         pathname: '/**',
       },
     ],

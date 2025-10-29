@@ -35,7 +35,7 @@ export default function PropertyDetailPage() {
   console.log('PropertyDetailPage - State:', { property, loading, error });
 
   const handleEdit = () => {
-    router.push(`/dashboard/propiedades/${propertyId}/edit`);
+    router.push(`/dashboard/properties/update/${propertyId}`);
   };
 
   const handleDelete = () => {

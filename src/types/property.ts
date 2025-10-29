@@ -88,6 +88,8 @@ export interface CreatePropertyForm {
   
   // Características adicionales
   features: string[];
+  featured_image: File | null;
+  images: File[];
 }
 
 export interface CreatePropertyPayload {
@@ -122,6 +124,8 @@ export interface CreatePropertyPayload {
   meta_title?: string;
   meta_description?: string;
   features: string[];
+  featured_image?: File | null;
+  images: File[];
 }
 
 export interface CreatePropertyResponse {
