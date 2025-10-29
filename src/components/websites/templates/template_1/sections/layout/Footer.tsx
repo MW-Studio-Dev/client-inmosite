@@ -39,6 +39,7 @@ const Footer: React.FC<FooterProps> = ({ config, adaptiveColors }) => {
             alt={config.company.name}
             fill
             className="object-contain"
+            unoptimized
           />
         </div>
       );
