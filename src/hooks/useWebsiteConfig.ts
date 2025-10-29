@@ -93,12 +93,12 @@ export const useWebsiteConfig = (subdomain: string): UseWebsiteConfigReturn => {
       setError(null);
 
       // Usar la URL de tu endpoint
-      const apiUrl = process.env.NEXT_PUBLIC_API_MEDIA;
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
       const controller = new AbortController();
 
-      console.log('Fetching config from:', `${apiUrl}/api/v1/websites/configs/public/${subdomain}/`);
+      console.log('Fetching config from:', `${apiUrl}/websites/configs/public/${subdomain}/`);
       
-      const response = await fetch(`${apiUrl}/api/v1/websites/configs/public/${subdomain}/`, {
+      const response = await fetch(`${apiUrl}/websites/configs/public/${subdomain}/`, {
         headers: {
           'Content-Type': 'application/json',
         },
