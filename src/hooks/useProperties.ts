@@ -43,8 +43,8 @@ export const useProperties = ({filters,subdomain}:{filters?:PropertyFilters,subd
       }
 
       const queryString = queryParams.toString();
-      // Para el dashboard admin, usar el endpoint completo de propiedades
-      const endpoint = `/properties/public/${subdomain}/properties/${queryString ? `?${queryString}` : ''}`;
+      // Para el cliente público, usar el endpoint correcto sin duplicar 'properties'
+      const endpoint = `/properties/public/${subdomain}/${queryString ? `?${queryString}` : ''}`;
 
       console.log('useProperties - fetching from endpoint:', endpoint);
       console.log('useProperties - baseURL:', axiosInstance.defaults.baseURL);

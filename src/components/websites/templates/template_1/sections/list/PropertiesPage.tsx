@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -46,9 +46,9 @@ const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1560518883-ce09059e
 // Funciones de utilidad para colores adaptativos
 const isLightColor = (color: string): boolean => {
   const hex = color.replace('#', '');
-  const r = parseInt(hex.substr(0, 2), 16);
-  const g = parseInt(hex.substr(2, 2), 16);
-  const b = parseInt(hex.substr(4, 2), 16);
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
   return luminance > 0.5;
 };
@@ -765,33 +765,47 @@ const PropertiesPage = ({subdomain}:{subdomain:string}) => {
 
   // Loading state mientras carga la configuración
   console.log('List.tsx - configLoading:', configLoading, 'config:', config);
-  
-  if (configLoading || !config) {
+
+  if (configLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mb-4"></div>
           <p className="text-gray-600">Cargando configuración...</p>
-          <p className="text-gray-500 text-sm mt-2">
-            Loading: {configLoading ? 'true' : 'false'} | Config: {config ? 'loaded' : 'null'}
-          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!config) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold mb-2 text-gray-900">Error al cargar configuración</h2>
+          <p className="text-gray-600 mb-4">No se pudo cargar la configuración del sitio</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            Reintentar
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ backgroundColor: config?.colors.background }} className="min-h-screen">
-      {config && <TopHeader config={config} />}
-      {config && <Navbar config={config} adaptiveColors={adaptiveColors}/>}
+    <div style={{ backgroundColor: config.colors.background }} className="min-h-screen">
+      <TopHeader config={config} />
+      <Navbar config={config} adaptiveColors={adaptiveColors}/>
       <MobileMenu />
 
       <div className="flex">
         <FilterSidebar />
         <MainContent />
       </div>
-      {/* <div className="mt-12" /> */}
-      {config && <Footer config={config} adaptiveColors={adaptiveColors} />}
+      <Footer config={config} adaptiveColors={adaptiveColors} />
       <WhatsAppButton />
     </div>
   );

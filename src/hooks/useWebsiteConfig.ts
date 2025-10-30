@@ -96,10 +96,10 @@ export const useWebsiteConfig = (subdomain: string): UseWebsiteConfigReturn => {
   const [config, setConfig] = useState<TemplateConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   console.log('useWebsiteConfig - subdomain:', subdomain);
   const refetch = useCallback(async () => {
-    let isCancelled = false;
+    const controller = new AbortController();
 
     try {
       setLoading(true);
@@ -107,10 +107,9 @@ export const useWebsiteConfig = (subdomain: string): UseWebsiteConfigReturn => {
 
       // Usar la URL de tu endpoint
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const controller = new AbortController();
 
       console.log('Fetching config from:', `${apiUrl}/websites/configs/public/${subdomain}/`);
-      
+
       const response = await fetch(`${apiUrl}/websites/configs/public/${subdomain}/`, {
         headers: {
           'Content-Type': 'application/json',
@@ -132,14 +131,12 @@ export const useWebsiteConfig = (subdomain: string): UseWebsiteConfigReturn => {
         throw new Error(data.message || 'Error al obtener configuración');
       }
 
-      if (!isCancelled) {
-        // Transformar la data de la API al formato esperado por tu template
-        const transformedConfig = transformApiDataToTemplateConfig(data.data);
-        setConfig(transformedConfig);
-      }
+      // Transformar la data de la API al formato esperado por tu template
+      const transformedConfig = transformApiDataToTemplateConfig(data.data);
+      setConfig(transformedConfig);
 
     } catch (err: any) {
-      if (!isCancelled && err.name !== 'AbortError') {
+      if (err.name !== 'AbortError') {
         console.error('Error fetching website config:', err);
         console.error('Error details:', {
           name: err.name,
@@ -149,17 +146,24 @@ export const useWebsiteConfig = (subdomain: string): UseWebsiteConfigReturn => {
         setError(err instanceof Error ? err.message : 'Error desconocido');
       }
     } finally {
-      if (!isCancelled) {
-        console.log('Setting loading to false');
-        setLoading(false);
-      }
+      console.log('Setting loading to false');
+      setLoading(false);
     }
   }, [subdomain]);
 
   useEffect(() => {
+    let mounted = true;
+
     if (subdomain) {
-      refetch();
+      // Reset state before fetching
+      if (mounted) {
+        refetch();
+      }
     }
+
+    return () => {
+      mounted = false;
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subdomain]);
 
