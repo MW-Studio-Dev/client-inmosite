@@ -86,7 +86,7 @@ export async function fetchPublicProperties(
     }
   });
 
-  const url = `${API_BASE_URL}/v1/properties/public/${subdomain}/properties/${
+  const url = `${API_BASE_URL}/properties/public/${subdomain}/properties/${
     searchParams.toString() ? `?${searchParams.toString()}` : ''
   }`;
 
@@ -150,7 +150,7 @@ export interface WebsiteConfigResponse {
 export async function fetchPublicWebsiteConfig(
   subdomain: string
 ): Promise<WebsiteConfigResponse | null> {
-  const url = `${API_BASE_URL}/v1/websites/configs/public/${subdomain}/`;
+  const url = `${API_BASE_URL}/websites/configs/public/${subdomain}/`;
 
   try {
     const response = await fetch(url, {
@@ -158,8 +158,7 @@ export async function fetchPublicWebsiteConfig(
       headers: {
         'Content-Type': 'application/json',
       },
-      cache: 'no-store', // Disable caching for real-time data
-      next: { revalidate: 60 }, // Revalidate every 60 seconds
+      cache: 'no-store', // No cachear en Next.js, Django maneja el caché
     });
 
     if (!response.ok) {

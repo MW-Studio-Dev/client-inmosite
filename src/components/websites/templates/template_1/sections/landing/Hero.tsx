@@ -21,7 +21,18 @@ const HeroSection: React.FC<HeroSectionProps> = ({ config, adaptiveColors }) => 
 
   // Determinar si el background es un video o una imagen
   const backgroundUrl = config.hero.backgroundVideoUrl;
-  console.log('Hero backgroundUrl:', backgroundUrl);
+  const backgroundImage = config.hero.backgroundImage;
+
+  console.log('🖼️ Hero - backgroundUrl:', backgroundUrl);
+  console.log('🖼️ Hero - backgroundImage:', backgroundImage);
+
+  // Validar que tengamos una imagen de fondo si no hay video
+  const hasValidBackground = backgroundUrl || (backgroundImage && backgroundImage !== '' && backgroundImage !== '/');
+
+  if (!hasValidBackground) {
+    console.warn('⚠️ Hero: No se encontró imagen o video de fondo válido');
+  }
+
   return (
     <section id="inicio" className="relative h-screen min-h-[600px] flex items-center justify-center pb-8 sm:pb-12 md:pb-16 overflow-hidden">
       {!mediaLoaded && <HeroSkeleton backgroundColor={config.colors.surface} />}
@@ -41,9 +52,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({ config, adaptiveColors }) => 
           />
           Su navegador no soporta videos.
         </video>
-      ) : (
+      ) : hasValidBackground ? (
         <Image
-          src={`${process.env.NEXT_PUBLIC_API_MEDIA}${config.hero.backgroundImage}`}
+          src={`${process.env.NEXT_PUBLIC_API_MEDIA}${backgroundImage}`}
           alt="Hero background"
           fill
           className={`object-cover transition-opacity duration-500 ${mediaLoaded ? 'opacity-100' : 'opacity-0'}`}
@@ -51,7 +62,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ config, adaptiveColors }) => 
           unoptimized
           onLoad={() => setMediaLoaded(true)}
         />
-
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900" />
       )}
 
       {/* Overlay semi-transparente para legibilidad del texto */}

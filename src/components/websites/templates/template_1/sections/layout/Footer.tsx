@@ -32,10 +32,19 @@ const Footer: React.FC<FooterProps> = ({ config, adaptiveColors }) => {
     
     // Si es objeto, es configuración de imagen
     if (typeof logo === 'object' && logo.type === 'image') {
+      // Validar que logo.src no esté vacío
+      if (!logo.src || logo.src === '' || logo.src === '/') {
+        console.warn('⚠️ Footer: Logo src está vacío o inválido:', logo);
+        return <span className="text-6xl mr-4">🏢</span>;
+      }
+
+      const logoUrl = `${process.env.NEXT_PUBLIC_API_MEDIA}${logo.src}`;
+      console.log('🖼️ Footer: Loading logo from:', logoUrl);
+
       return (
         <div className="relative h-20 w-600 mr-4">
           <Image
-            src={`${process.env.NEXT_PUBLIC_API_MEDIA}${logo.src}`}
+            src={logoUrl}
             alt={config.company.name}
             fill
             className="object-contain"

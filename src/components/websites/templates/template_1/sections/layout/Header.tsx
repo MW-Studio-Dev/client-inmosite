@@ -140,18 +140,27 @@ const Navbar: React.FC<NavbarProps> = ({
     }
     
     if (typeof logo === 'object' && logo.type === 'image') {
+      // Validar que logo.src no esté vacío
+      if (!logo.src || logo.src === '' || logo.src === '/') {
+        console.warn('⚠️ Logo src está vacío o inválido:', logo);
+        return <span className="text-2xl">🏢</span>;
+      }
+
+      const logoUrl = `${process.env.NEXT_PUBLIC_API_MEDIA}${logo.src}`;
+      console.log('🖼️ Loading logo from:', logoUrl);
+
       return (
-        <div 
+        <div
           className="relative flex items-center justify-center"
-          style={{ 
+          style={{
             width: `${sizes.width}px`,
             height: `${sizes.height}px`,
             maxHeight: `${sizes.maxHeight}px`,
-       
+
           }}
         >
           <Image
-            src={`${process.env.NEXT_PUBLIC_API_MEDIA}${logo.src}`}
+            src={logoUrl}
             alt={logo.alt || config.company.name}
             width={sizes.width}
             height={sizes.height}
@@ -223,8 +232,21 @@ const Navbar: React.FC<NavbarProps> = ({
     }
   };
 
-  const handleMenuItemClick = () => {
+  const handleMenuItemClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     setIsMenuOpen(false);
+
+    // Si el href contiene un hash, manejar el scroll manualmente
+    if (href.includes('#')) {
+      e.preventDefault();
+      const hash = href.split('#')[1];
+      const element = document.getElementById(hash);
+
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+        // Actualizar la URL sin recargar la página
+        window.history.pushState({}, '', href);
+      }
+    }
   };
 
   // Función para convertir hex a rgba con transparencia sutil
@@ -269,16 +291,17 @@ const Navbar: React.FC<NavbarProps> = ({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1, duration: 0.3 }}
                 >
-                  <Link 
-                    href={item.href} 
+                  <Link
+                    href={item.href}
                     className="relative transition-colors duration-200 text-sm xl:text-base py-2"
-                    style={{ 
+                    style={{
                       color: config.colors.textLight,
                       fontWeight: config.typography.fontWeight.normal
                     }}
+                    onClick={(e) => handleMenuItemClick(e, item.href)}
                   >
                     <motion.span
-                      whileHover={{ 
+                      whileHover={{
                         color: config.colors.primary,
                         transition: { duration: 0.2 }
                       }}
@@ -391,18 +414,18 @@ const Navbar: React.FC<NavbarProps> = ({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05, duration: 0.2 }}
                   >
-                    <Link 
-                      href={item.href} 
+                    <Link
+                      href={item.href}
                       className="flex items-center space-x-4 py-4 px-4 rounded-xl transition-all duration-200 hover:bg-gray-50 active:bg-gray-100"
-                      onClick={handleMenuItemClick}
+                      onClick={(e) => handleMenuItemClick(e, item.href)}
                     >
-                      <IconComponent 
-                        className="h-6 w-6 flex-shrink-0" 
-                        style={{ color: config.colors.primary }} 
+                      <IconComponent
+                        className="h-6 w-6 flex-shrink-0"
+                        style={{ color: config.colors.primary }}
                       />
-                      <span 
+                      <span
                         className="text-lg"
-                        style={{ 
+                        style={{
                           color: config.colors.text,
                           fontWeight: config.typography.fontWeight.medium
                         }}

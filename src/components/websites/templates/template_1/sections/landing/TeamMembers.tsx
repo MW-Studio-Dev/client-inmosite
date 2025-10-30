@@ -32,22 +32,34 @@ const TeamSection: React.FC<TeamSectionProps> = ({ config }) => {
     return teamMembers.slice(start, start + itemsPerPage);
   };
 
-  const renderMemberCard = (member: any) => (
-    <div
-      key={member.id}
-      className="rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 w-full max-w-sm mx-auto"
-      style={{ backgroundColor: config.colors.background }}
-    >
-      <div className="relative h-80">
-        <Image
-          src={`${process.env.NEXT_PUBLIC_API_MEDIA}${member.photo}`}
-          alt={member.name}
-          fill
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-          unoptimized
-        />
-      </div>
+  const renderMemberCard = (member: any) => {
+    const hasValidPhoto = member.photo && member.photo !== '' && member.photo !== '/';
+
+    return (
+      <div
+        key={member.id}
+        className="rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 w-full max-w-sm mx-auto"
+        style={{ backgroundColor: config.colors.background }}
+      >
+        <div className="relative h-80">
+          {hasValidPhoto ? (
+            <Image
+              src={`${process.env.NEXT_PUBLIC_API_MEDIA}${member.photo}`}
+              alt={member.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+              unoptimized
+            />
+          ) : (
+            <div
+              className="w-full h-full flex items-center justify-center"
+              style={{ backgroundColor: config.colors.surface }}
+            >
+              <span className="text-6xl">👤</span>
+            </div>
+          )}
+        </div>
       <div className="p-6 text-center">
         <h3
           className="text-xl mb-2"
@@ -78,7 +90,8 @@ const TeamSection: React.FC<TeamSectionProps> = ({ config }) => {
         </p>
       </div>
     </div>
-  );
+    );
+  };
 
   // Grid classes según cantidad de miembros
   const getGridClass = () => {

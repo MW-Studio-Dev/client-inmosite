@@ -72,7 +72,17 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({ config, adaptiveColor
   // Función para renderizar el logo del partner
   const renderPartnerLogo = (partner: any) => {
     if (typeof partner.logo === 'string') {
-      // Es emoji
+      // Validar que el logo no esté vacío
+      if (!partner.logo || partner.logo === '' || partner.logo === '/') {
+        console.warn('⚠️ Partners: Logo vacío para partner:', partner.name);
+        return (
+          <div className="flex items-center justify-center h-16 w-24">
+            <span className="text-2xl">🤝</span>
+          </div>
+        );
+      }
+
+      // Es una ruta de imagen
       return (
         <div className="flex items-center justify-center">
           <Image

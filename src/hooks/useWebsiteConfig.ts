@@ -66,6 +66,19 @@ interface WebsiteConfigResponse {
     team: any[];
     projects: any[];
     partners: any[];
+    seo?: {
+      metaTitle: string;
+      metaDescription: string;
+      metaKeywords: string;
+      favicon: string;
+    };
+    social?: {
+      facebook: string;
+      instagram: string;
+      linkedin: string;
+      tiktok: string;
+      youtube: string;
+    };
   };
   meta: any;
   timestamp: string;
@@ -141,10 +154,6 @@ export const useWebsiteConfig = (subdomain: string): UseWebsiteConfigReturn => {
         setLoading(false);
       }
     }
-
-    return () => {
-      isCancelled = true;
-    };
   }, [subdomain]);
 
   useEffect(() => {
@@ -199,7 +208,13 @@ function transformApiDataToTemplateConfig(apiData: WebsiteConfigResponse['data']
     },
     company: {
       name: apiData.company.name,
-      logo: apiData.company.logo,
+      logo: {
+        type: 'image' as const,
+        src: apiData.company.logo.src,
+        alt: apiData.company.logo.alt,
+        width: apiData.company.logo.width,
+        height: apiData.company.logo.height,
+      },
       phone: apiData.company.phone,
       email: apiData.company.email,
       address: apiData.company.address,
@@ -211,7 +226,7 @@ function transformApiDataToTemplateConfig(apiData: WebsiteConfigResponse['data']
       backgroundImage: apiData.hero.backgroundImage,
       ctaText: apiData.hero.ctaText,
       showSearchBar: apiData.hero.showSearchBar,
-      backgroundVideoUrl: apiData.hero.backgroundVideoUrl || null,
+      backgroundVideoUrl: apiData.hero.backgroundVideoUrl,
     },
     sections: {
       showRentSale: apiData.sections.showRentSale,
@@ -329,6 +344,19 @@ function transformApiDataToTemplateConfig(apiData: WebsiteConfigResponse['data']
     team: apiData.team || [],
     projects: apiData.projects || [],
     partners: apiData.partners || [],
+    seo: apiData.seo || {
+      metaTitle: '',
+      metaDescription: '',
+      metaKeywords: '',
+      favicon: '',
+    },
+    social: apiData.social || {
+      facebook: '',
+      instagram: '',
+      linkedin: '',
+      tiktok: '',
+      youtube: '',
+    },
   };
 }
 

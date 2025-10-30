@@ -209,23 +209,31 @@ const AboutUsSection: React.FC<AboutUsSectionProps> = ({ config }) => {
                 <AboutSkeleton backgroundColor={config.colors.textLight + '30'} />
               </div>
             )}
-            <div className=" lg:aspect-[4/5] rounded-xl shadow-2xl">
-              <Image
-                src={`${process.env.NEXT_PUBLIC_API_MEDIA}${aboutUs.image}`}
-                alt={aboutUs.title || "Sobre nosotros"}
-                fill
-                className={`object-contain p-8 md:p-10 transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                sizes="(max-width: 540px) 100vw, (max-width: 1024px) 50vw, 600px"
-                quality={100}
-                priority
-                unoptimized={true}
-                onLoad={() => setImageLoaded(true)}
-                style={{
-                  imageRendering: 'crisp-edges',
-                }}
-              />
-
-            </div>
+            {aboutUs.image && aboutUs.image !== '' && aboutUs.image !== '/' ? (
+              <div className=" lg:aspect-[4/5] rounded-xl shadow-2xl">
+                <Image
+                  src={`${process.env.NEXT_PUBLIC_API_MEDIA}${aboutUs.image}`}
+                  alt={aboutUs.title || "Sobre nosotros"}
+                  fill
+                  className={`object-contain p-8 md:p-10 transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                  sizes="(max-width: 540px) 100vw, (max-width: 1024px) 50vw, 600px"
+                  quality={100}
+                  priority
+                  unoptimized={true}
+                  onLoad={() => setImageLoaded(true)}
+                  style={{
+                    imageRendering: 'crisp-edges',
+                  }}
+                />
+              </div>
+            ) : (
+              <div
+                className="lg:aspect-[4/5] rounded-xl shadow-2xl flex items-center justify-center"
+                style={{ backgroundColor: config.colors.surface }}
+              >
+                <span className="text-6xl">🏢</span>
+              </div>
+            )}
             
             {/* Decoración de fondo */}
             <div 
