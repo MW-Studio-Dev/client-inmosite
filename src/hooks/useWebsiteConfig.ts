@@ -98,9 +98,8 @@ export const useWebsiteConfig = (subdomain: string): UseWebsiteConfigReturn => {
   const [error, setError] = useState<string | null>(null);
 
   console.log('useWebsiteConfig - subdomain:', subdomain);
-  const refetch = useCallback(async () => {
-    const controller = new AbortController();
 
+  const refetch = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -114,7 +113,6 @@ export const useWebsiteConfig = (subdomain: string): UseWebsiteConfigReturn => {
         headers: {
           'Content-Type': 'application/json',
         },
-        signal: controller.signal,
       });
 
       console.log('Response status:', response.status);
@@ -136,15 +134,13 @@ export const useWebsiteConfig = (subdomain: string): UseWebsiteConfigReturn => {
       setConfig(transformedConfig);
 
     } catch (err: any) {
-      if (err.name !== 'AbortError') {
-        console.error('Error fetching website config:', err);
-        console.error('Error details:', {
-          name: err.name,
-          message: err.message,
-          stack: err.stack
-        });
-        setError(err instanceof Error ? err.message : 'Error desconocido');
-      }
+      console.error('Error fetching website config:', err);
+      console.error('Error details:', {
+        name: err.name,
+        message: err.message,
+        stack: err.stack
+      });
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       console.log('Setting loading to false');
       setLoading(false);
@@ -152,20 +148,16 @@ export const useWebsiteConfig = (subdomain: string): UseWebsiteConfigReturn => {
   }, [subdomain]);
 
   useEffect(() => {
-    let mounted = true;
+    let isMounted = true;
 
-    if (subdomain) {
-      // Reset state before fetching
-      if (mounted) {
-        refetch();
-      }
+    if (subdomain && isMounted) {
+      refetch();
     }
 
     return () => {
-      mounted = false;
+      isMounted = false;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subdomain]);
+  }, [subdomain, refetch]);
 
   return {
     config,

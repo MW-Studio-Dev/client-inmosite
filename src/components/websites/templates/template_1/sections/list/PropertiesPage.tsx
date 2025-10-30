@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -82,6 +82,12 @@ const PropertiesPage = ({subdomain}:{subdomain:string}) => {
   // API state management
   const {properties, loading, error} = useProperties({subdomain})
   console.log('mis proppiedades',properties)
+
+  // Reset component state when subdomain changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+    setIsSidebarOpen(false);
+  }, [subdomain]);
   // Colores adaptativos usando el config
   const adaptiveColors = config ? {
     primaryText: getAdaptiveTextColor(config.colors.primary),

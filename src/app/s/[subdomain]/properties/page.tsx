@@ -44,5 +44,5 @@ export async function generateMetadata({ params }: PropertyPageProps): Promise<M
 export default async function ListPage({params}: PropertyPageProps) {
   const { subdomain } = await params;
   console.log(subdomain)
-  return <PropertiesPage subdomain={subdomain}/>;
+  return <PropertiesPage key={`properties-${subdomain}`} subdomain={subdomain}/>;
 }
