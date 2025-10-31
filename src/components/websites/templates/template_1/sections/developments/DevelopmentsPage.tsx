@@ -29,7 +29,7 @@ import {
   MdBusinessCenter
 } from 'react-icons/md';
 import { Navbar, TopHeader, Footer } from '../layout';
-import useWebsiteConfig from '@/hooks/useWebsiteConfig';
+import { useWebsiteConfigContext } from '@/contexts/WebsiteConfigContext';
 import { useProperties } from '@/hooks/useProperties';
 
 // Interfaces
@@ -68,7 +68,7 @@ const getAdaptiveTextColor = (backgroundColor: string): string => {
 };
 
 const DevelopmentsPage = ({ subdomain }: { subdomain: string }) => {
-  const { config, loading: configLoading } = useWebsiteConfig(subdomain);
+  const { config, loading: configLoading } = useWebsiteConfigContext();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [filters, setFilters] = useState<DevelopmentFilters>({
@@ -89,14 +89,12 @@ const DevelopmentsPage = ({ subdomain }: { subdomain: string }) => {
   });
 
   // API state management - filtrando solo desarrollos/emprendimientos
-  const { properties, loading, error } = useProperties({ subdomain });
+  const { properties, loading, error } = useProperties({ subdomain,isDevelopment:true });
 
   // Filtrar solo las propiedades que son emprendimientos (is_development = true)
   const developments = useMemo(() => {
     return properties.filter(property => property.is_development === true);
   }, [properties]);
-
-  console.log('developments filtered:', developments);
 
   // Colores adaptativos usando el config
   const adaptiveColors = config ? {
@@ -125,13 +123,20 @@ const DevelopmentsPage = ({ subdomain }: { subdomain: string }) => {
     }
 
     if (typeof logo === 'object' && logo.type === 'image') {
+      // Validar que logo.src no esté vacío - NO renderizar Image si está vacío
+      if (!logo.src || logo.src.trim() === '' || logo.src === '/') {
+        // Retornar fallback sin logging en producción
+        return <span className="text-2xl">🏢</span>;
+      }
+
       const defaultWidth = size === 'desktop' ? 40 : 32;
       const defaultHeight = size === 'desktop' ? 40 : 32;
+      const logoUrl = `${process.env.NEXT_PUBLIC_API_MEDIA}${logo.src}`;
 
       return (
         <div className={`relative ${size === 'desktop' ? 'h-10 w-auto' : 'h-8 w-auto'}`}>
           <Image
-            src={logo.src}
+            src={logoUrl}
             alt={logo.alt || config.company.name}
             width={logo.width || defaultWidth}
             height={logo.height || defaultHeight}
@@ -596,9 +601,6 @@ const DevelopmentsPage = ({ subdomain }: { subdomain: string }) => {
       </>
     );
   };
-
-  // Loading state mientras carga la configuración
-  console.log('DevelopmentsPage - configLoading:', configLoading, 'config:', config);
 
   // Solo mostrar loading si NO tenemos config Y estamos cargando
   // Esto evita el error de removeChild cuando navegamos entre páginas

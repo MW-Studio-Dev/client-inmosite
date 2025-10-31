@@ -143,14 +143,16 @@ const Navbar: React.FC<NavbarProps> = ({
     }
     
     if (typeof logo === 'object' && logo.type === 'image') {
-      // Validar que logo.src no esté vacío
-      if (!logo.src || logo.src === '' || logo.src === '/') {
-        console.warn('⚠️ Logo src está vacío o inválido:', logo);
+      // Validar que logo.src no esté vacío - NO renderizar Image si está vacío
+      if (!logo.src || logo.src.trim() === '' || logo.src === '/') {
+        // Retornar fallback sin logging en producción para evitar spam en consola
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('⚠️ Logo src está vacío o inválido, usando fallback emoji');
+        }
         return <span className="text-2xl">🏢</span>;
       }
 
       const logoUrl = `${process.env.NEXT_PUBLIC_API_MEDIA}${logo.src}`;
-      console.log('🖼️ Loading logo from:', logoUrl);
 
       return (
         <div

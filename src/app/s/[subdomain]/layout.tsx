@@ -2,6 +2,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import { fetchPublicWebsiteConfig } from '@/lib/website-api';
+import { WebsiteConfigWrapper } from '@/components/websites/templates/WebsiteConfigWrapper';
 
 interface SubdomainLayoutProps {
   children: React.ReactNode;
@@ -17,6 +18,8 @@ export async function generateMetadata({ params }: SubdomainLayoutProps): Promis
   // Si tenemos datos de SEO desde la API, agregar el favicon
   if (websiteConfig?.success && websiteConfig.data?.seo?.favicon) {
     return {
+      title: websiteConfig.data.seo.metaTitle || websiteConfig.data.company.name,
+      description: websiteConfig.data.seo.metaDescription || '',
       icons: {
         icon: websiteConfig.data.seo.favicon,
         shortcut: websiteConfig.data.seo.favicon,
@@ -25,7 +28,12 @@ export async function generateMetadata({ params }: SubdomainLayoutProps): Promis
     };
   }
 
-  return {};
+  // Retornar metadata básica sin favicon personalizado
+  return {
+    icons: {
+      icon: '/favicon.ico',
+    },
+  };
 }
 
 export default async function SubdomainLayout({
@@ -35,15 +43,10 @@ export default async function SubdomainLayout({
   const awaitedParams = await params;
 
   // Este layout es específico para los websites de subdominios
-  // No incluye el header/footer del sitio principal
+  // Envuelve el contenido con el provider de configuración
   return (
-    <html lang="es">
-      <head>
-        <meta name="subdomain" content={awaitedParams.subdomain} />
-      </head>
-      <body>
-        {children}
-      </body>
-    </html>
+    <WebsiteConfigWrapper subdomain={awaitedParams.subdomain}>
+      {children}
+    </WebsiteConfigWrapper>
   );
 }

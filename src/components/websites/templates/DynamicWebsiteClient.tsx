@@ -2,7 +2,7 @@
 
 // app/s/[subdomain]/DynamicWebsiteClient.tsx
 import React from 'react';
-import { useWebsiteConfig } from '@/hooks/useWebsiteConfig';
+import { useWebsiteConfigContext } from '@/contexts/WebsiteConfigContext';
 import RealEstateTemplate from '@/components/websites/templates/template_1';
 import {LoadingWebsite} from '@/components/websites/layout/LoadingWebsite';
 import {ErrorWebsite} from '@/components/websites/layout/ErrorWebsite';
@@ -12,11 +12,15 @@ interface DynamicWebsiteClientProps {
   companyName: string;
 }
 
-const DynamicWebsiteClient: React.FC<DynamicWebsiteClientProps> = ({ 
-  subdomain, 
-  companyName 
+/**
+ * Componente cliente que renderiza el template dinámico del website
+ * Usa el WebsiteConfigContext provisto por el layout padre
+ */
+const DynamicWebsiteClient: React.FC<DynamicWebsiteClientProps> = ({
+  subdomain,
+  companyName
 }) => {
-  const { config, loading, error, refetch } = useWebsiteConfig(subdomain);
+  const { config, loading, error, refetch } = useWebsiteConfigContext();
 
   if (loading) {
     return <LoadingWebsite companyName={companyName} />;
@@ -24,8 +28,8 @@ const DynamicWebsiteClient: React.FC<DynamicWebsiteClientProps> = ({
 
   if (error || !config) {
     return (
-      <ErrorWebsite 
-        error={error || 'No se pudo cargar la configuración'} 
+      <ErrorWebsite
+        error={error || 'No se pudo cargar la configuración'}
         companyName={companyName}
         subdomain={subdomain}
         onRetry={refetch}
@@ -34,7 +38,7 @@ const DynamicWebsiteClient: React.FC<DynamicWebsiteClientProps> = ({
   }
 
   return (
-    <RealEstateTemplate 
+    <RealEstateTemplate
       templateConfig={config}
       subdomain={subdomain}
     />

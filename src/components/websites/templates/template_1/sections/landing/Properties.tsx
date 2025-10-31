@@ -24,7 +24,7 @@ const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
   subdomain, 
   adaptiveColors 
 }) => {
-  const { properties, loading, error, refetch } = useProperties({subdomain:subdomain});
+  const { properties, loading, error, refetch } = useProperties({subdomain:subdomain,isFeatured:true});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [slidesToShow, setSlidesToShow] = useState(3);
   const carouselRef = useRef<HTMLDivElement>(null);

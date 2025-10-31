@@ -32,14 +32,16 @@ const Footer: React.FC<FooterProps> = ({ config, adaptiveColors }) => {
     
     // Si es objeto, es configuración de imagen
     if (typeof logo === 'object' && logo.type === 'image') {
-      // Validar que logo.src no esté vacío
-      if (!logo.src || logo.src === '' || logo.src === '/') {
-        console.warn('⚠️ Footer: Logo src está vacío o inválido:', logo);
+      // Validar que logo.src no esté vacío - NO renderizar Image si está vacío
+      if (!logo.src || logo.src.trim() === '' || logo.src === '/') {
+        // Retornar fallback sin logging en producción para evitar spam en consola
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('⚠️ Footer: Logo src está vacío, usando fallback emoji');
+        }
         return <span className="text-6xl mr-4">🏢</span>;
       }
 
       const logoUrl = `${process.env.NEXT_PUBLIC_API_MEDIA}${logo.src}`;
-      console.log('🖼️ Footer: Loading logo from:', logoUrl);
 
       return (
         <div className="relative h-20 w-600 mr-4">

@@ -32,7 +32,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Footer from '../layout/Footer';
 import { usePropertyDetail } from '@/hooks/usePropertyDetail';
-import { useWebsiteConfig } from '@/hooks/useWebsiteConfig';
+import { useWebsiteConfigContext } from '@/contexts/WebsiteConfigContext';
 import { PropertyDetail as PropertyDetailType } from '@/types/property';
 import Navbar from '../layout/Header';
 import StructuredData from '@/components/common/StructuredData';
@@ -437,7 +437,7 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
   const [showMap, setShowMap] = useState(false);
 
   // API calls - hooks must always be called
-  const { config: templateConfig, loading: configLoading } = useWebsiteConfig(subdomain);
+  const { config: templateConfig, loading: configLoading } = useWebsiteConfigContext();
   const { property: apiProperty, loading: propertyLoading, error: propertyError } = usePropertyDetail(subdomain, propertyId);
 
   // Transform API property to internal format

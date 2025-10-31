@@ -7,7 +7,6 @@ export default function DynamicFavicon() {
     // Remover todos los favicons existentes (incluyendo el principal)
     const existingFavicons = document.querySelectorAll('link[rel*="icon"]');
     existingFavicons.forEach(favicon => favicon.remove());
-    console.log('Favicon removido para subdominio');
   };
 
   const updateFavicon = (basePath: string) => {
@@ -31,8 +30,6 @@ export default function DynamicFavicon() {
     shortcut.type = 'image/x-icon';
     shortcut.href = `${basePath}?v=${timestamp}`;
     document.head.appendChild(shortcut);
-
-    console.log(`Favicon actualizado: ${basePath}`);
   };
 
   useEffect(() => {

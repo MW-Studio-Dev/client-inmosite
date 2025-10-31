@@ -17,7 +17,19 @@ interface ErrorResponse {
   message?: string;
 }
 
-export const useProperties = ({filters,subdomain}:{filters?:PropertyFilters,subdomain?:string}): UsePropertiesReturn => {
+interface UsePropertiesParams {
+  filters?: PropertyFilters;
+  subdomain?: string;
+  isFeatured?: boolean;
+  isDevelopment?: boolean;
+}
+
+export const useProperties = ({
+  filters,
+  subdomain,
+  isFeatured = false,
+  isDevelopment = false
+}: UsePropertiesParams): UsePropertiesReturn => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,8 +42,6 @@ export const useProperties = ({filters,subdomain}:{filters?:PropertyFilters,subd
       setLoading(true);
       setError(null);
 
-      console.log('useProperties - fetchProperties called with subdomain:', subdomain);
-
       // Construir query params si hay filtros
       const queryParams = new URLSearchParams();
       if (filters) {
@@ -43,15 +53,20 @@ export const useProperties = ({filters,subdomain}:{filters?:PropertyFilters,subd
       }
 
       const queryString = queryParams.toString();
-      // Para el cliente público, usar el endpoint correcto sin duplicar 'properties'
-      const endpoint = `/properties/public/${subdomain}/${queryString ? `?${queryString}` : ''}`;
 
-      console.log('useProperties - fetching from endpoint:', endpoint);
-      console.log('useProperties - baseURL:', axiosInstance.defaults.baseURL);
-
+      // Determinar el endpoint según si son propiedades destacadas o no
+      let endpoint: string;
+      if (isFeatured) {
+        // Endpoint para propiedades destacadas
+        endpoint = `/properties/public/${subdomain}/properties/featured/${queryString ? `?${queryString}` : ''}`;
+      } else {
+        // Endpoint para propiedades normales
+        endpoint = `/properties/public/${subdomain}/properties/${queryString ? `?${queryString}` : ''}`;
+      }
+      if (isDevelopment) {
+        endpoint = `/properties/public/${subdomain}/properties/?type=development${queryString ? `&${queryString}` : ''}`;
+      }
       const response = await axiosInstance.get<PropertyResponse>(endpoint);
-
-      console.log('useProperties - response:', response.data);
 
       if (response.data.success) {
         setProperties(response.data.data);
@@ -71,7 +86,7 @@ export const useProperties = ({filters,subdomain}:{filters?:PropertyFilters,subd
     } finally {
       setLoading(false);
     }
-  }, [filters, subdomain]); // Incluir filters y subdomain como dependencias
+  }, [filters, subdomain, isFeatured]); // Incluir filters, subdomain y isFeatured como dependencias
 
   useEffect(() => {
     fetchProperties();

@@ -17,8 +17,8 @@ import {
 import Navbar from '../layout/Header';
 import TopHeader from '../layout/TopHeader';
 import Footer from '../layout/Footer';
-import { useWebsiteConfigContext } from '@/contexts/WebsiteConfigContext';
 import { useProperties } from '@/hooks/useProperties';
+import { TemplateConfig } from '@/components/websites/templates/template_1/types';
 
 // Interfaces 
 interface PropertyFilters {
@@ -57,8 +57,15 @@ const getAdaptiveTextColor = (backgroundColor: string): string => {
   return isLightColor(backgroundColor) ? '#000000' : '#FFFFFF';
 };
 
-const PropertiesPage = ({subdomain}:{subdomain:string}) => {
-  const { config, loading: configLoading } = useWebsiteConfigContext();
+interface PropertiesPageClientProps {
+  subdomain: string;
+  initialConfig: any; // La config que viene del servidor
+}
+
+const PropertiesPageClient: React.FC<PropertiesPageClientProps> = ({subdomain, initialConfig}) => {
+  // Transformar initialConfig a TemplateConfig si es necesario
+  const config = initialConfig as TemplateConfig;
+
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [filters, setFilters] = useState<PropertyFilters>({
@@ -116,13 +123,20 @@ const PropertiesPage = ({subdomain}:{subdomain:string}) => {
     
     // Si es objeto, es configuración de imagen
     if (typeof logo === 'object' && logo.type === 'image') {
+      // Validar que logo.src no esté vacío - NO renderizar Image si está vacío
+      if (!logo.src || logo.src.trim() === '' || logo.src === '/') {
+        // Retornar fallback sin logging en producción
+        return <span className="text-2xl">🏢</span>;
+      }
+
       const defaultWidth = size === 'desktop' ? 40 : 32;
       const defaultHeight = size === 'desktop' ? 40 : 32;
-      
+      const logoUrl = `${process.env.NEXT_PUBLIC_API_MEDIA}${logo.src}`;
+
       return (
         <div className={`relative ${size === 'desktop' ? 'h-10 w-auto' : 'h-8 w-auto'}`}>
           <Image
-            src={logo.src}
+            src={logoUrl}
             alt={logo.alt || config.company.name}
             width={logo.width || defaultWidth}
             height={logo.height || defaultHeight}
@@ -768,39 +782,9 @@ const PropertiesPage = ({subdomain}:{subdomain:string}) => {
     );
   };
 
-  // Solo mostrar loading si NO tenemos config Y estamos cargando
-  // Esto evita el error de removeChild cuando navegamos entre páginas
-  if (!config && configLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mb-4"></div>
-          <p className="text-gray-600">Cargando configuración...</p>
-        </div>
-      </div>
-    );
-  }
+  // La configuración ya viene pre-cargada del servidor, no hay loading state
 
-  // Si no hay config después de cargar, mostrar error
-  if (!config) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-xl font-bold mb-2 text-gray-900">Error al cargar configuración</h2>
-          <p className="text-gray-600 mb-4">No se pudo cargar la configuración del sitio</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            Reintentar
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
+  return config ? (
     <div style={{ backgroundColor: config.colors.background }} className="min-h-screen">
       <TopHeader config={config} />
       <Navbar config={config} adaptiveColors={adaptiveColors}/>
@@ -813,7 +797,7 @@ const PropertiesPage = ({subdomain}:{subdomain:string}) => {
       <Footer config={config} adaptiveColors={adaptiveColors} />
       <WhatsAppButton />
     </div>
-  );
+  ) : null;
 };
 
-export default PropertiesPage;
+export default PropertiesPageClient;
