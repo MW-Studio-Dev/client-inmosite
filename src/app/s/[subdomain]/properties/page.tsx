@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
+import PropertiesPage from "@/components/websites/templates/template_1/sections/list/PropertiesPage";
 import { fetchPublicWebsiteConfig } from '@/lib/website-api';
-import PropertiesPageClient from './PropertiesPageClient';
 
 interface PropertyPageProps {
   params: Promise<{
@@ -44,5 +44,7 @@ export async function generateMetadata({ params }: PropertyPageProps): Promise<M
 export default async function ListPage({params}: PropertyPageProps) {
   const { subdomain } = await params;
   console.log(subdomain)
-  return <PropertiesPageClient subdomain={subdomain} />;
+  return <>
+  <PropertiesPage subdomain={subdomain}/>
+  </>;
 }
