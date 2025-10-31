@@ -70,14 +70,17 @@ const Navbar: React.FC<NavbarProps> = ({
   }, []);
 
   useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+
     if (isMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = originalOverflow || 'unset';
     }
-    
+
     return () => {
-      document.body.style.overflow = 'unset';
+      // Restore original overflow on unmount
+      document.body.style.overflow = originalOverflow || 'unset';
     };
   }, [isMenuOpen]);
 
@@ -233,7 +236,11 @@ const Navbar: React.FC<NavbarProps> = ({
   };
 
   const handleMenuItemClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    // Close menu immediately
     setIsMenuOpen(false);
+
+    // Restore body overflow immediately
+    document.body.style.overflow = 'unset';
 
     // Si el href contiene un hash, manejar el scroll manualmente
     if (href.includes('#')) {
