@@ -61,11 +61,13 @@ export const useProperties = (subdomain: string, baseUrl?: string): UsePropertie
     try {
       setLoading(true);
       setError(null);
-      
-      // Usar baseUrl si se proporciona, sino usar una URL por defecto
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_MEDIA;
-      const url = `${apiBaseUrl}/api/v1/properties/public/${subdomain}/properties/featured/`;
-      
+
+      // Usar la URL correcta del API
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+      const url = `${apiBaseUrl}/properties/public/${subdomain}/properties/featured/`;
+
+      console.log('Fetching featured properties from:', url);
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
