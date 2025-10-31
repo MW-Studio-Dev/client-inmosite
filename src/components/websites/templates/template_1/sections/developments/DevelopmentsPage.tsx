@@ -600,15 +600,33 @@ const DevelopmentsPage = ({ subdomain }: { subdomain: string }) => {
   // Loading state mientras carga la configuración
   console.log('DevelopmentsPage - configLoading:', configLoading, 'config:', config);
 
-  if (configLoading || !config) {
+  // Solo mostrar loading si NO tenemos config Y estamos cargando
+  // Esto evita el error de removeChild cuando navegamos entre páginas
+  if (!config && configLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mb-4"></div>
           <p className="text-gray-600">Cargando configuración...</p>
-          <p className="text-gray-500 text-sm mt-2">
-            Loading: {configLoading ? 'true' : 'false'} | Config: {config ? 'loaded' : 'null'}
-          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Si no hay config después de cargar, mostrar error
+  if (!config) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold mb-2 text-gray-900">Error al cargar configuración</h2>
+          <p className="text-gray-600 mb-4">No se pudo cargar la configuración del sitio</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            Reintentar
+          </button>
         </div>
       </div>
     );

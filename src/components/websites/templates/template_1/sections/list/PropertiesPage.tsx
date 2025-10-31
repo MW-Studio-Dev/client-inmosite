@@ -772,7 +772,9 @@ const PropertiesPage = ({subdomain}:{subdomain:string}) => {
   // Loading state mientras carga la configuración
   console.log('List.tsx - configLoading:', configLoading, 'config:', config);
 
-  if (configLoading) {
+  // Solo mostrar loading si NO tenemos config Y estamos cargando
+  // Esto evita el error de removeChild cuando navegamos entre páginas
+  if (!config && configLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
@@ -783,6 +785,7 @@ const PropertiesPage = ({subdomain}:{subdomain:string}) => {
     );
   }
 
+  // Si no hay config después de cargar, mostrar error
   if (!config) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
