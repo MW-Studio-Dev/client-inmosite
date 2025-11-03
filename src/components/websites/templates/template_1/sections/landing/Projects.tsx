@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { MapPinIcon } from "@heroicons/react/24/outline";
-import { TemplateConfig } from '../types';
+import { TemplateConfig } from '../../types';
 
 interface ProjectsSectionProps {
   config: TemplateConfig;
@@ -60,7 +60,7 @@ const ProjectsSection: React.FC<ProjectsSectionProps> = ({ config, adaptiveColor
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {config.projects.map((project) => (
+          {config.projects.map((project:any) => (
             <div 
               key={project.id} 
               className="rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"

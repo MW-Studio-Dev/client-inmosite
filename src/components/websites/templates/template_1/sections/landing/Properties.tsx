@@ -282,6 +282,7 @@ const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
                         fill
                         className="object-cover"
                         sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, (max-width: 1536px) 25vw, 20vw"
+                        unoptimized
                         // onError={(e) => {
                         //   const target = e.target as HTMLImageElement;
                         //   target.src = "https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80";
