@@ -33,7 +33,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ config, adaptiveColors }) => {
-  // Validar que la sección esté habilitada
+  // Validar que la secciÃ³n estÃ© habilitada
   if (!config.sections.howItWorks?.enabled) {
     return null;
   }
@@ -46,37 +46,37 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ config, adaptiveC
       number: 1,
       icon: 'MagnifyingGlassIcon',
       title: 'Explora Oportunidades',
-      description: 'Navega nuestro catálogo curado de inversiones inmobiliarias premium con análisis detallado de cada propiedad.'
+      description: 'Navega nuestro catÃ¡logo curado de inversiones inmobiliarias premium con anÃ¡lisis detallado de cada propiedad.'
     },
     {
       number: 2,
       icon: 'ChartBarIcon',
-      title: 'Análisis Profesional',
-      description: 'Recibe asesoría personalizada de nuestro equipo experto con proyecciones de ROI y evaluación de riesgos.'
+      title: 'AnÃ¡lisis Profesional',
+      description: 'Recibe asesorÃ­a personalizada de nuestro equipo experto con proyecciones de ROI y evaluaciÃ³n de riesgos.'
     },
     {
       number: 3,
       icon: 'DocumentCheckIcon',
       title: 'Due Diligence Legal',
-      description: 'Nuestro equipo legal verifica todos los documentos y garantiza una transacción segura y transparente.'
+      description: 'Nuestro equipo legal verifica todos los documentos y garantiza una transacciÃ³n segura y transparente.'
     },
     {
       number: 4,
       icon: 'BanknotesIcon',
       title: 'Financiamiento',
-      description: 'Te conectamos con las mejores opciones de financiamiento adaptadas a tu perfil de inversión.'
+      description: 'Te conectamos con las mejores opciones de financiamiento adaptadas a tu perfil de inversiÃ³n.'
     },
     {
       number: 5,
       icon: 'KeyIcon',
       title: 'Cierre de Deal',
-      description: 'Acompañamiento completo en el proceso de cierre y entrega de llaves de tu inversión.'
+      description: 'AcompaÃ±amiento completo en el proceso de cierre y entrega de llaves de tu inversiÃ³n.'
     },
     {
       number: 6,
       icon: 'UserGroupIcon',
-      title: 'Gestión Post-Venta',
-      description: 'Soporte continuo y servicios de gestión de propiedades para maximizar tu retorno de inversión.'
+      title: 'GestiÃ³n Post-Venta',
+      description: 'Soporte continuo y servicios de gestiÃ³n de propiedades para maximizar tu retorno de inversiÃ³n.'
     }
   ];
 
@@ -85,7 +85,7 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ config, adaptiveC
   return (
     <section className="py-20" style={{ backgroundColor: config.colors.background }}>
       <div className="container mx-auto px-4">
-        {/* Header de la sección */}
+        {/* Header de la secciÃ³n */}
         <div className="text-center mb-16">
           <h2
             className="text-3xl md:text-4xl mb-4"
@@ -94,7 +94,7 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ config, adaptiveC
               fontWeight: config.typography.fontWeight.bold
             }}
           >
-            {howItWorksConfig.title || '¿Cómo Funciona?'}
+            {howItWorksConfig.title || 'Â¿CÃ³mo Funciona?'}
           </h2>
           {howItWorksConfig.subtitle && (
             <p
@@ -127,7 +127,7 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ config, adaptiveC
               <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                 <Image
                   src={howItWorksConfig.image}
-                  alt={howItWorksConfig.title || 'Cómo funciona'}
+                  alt={howItWorksConfig.title || 'CÃ³mo funciona'}
                   width={600}
                   height={400}
                   className="w-full h-auto object-cover"
@@ -200,7 +200,7 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ config, adaptiveC
                         e.currentTarget.style.backgroundColor = config.colors.surface;
                       }}
                     >
-                      {/* Número e icono */}
+                      {/* NÃºmero e icono */}
                       <div className="flex-shrink-0">
                         <div
                           className="w-12 h-12 rounded-full flex items-center justify-center"
@@ -235,7 +235,7 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ config, adaptiveC
                         </p>
                       </div>
 
-                      {/* Badge de número */}
+                      {/* Badge de nÃºmero */}
                       <div
                         className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm"
                         style={{
@@ -257,7 +257,7 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ config, adaptiveC
         {/* Timeline horizontal completa - Solo si NO hay imagen */}
         {!howItWorksConfig.image && (
           <div className="relative">
-            {/* Línea conectora en desktop */}
+            {/* LÃ­nea conectora en desktop */}
             <div
               className="hidden lg:block absolute top-14 left-0 right-0 h-1"
               style={{
@@ -276,7 +276,7 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ config, adaptiveC
                     key={index}
                     className="group text-center transition-all duration-300 transform hover:-translate-y-2"
                   >
-                    {/* Número e icono */}
+                    {/* NÃºmero e icono */}
                     <div className="flex flex-col items-center mb-4">
                       <div
                         className="w-28 h-28 rounded-full flex items-center justify-center mb-3 shadow-lg group-hover:shadow-2xl transition-all duration-300"
@@ -288,7 +288,7 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ config, adaptiveC
                         <IconComponent className="h-12 w-12" />
                       </div>
 
-                      {/* Badge de número */}
+                      {/* Badge de nÃºmero */}
                       <div
                         className="w-10 h-10 rounded-full flex items-center justify-center text-lg shadow-md"
                         style={{
@@ -348,7 +348,7 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ config, adaptiveC
                 fontWeight: config.typography.fontWeight.medium
               }}
             >
-              {howItWorksConfig.ctaText || '¿Listo para comenzar tu inversión inmobiliaria?'}
+              {howItWorksConfig.ctaText || 'Â¿Listo para comenzar tu inversiÃ³n inmobiliaria?'}
             </p>
             <button
               className="px-8 py-3 rounded-lg transition-all duration-200 transform hover:scale-105"
