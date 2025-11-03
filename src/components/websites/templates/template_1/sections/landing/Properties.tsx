@@ -32,7 +32,7 @@ const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
   // Función para obtener imagen por defecto si no hay featured_image_url
   const getPropertyImage = (property: any) => {
     if (property.featured_image_url) {
-      return property.featured_image_url;
+      return `${process.env.NEXT_PUBLIC_API_MEDIA}${property.featured_image_url}`;
     }
     return "https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80";
   };
