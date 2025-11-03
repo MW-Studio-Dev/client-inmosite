@@ -2,6 +2,7 @@
 
 import React, { Suspense } from 'react';
 import { WebsiteConfigProvider } from '@/contexts/WebsiteConfigContext';
+import SharedLayout from '@/components/websites/templates/template_1/layout/SharedLayout';
 
 interface WebsiteConfigWrapperProps {
   subdomain: string;
@@ -21,6 +22,7 @@ const LoadingFallback = () => (
 /**
  * Client component wrapper para proveer el contexto de configuración
  * del website a todas las páginas del subdomain
+ * Incluye el SharedLayout con Navbar, Footer y WhatsApp button
  */
 export const WebsiteConfigWrapper: React.FC<WebsiteConfigWrapperProps> = ({
   subdomain,
@@ -29,7 +31,9 @@ export const WebsiteConfigWrapper: React.FC<WebsiteConfigWrapperProps> = ({
   return (
     <WebsiteConfigProvider subdomain={subdomain}>
       <Suspense fallback={<LoadingFallback />}>
-        {children}
+        <SharedLayout>
+          {children}
+        </SharedLayout>
       </Suspense>
     </WebsiteConfigProvider>
   );

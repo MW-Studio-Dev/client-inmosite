@@ -23,20 +23,15 @@ const HeroSection: React.FC<HeroSectionProps> = ({ config, adaptiveColors }) => 
   const backgroundUrl = config.hero.backgroundVideoUrl;
   const backgroundImage = config.hero.backgroundImage;
 
-  console.log('🖼️ Hero - backgroundUrl:', backgroundUrl);
-  console.log('🖼️ Hero - backgroundImage:', backgroundImage);
+
 
   // Validar que tengamos una imagen de fondo si no hay video
   const hasValidBackground = backgroundUrl || (backgroundImage && backgroundImage !== '' && backgroundImage !== '/');
 
-  if (!hasValidBackground) {
-    console.warn('⚠️ Hero: No se encontró imagen o video de fondo válido');
-  }
 
   return (
     <section id="inicio" className="relative h-screen min-h-[600px] flex items-center justify-center pb-8 sm:pb-12 md:pb-16 overflow-hidden">
       {!mediaLoaded && <HeroSkeleton backgroundColor={config.colors.surface} />}
-
       {backgroundUrl ? (
         <video
           autoPlay

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { TemplateConfig } from '../types';
+import { TemplateConfig } from '../../types';
 
 interface CallToActionProps {
   config: TemplateConfig;

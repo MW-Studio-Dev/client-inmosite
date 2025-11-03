@@ -158,6 +158,67 @@ export interface PartnersConfig {
   };
 }
 
+// Interface para WhyInvest
+export interface WhyInvestBenefit {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+export interface WhyInvestConfig {
+  enabled: boolean;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  image?: string;
+  benefits?: WhyInvestBenefit[];
+  cta?: {
+    text: string;
+  };
+}
+
+// Interface para HowItWorks
+export interface HowItWorksStep {
+  number: number;
+  icon: string;
+  title: string;
+  description: string;
+}
+
+export interface HowItWorksStat {
+  value: string;
+  label: string;
+}
+
+export interface HowItWorksConfig {
+  enabled: boolean;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  image?: string;
+  steps?: HowItWorksStep[];
+  stats?: HowItWorksStat[];
+  ctaText?: string;
+  ctaButton?: string;
+}
+
+// Interface para FAQ
+export interface FAQQuestion {
+  question: string;
+  answer: string;
+  category?: string;
+}
+
+export interface FAQConfig {
+  enabled: boolean;
+  title: string;
+  subtitle?: string;
+  questions: FAQQuestion[];
+  contactTitle?: string;
+  contactSubtitle?: string;
+  contactButton?: string;
+}
+
 interface ContactMethod {
   title: string;
   action: string;
@@ -357,12 +418,15 @@ export interface Sections {
   showTeam: boolean;
   showProjects: boolean;
   showContact: boolean;
-  showPartners: boolean; // Nueva opción
+  showPartners: boolean;
   featuredCount: number;
   aboutUs: AboutUs;
   propertyTypes: PropertyTypes;
   contact: ContactConfig;
-  partners: PartnersConfig; // Nueva configuración
+  partners: PartnersConfig;
+  whyInvest?: WhyInvestConfig;
+  howItWorks?: HowItWorksConfig;
+  faq?: FAQConfig;
 }
 
 export interface TemplateConfig {
@@ -375,7 +439,7 @@ export interface TemplateConfig {
   sections: Sections;
   team?: TeamMember[];
   projects?: Project[];
-  partners?: Partner[]; // Nueva lista de partners
+  partners?: Partner[]; 
 }
 
 export interface SearchData {

@@ -3,8 +3,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { 
-  Bars3Icon, 
+import { usePathname } from 'next/navigation';
+import {
+  Bars3Icon,
   XMarkIcon,
   HomeIcon,
   BuildingOfficeIcon,
@@ -13,8 +14,10 @@ import {
   StarIcon,
   PhoneIcon
 } from "@heroicons/react/24/outline";
-import { motion, AnimatePresence } from 'framer-motion';
 import { TemplateConfig } from '../../types';
+import { createDebugger } from '@/utils/debug';
+
+const debug = createDebugger('Navbar');
 
 interface MenuItemConfig {
   href: string;
@@ -43,8 +46,8 @@ interface NavbarProps {
   };
 }
 
-const Navbar: React.FC<NavbarProps> = ({ 
-  config, 
+const Navbar: React.FC<NavbarProps> = ({
+  config,
   adaptiveColors,
   menuConfig = {
     showHome: true,
@@ -56,37 +59,70 @@ const Navbar: React.FC<NavbarProps> = ({
     showContactButton: true
   }
 }) => {
+  debug.render({ pathname: typeof window !== 'undefined' ? window.location.pathname : 'SSR' }, 'Header.tsx', 59);
+
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const pathname = usePathname();
+
+  // MOUNT/UNMOUNT tracking
+  useEffect(() => {
+    debug.mount('Header.tsx', 65);
+    return () => {
+      debug.unmount('Header.tsx', 67);
+    };
+  }, []);
+
+  // Cerrar menú cuando cambia la ruta (navegación)
+  useEffect(() => {
+    debug.effect('pathname-change', { pathname, prevOpen: isMenuOpen }, 'Header.tsx', 73);
+    setIsMenuOpen(false);
+    document.body.style.overflow = 'unset';
+  }, [pathname]);
+
+  // Cleanup: cerrar menú cuando el componente se desmonte
+  useEffect(() => {
+    debug.effect('cleanup-setup', undefined, 'Header.tsx', 80);
+    return () => {
+      debug.track('cleanup-execute', undefined, 'Header.tsx', 82);
+      setIsMenuOpen(false);
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
 
   useEffect(() => {
+    debug.effect('resize-listener-setup', undefined, 'Header.tsx', 89);
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
+        debug.track('resize-close-menu', { width: window.innerWidth }, 'Header.tsx', 92);
         setIsMenuOpen(false);
       }
     };
 
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    return () => {
+      debug.track('resize-listener-cleanup', undefined, 'Header.tsx', 99);
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   useEffect(() => {
-    const originalOverflow = document.body.style.overflow;
-
+    debug.effect('menu-overflow', { isMenuOpen }, 'Header.tsx', 105);
     if (isMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = originalOverflow || 'unset';
+      document.body.style.overflow = 'unset';
     }
 
+    // Cleanup function to restore scroll when component unmounts
     return () => {
-      // Restore original overflow on unmount
-      document.body.style.overflow = originalOverflow || 'unset';
+      debug.track('overflow-cleanup', undefined, 'Header.tsx', 114);
+      document.body.style.overflow = 'unset';
     };
   }, [isMenuOpen]);
 
   const logoSizes = useMemo(() => {
     const logo = config.company.logo;
-    
+
     if (typeof logo === 'string') {
       return {
         desktop: { width: 56, height: 56, maxHeight: 72 },
@@ -94,29 +130,28 @@ const Navbar: React.FC<NavbarProps> = ({
         navbarPadding: 'py-4'
       };
     }
-    
+
     if (typeof logo === 'object' && logo.type === 'image') {
       const originalWidth = logo.width || 48;
       const originalHeight = logo.height || 48;
-      
+
       const aspectRatio = originalWidth / originalHeight;
-      
-      // Altura aumentada para mejor visibilidad
-      const desktopHeight = 50; // Aumentado de 40 a 50
+
+      const desktopHeight = 50;
       const desktopWidth = desktopHeight * aspectRatio;
-      
-      const mobileHeight = 44; // Aumentado de 36 a 44
+
+      const mobileHeight = 44;
       const mobileWidth = mobileHeight * aspectRatio;
-      
+
       const navbarPadding = 'py-4';
-      
+
       return {
         desktop: { width: desktopWidth, height: desktopHeight, maxHeight: 50 },
         mobile: { width: mobileWidth, height: mobileHeight, maxHeight: 44 },
         navbarPadding
       };
     }
-    
+
     return {
       desktop: { width: 56, height: 56, maxHeight: 72 },
       mobile: { width: 48, height: 48, maxHeight: 64 },
@@ -127,12 +162,12 @@ const Navbar: React.FC<NavbarProps> = ({
   const renderLogo = (size: 'desktop' | 'mobile' = 'desktop') => {
     const logo = config.company.logo;
     const sizes = logoSizes[size];
-    
+
     if (typeof logo === 'string') {
       return (
-        <span 
+        <span
           className="flex items-center justify-center font-bold"
-          style={{ 
+          style={{
             fontSize: size === 'desktop' ? '1.875rem' : '1.5rem',
             lineHeight: 1
           }}
@@ -141,11 +176,9 @@ const Navbar: React.FC<NavbarProps> = ({
         </span>
       );
     }
-    
+
     if (typeof logo === 'object' && logo.type === 'image') {
-      // Validar que logo.src no esté vacío - NO renderizar Image si está vacío
       if (!logo.src || logo.src.trim() === '' || logo.src === '/') {
-        // Retornar fallback sin logging en producción para evitar spam en consola
         if (process.env.NODE_ENV === 'development') {
           console.warn('⚠️ Logo src está vacío o inválido, usando fallback emoji');
         }
@@ -161,7 +194,6 @@ const Navbar: React.FC<NavbarProps> = ({
             width: `${sizes.width}px`,
             height: `${sizes.height}px`,
             maxHeight: `${sizes.maxHeight}px`,
-
           }}
         >
           <Image
@@ -184,7 +216,7 @@ const Navbar: React.FC<NavbarProps> = ({
         </div>
       );
     }
-    
+
     return <span className="text-2xl">🏢</span>;
   };
 
@@ -238,21 +270,22 @@ const Navbar: React.FC<NavbarProps> = ({
   };
 
   const handleMenuItemClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    // Close menu immediately
-    setIsMenuOpen(false);
+    debug.track('handleMenuItemClick', { href, isMenuOpen }, 'Header.tsx', 270);
 
-    // Restore body overflow immediately
+    // Cerrar menú inmediatamente
+    setIsMenuOpen(false);
     document.body.style.overflow = 'unset';
+    debug.track('menu-closed', { href }, 'Header.tsx', 275);
 
     // Si el href contiene un hash, manejar el scroll manualmente
     if (href.includes('#')) {
+      debug.track('hash-navigation', { href }, 'Header.tsx', 279);
       e.preventDefault();
       const hash = href.split('#')[1];
       const element = document.getElementById(hash);
 
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
-        // Actualizar la URL sin recargar la página
         window.history.pushState({}, '', href);
       }
     }
@@ -268,219 +301,220 @@ const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <>
+      <style jsx>{`
+        @keyframes slideDown {
+          from {
+            transform: translateY(-100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes slideInFromRight {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+
+        .navbar-animate {
+          animation: slideDown 0.5s ease-out;
+        }
+
+        .mobile-menu-enter {
+          animation: fadeIn 0.2s ease-out;
+        }
+
+        .mobile-menu-item {
+          animation: slideInFromRight 0.3s ease-out;
+        }
+
+        .hover-underline {
+          position: relative;
+        }
+
+        .hover-underline::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 0;
+          height: 2px;
+          transition: width 0.2s ease-out;
+        }
+
+        .hover-underline:hover::after {
+          width: 100%;
+        }
+      `}</style>
+
       {/* Navbar con transparencia sutil */}
-      <motion.nav 
-        className={`sticky top-0 z-50 border-b border-gray-200 ${logoSizes.navbarPadding}`}
-        style={{ 
+      <nav
+        className={`navbar-animate sticky top-0 z-50 border-b border-gray-200 ${logoSizes.navbarPadding}`}
+        style={{
           backgroundColor: hexToRgba(config.colors.background, 0.95),
           backdropFilter: 'blur(8px)',
           WebkitBackdropFilter: 'blur(8px)'
         }}
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
       >
         <div className="container mx-auto px-4 lg:px-6">
           <div className="flex justify-between items-center min-h-[64px]">
             {/* Logo */}
-            <motion.div 
-              className="flex items-center min-w-0 flex-shrink-0"
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
+            <div className="flex items-center min-w-0 flex-shrink-0 transition-transform duration-200 hover:scale-105">
               {renderLogo('desktop')}
-            </motion.div>
+            </div>
 
             {/* Desktop Menu */}
             <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
-              {menuItems.map((item, index) => (
-                <motion.div
+              {menuItems.map((item) => (
+                <Link
                   key={item.href}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1, duration: 0.3 }}
+                  href={item.href}
+                  className="hover-underline relative transition-colors duration-200 text-sm xl:text-base py-2"
+                  style={{
+                    color: config.colors.textLight,
+                    fontWeight: config.typography.fontWeight.normal
+                  }}
+                  onClick={(e) => handleMenuItemClick(e, item.href)}
                 >
-                  <Link
-                    href={item.href}
-                    className="relative transition-colors duration-200 text-sm xl:text-base py-2"
-                    style={{
-                      color: config.colors.textLight,
-                      fontWeight: config.typography.fontWeight.normal
-                    }}
-                    onClick={(e) => handleMenuItemClick(e, item.href)}
-                  >
-                    <motion.span
-                      whileHover={{
-                        color: config.colors.primary,
-                        transition: { duration: 0.2 }
-                      }}
-                    >
-                      {item.label}
-                    </motion.span>
-                    <motion.div
-                      className="absolute bottom-0 left-0 h-0.5"
-                      style={{ backgroundColor: config.colors.primary }}
-                      initial={{ width: 0 }}
-                      whileHover={{ width: '100%' }}
-                      transition={{ duration: 0.2 }}
-                    />
-                  </Link>
-                </motion.div>
+                  <span className="hover:opacity-80 transition-opacity duration-200">
+                    {item.label}
+                  </span>
+                  <div
+                    className="absolute bottom-0 left-0 h-0.5 w-0 transition-all duration-200 hover:w-full"
+                    style={{ backgroundColor: config.colors.primary }}
+                  />
+                </Link>
               ))}
-              
+
               {(menuConfig.showContactButton && !menuConfig.showContact) && (
-                <motion.button 
+                <button
                   onClick={handleContactClick}
-                  className="px-5 xl:px-7 py-2.5 rounded-lg text-sm xl:text-base whitespace-nowrap shadow-sm hover:shadow-md transition-shadow duration-200"
-                  style={{ 
+                  className="px-5 xl:px-7 py-2.5 rounded-lg text-sm xl:text-base whitespace-nowrap shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105 active:scale-95"
+                  style={{
                     backgroundColor: config.colors.primary,
                     color: adaptiveColors.primaryText,
                     fontWeight: config.typography.fontWeight.semibold
                   }}
-                  whileHover={{ 
-                    scale: 1.05,
-                    backgroundColor: config.colors.primaryDark,
-                    transition: { duration: 0.2 }
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5, duration: 0.3 }}
                 >
                   Contactar
-                </motion.button>
+                </button>
               )}
             </div>
 
             {/* Mobile Menu Button */}
-            <motion.button
+            <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden p-2.5 relative z-50 flex-shrink-0 rounded-lg hover:bg-gray-100 transition-colors duration-200"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="lg:hidden p-2.5 relative z-50 flex-shrink-0 rounded-lg hover:bg-gray-100 transition-all duration-200 hover:scale-105 active:scale-95"
             >
-              <AnimatePresence mode="wait">
-                {isMenuOpen ? (
-                  <motion.div
-                    key="close"
-                    initial={{ rotate: -90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: 90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <XMarkIcon className="h-7 w-7" style={{ color: config.colors.text }} />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="menu"
-                    initial={{ rotate: 90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: -90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Bars3Icon className="h-7 w-7" style={{ color: config.colors.text }} />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.button>
+              {isMenuOpen ? (
+                <XMarkIcon className="h-7 w-7 transition-transform duration-200" style={{ color: config.colors.text }} />
+              ) : (
+                <Bars3Icon className="h-7 w-7 transition-transform duration-200" style={{ color: config.colors.text }} />
+              )}
+            </button>
           </div>
         </div>
-      </motion.nav>
+      </nav>
 
       {/* Mobile Menu Fullscreen */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            className="fixed inset-0 z-50 lg:hidden flex flex-col"
-            style={{ backgroundColor: config.colors.background }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            {/* Header del menú móvil */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 min-h-[80px]">
-              <div className="flex items-center">
-                {renderLogo('mobile')}
-              </div>
-              <button
-                onClick={() => setIsMenuOpen(false)}
-                className="p-2.5 rounded-full transition-colors duration-200 hover:bg-gray-100"
-                style={{ backgroundColor: config.colors.surface }}
-              >
-                <XMarkIcon className="h-7 w-7" style={{ color: config.colors.text }} />
-              </button>
+      {isMenuOpen && (
+        <div
+          className="mobile-menu-enter fixed inset-0 z-40 lg:hidden flex flex-col"
+          style={{ backgroundColor: config.colors.background }}
+        >
+          {/* Header del menú móvil */}
+          <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 min-h-[80px]">
+            <div className="flex items-center">
+              {renderLogo('mobile')}
             </div>
-            
-            {/* Menu Items */}
-            <div className="flex-1 px-6 py-8 space-y-2 overflow-y-auto">
-              {menuItems.map((item, index) => {
-                const IconComponent = item.icon;
-                return (
-                  <motion.div
-                    key={item.href}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05, duration: 0.2 }}
-                  >
-                    <Link
-                      href={item.href}
-                      className="flex items-center space-x-4 py-4 px-4 rounded-xl transition-all duration-200 hover:bg-gray-50 active:bg-gray-100"
-                      onClick={(e) => handleMenuItemClick(e, item.href)}
-                    >
-                      <IconComponent
-                        className="h-6 w-6 flex-shrink-0"
-                        style={{ color: config.colors.primary }}
-                      />
-                      <span
-                        className="text-lg"
-                        style={{
-                          color: config.colors.text,
-                          fontWeight: config.typography.fontWeight.medium
-                        }}
-                      >
-                        {item.label}
-                      </span>
-                    </Link>
-                  </motion.div>
-                );
-              })}
-              
-              {(menuConfig.showContactButton && !menuConfig.showContact) && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: menuItems.length * 0.05, duration: 0.2 }}
-                  className="pt-6"
-                >
-                  <button 
-                    onClick={handleContactClick}
-                    className="w-full flex items-center justify-center space-x-3 py-4 px-6 rounded-xl text-lg shadow-md hover:shadow-lg active:shadow-sm transition-all duration-200"
-                    style={{ 
-                      backgroundColor: config.colors.primary,
-                      color: adaptiveColors.primaryText,
-                      fontWeight: config.typography.fontWeight.semibold
-                    }}
-                  >
-                    <PhoneIcon className="h-5 w-5" />
-                    <span>Contactar</span>
-                  </button>
-                </motion.div>
-              )}
-            </div>
+            <button
+              onClick={() => setIsMenuOpen(false)}
+              className="p-2.5 rounded-full transition-colors duration-200 hover:bg-gray-100"
+              style={{ backgroundColor: config.colors.surface }}
+            >
+              <XMarkIcon className="h-7 w-7" style={{ color: config.colors.text }} />
+            </button>
+          </div>
 
-            {/* Footer */}
-            <div className="px-6 py-5 text-center border-t border-gray-100">
-              <p 
-                className="text-sm opacity-60"
-                style={{ color: config.colors.textLight }}
-              >
-                Powered by Inmosite
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          {/* Menu Items */}
+          <div className="flex-1 px-6 py-8 space-y-2 overflow-y-auto">
+            {menuItems.map((item, index) => {
+              const IconComponent = item.icon;
+              return (
+                <div
+                  key={item.href}
+                  className="mobile-menu-item"
+                  style={{ animationDelay: `${index * 0.05}s` }}
+                >
+                  <Link
+                    href={item.href}
+                    className="flex items-center space-x-4 py-4 px-4 rounded-xl transition-all duration-200 hover:bg-gray-50 active:bg-gray-100"
+                    onClick={(e) => handleMenuItemClick(e, item.href)}
+                  >
+                    <IconComponent
+                      className="h-6 w-6 flex-shrink-0"
+                      style={{ color: config.colors.primary }}
+                    />
+                    <span
+                      className="text-lg"
+                      style={{
+                        color: config.colors.text,
+                        fontWeight: config.typography.fontWeight.medium
+                      }}
+                    >
+                      {item.label}
+                    </span>
+                  </Link>
+                </div>
+              );
+            })}
+
+            {(menuConfig.showContactButton && !menuConfig.showContact) && (
+              <div className="pt-6">
+                <button
+                  onClick={handleContactClick}
+                  className="w-full flex items-center justify-center space-x-3 py-4 px-6 rounded-xl text-lg shadow-md hover:shadow-lg active:shadow-sm transition-all duration-200"
+                  style={{
+                    backgroundColor: config.colors.primary,
+                    color: adaptiveColors.primaryText,
+                    fontWeight: config.typography.fontWeight.semibold
+                  }}
+                >
+                  <PhoneIcon className="h-5 w-5" />
+                  <span>Contactar</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="px-6 py-5 text-center border-t border-gray-100">
+            <p
+              className="text-sm opacity-60"
+              style={{ color: config.colors.textLight }}
+            >
+              Powered by iNMOSITE
+            </p>
+          </div>
+        </div>
+      )}
     </>
   );
 };

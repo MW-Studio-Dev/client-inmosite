@@ -123,9 +123,9 @@ export default function SEO({
 
       return () => {
         const scriptToRemove = document.getElementById('structured-data-seo');
-        if (scriptToRemove) {
-          document.head.removeChild(scriptToRemove);
-        }
+        // if (scriptToRemove) {
+        //   document.head.removeChild(scriptToRemove);
+        // }
       };
     }
   }, [structuredData]);

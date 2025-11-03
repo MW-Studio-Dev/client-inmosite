@@ -33,11 +33,8 @@ const RealEstateTemplate: React.FC<RealEstateTemplateProps> = ({
   console.log('secccion de partners',templateConfig.sections.showPartners)
   return (
     <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: templateConfig.colors.background }}>
-      {/* Header superior con información de contacto */}
-      <TopHeader config={templateConfig} />
-      
-      {/* Barra de navegación */}
-      <Navbar config={templateConfig} adaptiveColors={adaptiveColors} />
+
+
       
       {/* Sección hero principal con fondo de imagen */}
       <HeroSection config={templateConfig} adaptiveColors={adaptiveColors} />
@@ -80,11 +77,9 @@ const RealEstateTemplate: React.FC<RealEstateTemplateProps> = ({
         <Contact config={templateConfig} adaptiveColors={adaptiveColors} />
       )}
       
-      {/* Botón flotante de WhatsApp */}
-      <WhatsAppButton config={templateConfig} />
+
       
-      {/* Pie de página */}
-      <Footer config={templateConfig} adaptiveColors={adaptiveColors} />
+     
     </div>
   );
 };

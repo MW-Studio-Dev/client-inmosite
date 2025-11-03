@@ -68,6 +68,7 @@ const PropertiesPageClient: React.FC<PropertiesPageClientProps> = ({subdomain, i
 
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const [filters, setFilters] = useState<PropertyFilters>({
     type: 'todos',
     propertyType: 'todos',
@@ -556,6 +557,21 @@ const PropertiesPageClient: React.FC<PropertiesPageClientProps> = ({subdomain, i
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
             {properties.map((property) => {
+              // Validar que la imagen exista y sea una URL válida
+              const imageUrl = property.featured_image_url;
+              const hasFailedBefore = imageUrl ? failedImages.has(imageUrl) : false;
+              const hasValidImage = imageUrl &&
+                                    imageUrl.trim() !== '' &&
+                                    imageUrl !== '/' &&
+                                    !imageUrl.includes('undefined') &&
+                                    !hasFailedBefore;
+
+              const handleImageError = () => {
+                if (imageUrl) {
+                  setFailedImages(prev => new Set(prev).add(imageUrl));
+                }
+              };
+
               const getStatusColor = (status: string) => {
                 switch (status) {
                   case 'disponible':
@@ -583,13 +599,25 @@ const PropertiesPageClient: React.FC<PropertiesPageClientProps> = ({subdomain, i
                 >
                   {/* Imagen */}
                   <div className="relative h-44 bg-gray-100 rounded-t-lg overflow-hidden">
-                    <Image
-                      src={property.featured_image_url || PLACEHOLDER_IMAGE}
-                      alt={property.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
+                    {hasValidImage && imageUrl ? (
+                      <Image
+                        src={imageUrl}
+                        alt={property.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        // onError={handleImageError}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <div className="text-center">
+                          <HomeIcon className="h-12 w-12 mx-auto mb-2 text-gray-400" />
+                          <p className="text-xs text-gray-500">
+                            Sin imagen
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Badges */}
                     <div className="absolute top-2 left-2 flex gap-1.5">
@@ -782,9 +810,20 @@ const PropertiesPageClient: React.FC<PropertiesPageClientProps> = ({subdomain, i
     );
   };
 
-  // La configuración ya viene pre-cargada del servidor, no hay loading state
+  // Solo mostrar loading si NO tenemos config
+  // Esto evita el error de removeChild cuando navegamos entre páginas
+  if (!config) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mb-4"></div>
+          <p className="text-gray-600">Cargando configuración...</p>
+        </div>
+      </div>
+    );
+  }
 
-  return config ? (
+  return (
     <div style={{ backgroundColor: config.colors.background }} className="min-h-screen">
       <TopHeader config={config} />
       <Navbar config={config} adaptiveColors={adaptiveColors}/>
@@ -797,7 +836,7 @@ const PropertiesPageClient: React.FC<PropertiesPageClientProps> = ({subdomain, i
       <Footer config={config} adaptiveColors={adaptiveColors} />
       <WhatsAppButton />
     </div>
-  ) : null;
+  );
 };
 
 export default PropertiesPageClient;

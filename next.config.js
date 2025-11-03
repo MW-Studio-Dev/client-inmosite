@@ -56,6 +56,9 @@ const nextConfig = {
 
     // Loader personalizado para imágenes de media que vienen del backend
     loader: 'default',
+
+    // Deshabilitar caché de imágenes fallidas para evitar reintentos infinitos
+    minimumCacheTTL: 60,
   },
 
   // Reescribir rutas de media para proxear al backend

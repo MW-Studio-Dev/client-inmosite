@@ -14,20 +14,8 @@ import {
   FiXCircle,
   FiHome,
   FiStar,
-  FiCalendar,
-  FiUsers,
-  FiTrendingUp,
-  FiCheckCircle,
   FiPhone
 } from 'react-icons/fi';
-import {
-  MdPool,
-  MdFitnessCenter,
-  MdSecurity,
-  MdLocalParking,
-  MdPark,
-  MdBusinessCenter
-} from 'react-icons/md';
 import { Navbar, TopHeader, Footer } from '../layout';
 import { useWebsiteConfigContext } from '@/contexts/WebsiteConfigContext';
 import { useProperties } from '@/hooks/useProperties';
@@ -50,9 +38,6 @@ interface PaginationInfo {
   totalItems: number;
 }
 
-// Placeholder image
-const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80";
-
 // Funciones de utilidad para colores adaptativos
 const isLightColor = (color: string): boolean => {
   const hex = color.replace('#', '');
@@ -71,6 +56,7 @@ const DevelopmentsPage = ({ subdomain }: { subdomain: string }) => {
   const { config, loading: configLoading } = useWebsiteConfigContext();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const [filters, setFilters] = useState<DevelopmentFilters>({
     status: 'todos',
     type: 'todos',
@@ -368,20 +354,48 @@ const DevelopmentsPage = ({ subdomain }: { subdomain: string }) => {
         {!loading && !error && paginatedDevelopments.length > 0 && (
           <div className="p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-              {paginatedDevelopments.map((development) => (
-                <div
-                  key={development.id}
-                  style={{ backgroundColor: config.colors.surface }}
-                  className="rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
-                >
-                  <div className="relative h-64">
-                    <Image
-                      src={development.featured_image_url || PLACEHOLDER_IMAGE}
-                      alt={development.title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
+              {paginatedDevelopments.map((development) => {
+                // Validar que la imagen exista y sea una URL válida
+                const imageUrl = development.featured_image_url;
+                const hasFailedBefore = imageUrl ? failedImages.has(imageUrl) : false;
+                const hasValidImage = imageUrl &&
+                                      imageUrl.trim() !== '' &&
+                                      imageUrl !== '/' &&
+                                      !imageUrl.includes('undefined') &&
+                                      !hasFailedBefore;
+
+                const handleImageError = () => {
+                  if (imageUrl) {
+                    setFailedImages(prev => new Set(prev).add(imageUrl));
+                  }
+                };
+
+                return (
+                  <div
+                    key={development.id}
+                    style={{ backgroundColor: config.colors.surface }}
+                    className="rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+                  >
+                    <div className="relative h-64">
+                      {hasValidImage && imageUrl ? (
+                        <Image
+                          src={imageUrl}
+                          alt={development.title}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          // onError={handleImageError}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                          <div className="text-center">
+                            <FiHome className="h-16 w-16 mx-auto mb-2" style={{ color: config.colors.textLight }} />
+                            <p className="text-sm" style={{ color: config.colors.textLight }}>
+                              Sin imagen
+                            </p>
+                          </div>
+                        </div>
+                      )}
 
                     {/* Badge destacado */}
                     {development.is_featured && (
@@ -452,7 +466,8 @@ const DevelopmentsPage = ({ subdomain }: { subdomain: string }) => {
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Paginación */}
@@ -636,17 +651,13 @@ const DevelopmentsPage = ({ subdomain }: { subdomain: string }) => {
 
   return (
     <div style={{ backgroundColor: config?.colors.background }} className="min-h-screen">
-      {config && <TopHeader config={config} />}
-      {config && <Navbar config={config} adaptiveColors={adaptiveColors} />}
-      <MobileMenu />
+     
 
       <div className="flex">
         <FilterSidebar />
         <MainContent />
       </div>
 
-      {config && <Footer config={config} adaptiveColors={adaptiveColors} />}
-      <WhatsAppButton />
     </div>
   );
 };
