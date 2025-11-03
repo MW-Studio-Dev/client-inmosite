@@ -303,7 +303,7 @@ const PropertiesPageClient: React.FC<PropertiesPageClientProps> = ({ subdomain }
                     <div className="relative h-44 bg-gray-100 rounded-t-lg overflow-hidden">
                       {hasValidImage && imageUrl ? (
                         <Image
-                          src={imageUrl}
+                          src={`${process.env.NEXT_PUBLIC_API_MEDIA}${imageUrl}`}
                           alt={property.title}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-300"

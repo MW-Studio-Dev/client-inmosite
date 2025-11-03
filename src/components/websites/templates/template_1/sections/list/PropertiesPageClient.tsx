@@ -67,19 +67,7 @@ const PropertiesPageClient: React.FC<PropertiesPageClientProps> = ({subdomain, i
   const config = initialConfig as TemplateConfig;
 
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
-  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
-  const [filters, setFilters] = useState<PropertyFilters>({
-    type: 'todos',
-    propertyType: 'todos',
-    minPrice: '',
-    maxPrice: '',
-    location: '',
-    bedrooms: 'todos',
-    bathrooms: 'todos',
-    minArea: '',
-    maxArea: ''
-  });
+  const [failedImages] = useState<Set<string>>(new Set());
   const [pagination, setPagination] = useState<PaginationInfo>({
     currentPage: 1,
     totalPages: 1,
@@ -93,7 +81,6 @@ const PropertiesPageClient: React.FC<PropertiesPageClientProps> = ({subdomain, i
   // Reset component state when subdomain changes
   useEffect(() => {
     setIsMenuOpen(false);
-    setIsSidebarOpen(false);
   }, [subdomain]);
   // Colores adaptativos usando el config
   const adaptiveColors = config ? {
@@ -152,348 +139,26 @@ const PropertiesPageClient: React.FC<PropertiesPageClientProps> = ({subdomain, i
     return <span className="text-2xl">🏢</span>;
   };
 
-  // Inyectar estilos dinámicos usando config
-
-  // Obtener tipos de propiedades habilitados desde config
-  const getEnabledPropertyTypes = () => {
-    if (!config) return [];
-    return Object.entries(config.sections.propertyTypes)
-      .filter(([_, config]) => config.enabled)
-      .map(([key, config]) => ({
-        value: key,
-        label: config.title
-      }));
-  };
-
-
-  // Sidebar de Filtros usando config
-  const FilterSidebar: React.FC = () => {
-    if (!config) return null;
-    
-    return (
-    <>
-      {/* Overlay transparente para cerrar al hacer clic afuera */}
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 z-30 lg:hidden"
-          style={{ top: '88px' }}
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar - debajo del navbar, respetando footer */}
-      <aside
-        className={`
-          fixed lg:sticky left-0 z-40 lg:z-10
-          w-80 lg:w-72 xl:w-80
-          transform transition-transform duration-300 ease-in-out
-          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          overflow-y-auto shadow-2xl lg:shadow-none
-          self-start
-        `}
-        style={{
-          backgroundColor: config.colors.surface,
-          top: '88px',
-          height: 'calc(100vh - 88px)',
-          maxHeight: 'calc(100vh - 88px)'
-        }}
-      >
-        <div className="p-6">
-          {/* Header del sidebar */}
-          <div className="flex items-center justify-between mb-6 lg:mb-8">
-            <h2 
-              style={{ color: config.colors.text }}
-              className="text-xl font-bold flex items-center"
-            >
-              <FunnelIcon className="h-5 w-5 mr-2" style={{ color: config.colors.primary }} />
-              Filtrar Propiedades
-            </h2>
-            <button
-              onClick={() => setIsSidebarOpen(false)}
-              className="lg:hidden p-1"
-            >
-              <XMarkIcon className="h-6 w-6" style={{ color: config.colors.text }} />
-            </button>
-          </div>
-
-          {/* Filtros */}
-          <div className="space-y-6">
-            {/* Búsqueda por texto */}
-            <div>
-              <label style={{ color: config.colors.text }} className="block text-sm font-semibold mb-3">
-                Buscar por ubicación
-              </label>
-              <div className="relative">
-                <MagnifyingGlassIcon 
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4"
-                  style={{ color: config.colors.textLight }}
-                />
-                <input 
-                  type="text"
-                  placeholder="Villa Esperanza, Jardines del Sol..."
-                  value={filters.location}
-                  onChange={(e) => setFilters({...filters, location: e.target.value})}
-                  style={{ 
-                    backgroundColor: config.colors.background,
-                    color: config.colors.text,
-                    borderColor: config.colors.textLight + '30'
-                  }}
-                  className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent"
-                />
-              </div>
-            </div>
-
-            {/* Tipo de operación */}
-            <div>
-              <label style={{ color: config.colors.text }} className="block text-sm font-semibold mb-3">
-                Tipo de Operación
-              </label>
-              <div className="space-y-2">
-                {[
-                  { value: 'todos', label: 'Todas las operaciones' },
-                  { value: 'comprar', label: 'Comprar' },
-                  { value: 'alquilar', label: 'Alquilar' }
-                ].map(option => (
-                  <label key={option.value} className="flex items-center cursor-pointer">
-                    <input
-                      type="radio"
-                      name="type"
-                      value={option.value}
-                      checked={filters.type === option.value}
-                      onChange={(e) => setFilters({...filters, type: e.target.value})}
-                      style={{ accentColor: config.colors.primary }}
-                      className="mr-3"
-                    />
-                    <span style={{ color: config.colors.text }} className="text-sm">
-                      {option.label}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Tipo de propiedad usando config */}
-            <div>
-              <label style={{ color: config.colors.text }} className="block text-sm font-semibold mb-3">
-                Tipo de Propiedad
-              </label>
-              <select 
-                value={filters.propertyType}
-                onChange={(e) => setFilters({...filters, propertyType: e.target.value})}
-                style={{ 
-                  backgroundColor: config.colors.background,
-                  color: config.colors.text,
-                  borderColor: config.colors.textLight + '30'
-                }}
-                className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:border-transparent"
-              >
-                <option value="todos">Todos los tipos</option>
-                {getEnabledPropertyTypes().map(type => (
-                  <option key={type.value} value={type.value}>
-                    {type.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Rango de precios */}
-            <div>
-              <label style={{ color: config.colors.text }} className="block text-sm font-semibold mb-3">
-                Rango de Precios
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <input 
-                    type="number"
-                    placeholder="Precio mín"
-                    value={filters.minPrice}
-                    onChange={(e) => setFilters({...filters, minPrice: e.target.value})}
-                    style={{ 
-                      backgroundColor: config.colors.background,
-                      color: config.colors.text,
-                      borderColor: config.colors.textLight + '30'
-                    }}
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  />
-                </div>
-                <div>
-                  <input 
-                    type="number"
-                    placeholder="Precio máx"
-                    value={filters.maxPrice}
-                    onChange={(e) => setFilters({...filters, maxPrice: e.target.value})}
-                    style={{ 
-                      backgroundColor: config.colors.background,
-                      color: config.colors.text,
-                      borderColor: config.colors.textLight + '30'
-                    }}
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Habitaciones */}
-            <div>
-              <label style={{ color: config.colors.text }} className="block text-sm font-semibold mb-3">
-                Habitaciones
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {['todos', '1', '2', '3', '4+'].map(bedroom => (
-                  <button
-                    key={bedroom}
-                    onClick={() => setFilters({...filters, bedrooms: bedroom})}
-                    style={{ 
-                      backgroundColor: filters.bedrooms === bedroom ? config.colors.primary : config.colors.background,
-                      color: filters.bedrooms === bedroom ? adaptiveColors.primaryText : config.colors.text,
-                      borderColor: filters.bedrooms === bedroom ? config.colors.primary : config.colors.textLight + '30'
-                    }}
-                    className="border rounded-lg py-2 px-3 text-sm font-medium transition-colors"
-                  >
-                    {bedroom === 'todos' ? 'Todas' : bedroom}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Baños */}
-            <div>
-              <label style={{ color: config.colors.text }} className="block text-sm font-semibold mb-3">
-                Baños
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {['todos', '1', '2', '3', '4+'].map(bathroom => (
-                  <button
-                    key={bathroom}
-                    onClick={() => setFilters({...filters, bathrooms: bathroom})}
-                    style={{ 
-                      backgroundColor: filters.bathrooms === bathroom ? config.colors.primary : config.colors.background,
-                      color: filters.bathrooms === bathroom ? adaptiveColors.primaryText : config.colors.text,
-                      borderColor: filters.bathrooms === bathroom ? config.colors.primary : config.colors.textLight + '30'
-                    }}
-                    className="border rounded-lg py-2 px-3 text-sm font-medium transition-colors"
-                  >
-                    {bathroom === 'todos' ? 'Todos' : bathroom}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Área */}
-            <div>
-              <label style={{ color: config.colors.text }} className="block text-sm font-semibold mb-3">
-                Área (m²)
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <input 
-                  type="number"
-                  placeholder="Área mín"
-                  value={filters.minArea}
-                  onChange={(e) => setFilters({...filters, minArea: e.target.value})}
-                  style={{ 
-                    backgroundColor: config.colors.background,
-                    color: config.colors.text,
-                    borderColor: config.colors.textLight + '30'
-                  }}
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
-                />
-                <input 
-                  type="number"
-                  placeholder="Área máx"
-                  value={filters.maxArea}
-                  onChange={(e) => setFilters({...filters, maxArea: e.target.value})}
-                  style={{ 
-                    backgroundColor: config.colors.background,
-                    color: config.colors.text,
-                    borderColor: config.colors.textLight + '30'
-                  }}
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
-                />
-              </div>
-            </div>
-
-            {/* Botones de acción */}
-            <div className="pt-4 border-t space-y-3" style={{ borderColor: config.colors.textLight + '20' }}>
-              {/* Botón aplicar filtros (solo móvil) */}
-              <button
-                onClick={() => setIsSidebarOpen(false)}
-                style={{
-                  backgroundColor: config.colors.primary,
-                  color: adaptiveColors.primaryText
-                }}
-                className="w-full py-3 rounded-lg transition-colors duration-200 font-semibold flex items-center justify-center space-x-2 lg:hidden"
-              >
-                <span>Aplicar Filtros</span>
-              </button>
-
-              {/* Botón limpiar filtros */}
-              <button
-                onClick={() => {
-                  setFilters({
-                    type: 'todos',
-                    propertyType: 'todos',
-                    minPrice: '',
-                    maxPrice: '',
-                    location: '',
-                    bedrooms: 'todos',
-                    bathrooms: 'todos',
-                    minArea: '',
-                    maxArea: ''
-                  });
-                }}
-                style={{
-                  backgroundColor: config.colors.background,
-                  color: config.colors.text,
-                  borderColor: config.colors.textLight + '30'
-                }}
-                className="w-full py-3 rounded-lg transition-colors duration-200 font-semibold flex items-center justify-center space-x-2 border"
-              >
-                <XCircleIcon className="h-4 w-4" />
-                <span>Limpiar Filtros</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </aside>
-    </>
-    );
-  };
 
   // Área principal con resultados
   const MainContent: React.FC = () => {
     if (!config) return null;
-    
-    return (
-    <main className="flex-1 min-h-screen" style={{ backgroundColor: config.colors.background }}>
-      {/* Header de resultados */}
-      <div style={{ backgroundColor: config.colors.surface }} className="p-6 border-b">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
-          <div>
-            <h1
-              style={{ color: config.colors.text }}
-              className="text-2xl lg:text-3xl font-bold mb-2"
-            >
-              Propiedades
-            </h1>
-            <p style={{ color: config.colors.textLight }} className="text-sm">
-              {loading ? 'Cargando...' : `${pagination.totalItems} propiedades encontradas • Mostrando ${properties.length} resultados`}
-            </p>
-          </div>
 
-          {/* Botón de filtros para móvil y desktop */}
-          <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            style={{
-              backgroundColor: config.colors.primary,
-              color: adaptiveColors.primaryText
-            }}
-            className="flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors"
+    return (
+    <main className="flex-1 min-h-screen bg-white">
+      {/* Header de resultados - Minimalista */}
+      <div className="max-w-7xl mx-auto px-6 py-16">
+        <div className="mb-12">
+          <h1
+            style={{ color: config.colors.text }}
+            className="text-5xl lg:text-6xl font-bold mb-4"
           >
-            <AdjustmentsHorizontalIcon className="h-5 w-5" />
-            <span className="font-semibold">Filtros</span>
-          </button>
+            Properties
+          </h1>
+          <p style={{ color: config.colors.textLight }} className="text-lg">
+            {loading ? 'Loading...' : `${pagination.totalItems} properties available`}
+          </p>
         </div>
-      </div>
 
       {/* Loading State */}
       {/* {loading && (
@@ -554,8 +219,8 @@ const PropertiesPageClient: React.FC<PropertiesPageClientProps> = ({subdomain, i
 
       {/* Grid de propiedades */}
       {!loading && !error && properties.length > 0 && (
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {properties.map((property) => {
               // Validar que la imagen exista y sea una URL válida
               const imageUrl = property.featured_image_url;
@@ -566,164 +231,95 @@ const PropertiesPageClient: React.FC<PropertiesPageClientProps> = ({subdomain, i
                                     !imageUrl.includes('undefined') &&
                                     !hasFailedBefore;
 
-              const handleImageError = () => {
-                if (imageUrl) {
-                  setFailedImages(prev => new Set(prev).add(imageUrl));
-                }
-              };
-
-              const getStatusColor = (status: string) => {
-                switch (status) {
-                  case 'disponible':
-                    return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-                  case 'vendido':
-                    return 'bg-slate-100 text-slate-700 border-slate-300';
-                  case 'reservado':
-                    return 'bg-amber-50 text-amber-700 border-amber-200';
-                  default:
-                    return 'bg-gray-50 text-gray-700 border-gray-200';
-                }
-              };
-
-              const getOperationTypeBadge = (type: string) => {
-                return type === 'venta'
-                  ? 'bg-blue-50 text-blue-700 border-blue-200'
-                  : 'bg-purple-50 text-purple-700 border-purple-200';
-              };
-
               return (
-                <div
+                <a
                   key={property.id}
-                  style={{ backgroundColor: config.colors.surface }}
-                  className="group rounded-lg border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md transition-all duration-200"
+                  href={`/properties/${property.id}`}
+                  className="group block"
                 >
                   {/* Imagen */}
-                  <div className="relative h-44 bg-gray-100 rounded-t-lg overflow-hidden">
+                  <div className="relative aspect-[4/3] bg-gray-100 rounded-2xl overflow-hidden mb-4">
                     {hasValidImage && imageUrl ? (
                       <Image
                         src={imageUrl}
                         alt={property.title}
                         fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        // onError={handleImageError}
                       />
                     ) : (
-                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                        <div className="text-center">
-                          <HomeIcon className="h-12 w-12 mx-auto mb-2 text-gray-400" />
-                          <p className="text-xs text-gray-500">
-                            Sin imagen
-                          </p>
-                        </div>
+                      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                        <HomeIcon className="h-16 w-16 text-gray-300" />
                       </div>
                     )}
-
-                    {/* Badges */}
-                    <div className="absolute top-2 left-2 flex gap-1.5">
-                      <span className={`text-[10px] px-2 py-1 rounded-md font-medium border ${getOperationTypeBadge(property.operation_type)}`}>
-                        {property.operation_type === 'venta' ? 'Venta' : 'Alquiler'}
-                      </span>
-                      <span className={`text-[10px] px-2 py-1 rounded-md font-medium border ${getStatusColor(property.status)}`}>
-                        {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
-                      </span>
-                    </div>
                   </div>
 
                   {/* Contenido */}
-                  <div className="p-4">
-                    <h3 className="text-base font-semibold text-gray-900 line-clamp-1 mb-2">
-                      {property.title}
-                    </h3>
-
-                    <p className="text-xl font-bold text-gray-900 mb-3">
-                      {property.price_display}
-                    </p>
-
-                    <div className="space-y-1.5 mb-4">
-                      <p className="text-sm text-gray-600 flex items-center gap-1.5">
-                        <MapPinIcon className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
-                        <span className="line-clamp-1">{property.location_display}</span>
-                      </p>
-                      <p className="text-sm text-gray-600 flex items-center gap-1.5">
-                        <HomeIcon className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
-                        {property.property_type.charAt(0).toUpperCase() + property.property_type.slice(1)}
-                      </p>
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 style={{ color: config.colors.text }} className="text-lg font-semibold line-clamp-1">
+                        {property.title}
+                      </h3>
                     </div>
 
-                    {/* Botón de acción */}
-                    <a
-                      href={`/properties/${property.id}`}
-                      style={{
-                        backgroundColor: config.colors.primary,
-                        color: adaptiveColors.primaryText
-                      }}
-                      className="block text-center w-full py-2 px-3 rounded-md text-sm font-medium transition-colors hover:opacity-90"
-                    >
-                      Ver Detalles
-                    </a>
+                    <p className="text-sm text-gray-500 line-clamp-1 flex items-center gap-1">
+                      <MapPinIcon className="h-4 w-4 flex-shrink-0" />
+                      {property.location_display}
+                    </p>
+
+                    <p style={{ color: config.colors.text }} className="text-xl font-bold">
+                      {property.price_display}
+                    </p>
                   </div>
-                </div>
+                </a>
               );
             })}
           </div>
 
           {/* Paginación */}
           {pagination.totalPages > 1 && (
-            <div className="mt-12 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-              <div style={{ color: config.colors.textLight }}>
-                Página {pagination.currentPage} de {pagination.totalPages}
-              </div>
-
-              <div className="flex items-center space-x-2">
+            <div className="mt-16 flex justify-center">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => setPagination(prev => ({ ...prev, currentPage: prev.currentPage - 1 }))}
                   disabled={pagination.currentPage === 1}
-                  style={{
-                    backgroundColor: pagination.currentPage === 1 ? config.colors.surface : config.colors.background,
-                    color: pagination.currentPage === 1 ? config.colors.textLight : config.colors.text,
-                    borderColor: config.colors.textLight + '30'
-                  }}
-                  className="p-2 border rounded-lg transition-colors disabled:cursor-not-allowed"
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  <ChevronLeftIcon className="h-4 w-4" />
+                  <ChevronLeftIcon className="h-5 w-5" style={{ color: config.colors.text }} />
                 </button>
 
-                {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                  const pageNum = i + 1;
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setPagination(prev => ({ ...prev, currentPage: pageNum }))}
-                      style={{
-                        backgroundColor: pagination.currentPage === pageNum ? config.colors.primary : config.colors.background,
-                        color: pagination.currentPage === pageNum ? adaptiveColors.primaryText : config.colors.text,
-                        borderColor: pagination.currentPage === pageNum ? config.colors.primary : config.colors.textLight + '30'
-                      }}
-                      className="px-3 py-2 border rounded-lg transition-colors font-medium"
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                    const pageNum = i + 1;
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setPagination(prev => ({ ...prev, currentPage: pageNum }))}
+                        style={{
+                          backgroundColor: pagination.currentPage === pageNum ? config.colors.text : 'transparent',
+                          color: pagination.currentPage === pageNum ? 'white' : config.colors.text
+                        }}
+                        className="w-10 h-10 rounded-full text-sm font-medium transition-colors hover:bg-gray-100"
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
 
                 <button
                   onClick={() => setPagination(prev => ({ ...prev, currentPage: prev.currentPage + 1 }))}
                   disabled={pagination.currentPage === pagination.totalPages}
-                  style={{
-                    backgroundColor: pagination.currentPage === pagination.totalPages ? config.colors.surface : config.colors.background,
-                    color: pagination.currentPage === pagination.totalPages ? config.colors.textLight : config.colors.text,
-                    borderColor: config.colors.textLight + '30'
-                  }}
-                  className="p-2 border rounded-lg transition-colors disabled:cursor-not-allowed"
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  <ChevronRightIcon className="h-4 w-4" />
+                  <ChevronRightIcon className="h-5 w-5" style={{ color: config.colors.text }} />
                 </button>
               </div>
             </div>
           )}
-        </div>
+        </>
       )}
+      </div>
     </main>
     );
   };
@@ -824,15 +420,11 @@ const PropertiesPageClient: React.FC<PropertiesPageClientProps> = ({subdomain, i
   }
 
   return (
-    <div style={{ backgroundColor: config.colors.background }} className="min-h-screen">
+    <div className="min-h-screen bg-white">
       <TopHeader config={config} />
       <Navbar config={config} adaptiveColors={adaptiveColors}/>
       <MobileMenu />
-
-      <div className="flex">
-        <FilterSidebar />
-        <MainContent />
-      </div>
+      <MainContent />
       <Footer config={config} adaptiveColors={adaptiveColors} />
       <WhatsAppButton />
     </div>

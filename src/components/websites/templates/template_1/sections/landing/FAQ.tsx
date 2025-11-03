@@ -99,8 +99,7 @@ const FAQSection: React.FC<FAQSectionProps> = ({ config, adaptiveColors }) => {
                     key={index}
                     className="rounded-2xl overflow-hidden"
                     style={{
-                      backgroundColor: config.colors.surface,
-                      border: `1px solid ${config.colors.primary}15`,
+                      backgroundColor: config.colors.surface
                     }}
                   >
                     {/* Pregunta - Versión estática sin eventos */}
@@ -149,21 +148,7 @@ const FAQSection: React.FC<FAQSectionProps> = ({ config, adaptiveColors }) => {
           {/* Columna izquierda - Título y badge */}
           <div className="lg:col-span-4">
             <div className="lg:sticky lg:top-24">
-              {/* Badge FAQ */}
-              <div
-                className="inline-block px-4 py-2 rounded-lg mb-6"
-                style={{
-                  backgroundColor: config.colors.surface,
-                  border: `1px solid ${config.colors.primary}20`
-                }}
-              >
-                <span
-                  className="text-sm font-medium"
-                  style={{ color: config.colors.textLight }}
-                >
-                  FAQ
-                </span>
-              </div>
+            
 
               {/* Título principal */}
               <h2
@@ -205,8 +190,7 @@ const FAQSection: React.FC<FAQSectionProps> = ({ config, adaptiveColors }) => {
                     key={index}
                     className="rounded-2xl overflow-hidden transition-all duration-300"
                     style={{
-                      backgroundColor: config.colors.surface,
-                      border: `1px solid ${config.colors.primary}15`,
+                      backgroundColor: config.colors.surface
                     }}
                   >
                     {/* Pregunta - Botón clickeable */}

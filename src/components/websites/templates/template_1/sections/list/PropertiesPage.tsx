@@ -480,63 +480,6 @@ const PropertiesPage = ({subdomain}:{subdomain:string}) => {
         </div>
       </div>
 
-      {/* Loading State */}
-      {/* {loading && (
-        <div className="p-6">
-          <div className="flex justify-center items-center min-h-[400px]">
-            <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: config.colors.primary }}></div>
-              <p style={{ color: config.colors.textLight }} className="mt-4">Cargando propiedades...</p>
-            </div>
-          </div>
-        </div>
-      )} */}
-
-      {/* Error State
-      {error && !loading && (
-        <div className="p-6">
-          <div className="flex justify-center items-center min-h-[400px]">
-            <div className="text-center max-w-md">
-              <div className="text-6xl mb-4">⚠️</div>
-              <h2 style={{ color: config.colors.text }} className="text-xl font-bold mb-2">
-                Error al cargar propiedades
-              </h2>
-              <p style={{ color: config.colors.textLight }} className="mb-4">
-                {error}
-              </p>
-              <button
-                onClick={() => window.location.reload()}
-                style={{
-                  backgroundColor: config.colors.primary,
-                  color: adaptiveColors.primaryText
-                }}
-                className="px-6 py-2 rounded-lg transition-colors"
-              >
-                Reintentar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-   
-      {!loading && !error && properties.length === 0 && (
-        <div className="p-6">
-          <div className="flex justify-center items-center min-h-[400px]">
-            <div className="text-center max-w-md">
-              <div className="text-6xl mb-4">🏠</div>
-              <h2 style={{ color: config.colors.text }} className="text-xl font-bold mb-2">
-                No se encontraron propiedades
-              </h2>
-              <p style={{ color: config.colors.textLight }} className="mb-4">
-                Intenta ajustar los filtros para ver más resultados
-              </p>
-            </div>
-          </div>
-        </div>
-      )} 
-      */}
-
       {/* Grid de propiedades */}
       {!loading && !error && properties.length > 0 && (
         <div className="p-6">
@@ -570,7 +513,7 @@ const PropertiesPage = ({subdomain}:{subdomain:string}) => {
                   {/* Imagen */}
                   <div className="relative h-44 bg-gray-100 rounded-t-lg overflow-hidden">
                     <Image
-                      src={property.featured_image_url || PLACEHOLDER_IMAGE}
+                      src={`${process.env.NEXT_PUBLIC_API_MEDIA}${property.featured_image_url}`}
                       alt={property.title}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"

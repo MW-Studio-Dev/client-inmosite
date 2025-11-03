@@ -126,8 +126,9 @@ const Navbar: React.FC<NavbarProps> = ({
     if (typeof logo === 'string') {
       return {
         desktop: { width: 64, height: 64, maxHeight: 72 },
-        mobile: { width: 52, height: 52, maxHeight: 60 },
-        navbarPadding: 'py-0'
+        tablet: { width: 56, height: 56, maxHeight: 64 },
+        mobile: { width: 48, height: 48, maxHeight: 56 },
+        navbarPadding: 'py-2 sm:py-2.5 lg:py-3'
       };
     }
 
@@ -137,40 +138,48 @@ const Navbar: React.FC<NavbarProps> = ({
 
       const aspectRatio = originalWidth / originalHeight;
 
-      const desktopHeight = 120;
+      // Desktop (lg y superior)
+      const desktopHeight = 100;
       const desktopWidth = desktopHeight * aspectRatio;
 
-      const mobileHeight = 80;
+      // Tablet (md)
+      const tabletHeight = 75;
+      const tabletWidth = tabletHeight * aspectRatio;
+
+      // Mobile (sm y inferior)
+      const mobileHeight = 60;
       const mobileWidth = mobileHeight * aspectRatio;
 
-      const navbarPadding = 'py-2';
+      const navbarPadding = 'py-1.5 sm:py-2 lg:py-2.5';
 
       return {
-        desktop: { width: desktopWidth, height: desktopHeight, maxHeight: 120 },
-        mobile: { width: mobileWidth, height: mobileHeight, maxHeight: 80 },
+        desktop: { width: desktopWidth, height: desktopHeight, maxHeight: 100 },
+        tablet: { width: tabletWidth, height: tabletHeight, maxHeight: 75 },
+        mobile: { width: mobileWidth, height: mobileHeight, maxHeight: 60 },
         navbarPadding
       };
     }
 
     return {
       desktop: { width: 64, height: 64, maxHeight: 72 },
-      mobile: { width: 52, height: 52, maxHeight: 60 },
-      navbarPadding: 'py-3'
+      tablet: { width: 56, height: 56, maxHeight: 64 },
+      mobile: { width: 48, height: 48, maxHeight: 56 },
+      navbarPadding: 'py-2 sm:py-2.5 lg:py-3'
     };
   }, [config.company.logo]);
 
-  const renderLogo = (size: 'desktop' | 'mobile' = 'desktop') => {
+  const renderLogo = (context: 'navbar' | 'mobile-menu' = 'navbar') => {
     const logo = config.company.logo;
-    const sizes = logoSizes[size];
 
     if (typeof logo === 'string') {
       return (
         <span
-          className="flex items-center justify-center font-bold"
-          style={{
-            fontSize: size === 'desktop' ? '1.875rem' : '1.5rem',
-            lineHeight: 1
-          }}
+          className={`flex items-center justify-center font-bold ${
+            context === 'navbar'
+              ? 'text-2xl sm:text-3xl lg:text-4xl'
+              : 'text-xl sm:text-2xl'
+          }`}
+          style={{ lineHeight: 1 }}
         >
           {logo}
         </span>
@@ -187,34 +196,51 @@ const Navbar: React.FC<NavbarProps> = ({
 
       const logoUrl = `${process.env.NEXT_PUBLIC_API_MEDIA}${logo.src}`;
 
-      return (
-        <div
-          className="relative flex items-center justify-center"
-          style={{
-            width: `${sizes.width}px`,
-            height: `${sizes.height}px`,
-            maxHeight: `${sizes.maxHeight}px`,
-          }}
-        >
-          <Image
-            src={logoUrl}
-            alt={logo.alt || config.company.name}
-            width={sizes.width}
-            height={sizes.height}
-            className="object-contain w-full h-full"
-            style={{
-              maxWidth: '100%',
-              maxHeight: '100%',
-              imageRendering: 'crisp-edges',
-              backgroundColor: 'transparent'
-            }}
-            priority
-            quality={100}
-            unoptimized={logo.src.endsWith('.png') || logo.src.endsWith('.svg')}
-            sizes={size === 'desktop' ? '(max-width: 1024px) 120px, 180px' : '120px'}
-          />
-        </div>
-      );
+      // Usar diferentes tamaños según el contexto
+      if (context === 'navbar') {
+        return (
+          <div className="relative flex items-center justify-center h-[60px] sm:h-[75px] lg:h-[100px] w-auto">
+            <Image
+              src={logoUrl}
+              alt={logo.alt || config.company.name}
+              width={logoSizes.desktop.width}
+              height={logoSizes.desktop.height}
+              className="object-contain w-auto h-full"
+              style={{
+                maxHeight: '100%',
+                imageRendering: 'crisp-edges',
+                backgroundColor: 'transparent'
+              }}
+              priority
+              quality={100}
+              unoptimized={logo.src.endsWith('.png') || logo.src.endsWith('.svg')}
+              sizes="(max-width: 640px) 60px, (max-width: 1024px) 75px, 100px"
+            />
+          </div>
+        );
+      } else {
+        // Mobile menu logo
+        return (
+          <div className="relative flex items-center justify-center h-[50px] sm:h-[60px] w-auto">
+            <Image
+              src={logoUrl}
+              alt={logo.alt || config.company.name}
+              width={logoSizes.mobile.width}
+              height={logoSizes.mobile.height}
+              className="object-contain w-auto h-full"
+              style={{
+                maxHeight: '100%',
+                imageRendering: 'crisp-edges',
+                backgroundColor: 'transparent'
+              }}
+              priority
+              quality={100}
+              unoptimized={logo.src.endsWith('.png') || logo.src.endsWith('.svg')}
+              sizes="(max-width: 640px) 50px, 60px"
+            />
+          </div>
+        );
+      }
     }
 
     return <span className="text-2xl">🏢</span>;
@@ -391,11 +417,11 @@ const Navbar: React.FC<NavbarProps> = ({
           WebkitBackdropFilter: 'blur(8px)'
         }}
       >
-        <div className="container mx-auto px-4 lg:px-6">
-          <div className="flex lg:grid lg:grid-cols-3 justify-between items-center min-h-[52px]">
+        <div className="container mx-auto px-3 sm:px-4 lg:px-6">
+          <div className="flex lg:grid lg:grid-cols-3 justify-between items-center min-h-[70px] sm:min-h-[85px] lg:min-h-[110px]">
             {/* Logo - Izquierda */}
             <div className="flex items-center min-w-0 flex-shrink-0 transition-transform duration-200 hover:scale-105">
-              {renderLogo('desktop')}
+              {renderLogo('navbar')}
             </div>
 
             {/* Desktop Menu - Centro */}
@@ -462,7 +488,7 @@ const Navbar: React.FC<NavbarProps> = ({
           {/* Header del menú móvil */}
           <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 min-h-[80px]">
             <div className="flex items-center">
-              {renderLogo('mobile')}
+              {renderLogo('mobile-menu')}
             </div>
             <button
               onClick={() => setIsMenuOpen(false)}
