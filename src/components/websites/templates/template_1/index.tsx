@@ -18,6 +18,9 @@ import { RentSaleSection,
          Contact 
         } from './sections/landing';  
 import { Navbar,TopHeader,Footer } from './sections/layout'
+import HowItWorksSection from './sections/landing/HowItWorks';
+import FAQSection from './sections/landing/FAQ';
+import WhyInvestSection from './sections/landing/WhyInvest';
 // Interface para las props del componente
 interface RealEstateTemplateProps {
   templateConfig: TemplateConfig;
@@ -66,7 +69,15 @@ const RealEstateTemplate: React.FC<RealEstateTemplateProps> = ({
       {templateConfig.sections.showProjects && (
         <ProjectsSection config={templateConfig} adaptiveColors={adaptiveColors} />
       )}
-      
+      {templateConfig.sections.howItWorks?.enabled && (
+        <HowItWorksSection config={templateConfig} adaptiveColors={adaptiveColors} />
+      )}
+      {templateConfig.sections.faq?.enabled && (
+        <FAQSection config={templateConfig} adaptiveColors={adaptiveColors} />
+      )}
+      {templateConfig.sections.whyInvest?.enabled && (
+        <WhyInvestSection config={templateConfig} adaptiveColors={adaptiveColors} />
+      )}
       {/* Partners (condicional) */}
       {templateConfig.sections.showPartners && (
         <PartnersSection config={templateConfig} adaptiveColors={adaptiveColors} />
