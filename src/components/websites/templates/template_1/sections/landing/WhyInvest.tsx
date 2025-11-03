@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import {
-  TrendingUpIcon,
+  ArrowTrendingUpIcon,
   ShieldCheckIcon,
   GlobeAltIcon,
   ChartBarIcon,
@@ -24,7 +24,7 @@ interface WhyInvestSectionProps {
 
 // Iconos disponibles para los beneficios
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  TrendingUpIcon,
+  ArrowTrendingUpIcon,
   ShieldCheckIcon,
   GlobeAltIcon,
   ChartBarIcon,
@@ -43,7 +43,7 @@ const WhyInvestSection: React.FC<WhyInvestSectionProps> = ({ config, adaptiveCol
   // Beneficios por defecto si no vienen en la config
   const defaultBenefits = [
     {
-      icon: 'TrendingUpIcon',
+      icon: 'ArrowTrendingUpIcon',
       title: 'Alto Retorno de Inversión',
       description: 'Propiedades seleccionadas con potencial de revalorización superior al promedio del mercado.'
     },
@@ -142,7 +142,7 @@ const WhyInvestSection: React.FC<WhyInvestSectionProps> = ({ config, adaptiveCol
           <div className={`order-1 lg:order-2 ${!whyInvestConfig.image ? 'lg:col-span-2' : ''}`}>
             <div className={`grid grid-cols-1 ${!whyInvestConfig.image ? 'md:grid-cols-2 lg:grid-cols-3' : 'md:grid-cols-2'} gap-6`}>
               {benefits.map((benefit, index) => {
-                const IconComponent = iconMap[benefit.icon] || TrendingUpIcon;
+                const IconComponent = iconMap[benefit.icon] || ArrowTrendingUpIcon;
 
                 return (
                   <div
