@@ -30,39 +30,46 @@ const HeroSection: React.FC<HeroSectionProps> = ({ config, adaptiveColors }) => 
 
 
   return (
-    <section id="inicio" className="relative h-screen min-h-[600px] flex items-center justify-center pb-8 sm:pb-12 md:pb-16 overflow-hidden">
-      {!mediaLoaded && <HeroSkeleton backgroundColor={config.colors.surface} />}
-      {backgroundUrl ? (
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${mediaLoaded ? 'opacity-100' : 'opacity-0'}`}
-          onLoadedData={() => setMediaLoaded(true)}
-        >
-          <source
-            src={backgroundUrl}
-            type="video/mp4"
+    <section
+      id="inicio"
+      className="relative h-screen min-h-[600px] flex items-center justify-center pb-4 sm:pb-12 md:pb-16"
+      style={{ backgroundColor: config.colors.background }}
+    >
+      {/* Contenedor del video/imagen con bordes redondeados */}
+      <div className="absolute top-1 left-1 right-1 bottom-2 sm:top-3 sm:left-3 sm:right-3 sm:bottom-3 md:top-4 md:left-4 md:right-4 md:bottom-4 rounded-2xl md:rounded-3xl overflow-hidden">
+        {!mediaLoaded && <HeroSkeleton backgroundColor={config.colors.surface} />}
+        {backgroundUrl ? (
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${mediaLoaded ? 'opacity-100' : 'opacity-0'}`}
+            onLoadedData={() => setMediaLoaded(true)}
+          >
+            <source
+              src={backgroundUrl}
+              type="video/mp4"
+            />
+            Su navegador no soporta videos.
+          </video>
+        ) : hasValidBackground ? (
+          <Image
+            src={`${process.env.NEXT_PUBLIC_API_MEDIA}${backgroundImage}`}
+            alt="Hero background"
+            fill
+            className={`object-cover transition-opacity duration-500 ${mediaLoaded ? 'opacity-100' : 'opacity-0'}`}
+            priority
+            unoptimized
+            onLoad={() => setMediaLoaded(true)}
           />
-          Su navegador no soporta videos.
-        </video>
-      ) : hasValidBackground ? (
-        <Image
-          src={`${process.env.NEXT_PUBLIC_API_MEDIA}${backgroundImage}`}
-          alt="Hero background"
-          fill
-          className={`object-cover transition-opacity duration-500 ${mediaLoaded ? 'opacity-100' : 'opacity-0'}`}
-          priority
-          unoptimized
-          onLoad={() => setMediaLoaded(true)}
-        />
-      ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900" />
-      )}
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900" />
+        )}
 
-      {/* Overlay semi-transparente para legibilidad del texto */}
-      <div className="absolute inset-0 bg-black/40 z-[1]" />
+        {/* Overlay semi-transparente para legibilidad del texto */}
+        <div className="absolute inset-0 bg-black/40 z-[1]" />
+      </div>
       <div className="relative text-center text-white px-4 sm:px-6 md:px-8 max-w-7xl mx-auto z-10 w-full">
         <h1
           className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl mb-4 sm:mb-6 leading-tight px-2"
@@ -90,12 +97,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ config, adaptiveColors }) => 
           <a
             className="px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg transition-all duration-200 transform hover:scale-105 inline-block shadow-lg"
             style={{
-              backgroundColor: config.colors.primary,
+              backgroundColor: config.colors.secondary,
               color: adaptiveColors.primaryText,
               fontWeight: config.typography.fontWeight.semibold
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = config.colors.primary + 90  }
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = config.colors.primary}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = config.colors.secondary }
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = config.colors.secondary}
             href='/properties'
           >
             {config.hero.ctaText}

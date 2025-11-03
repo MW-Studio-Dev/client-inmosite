@@ -7,12 +7,12 @@ import { usePathname } from 'next/navigation';
 import {
   Bars3Icon,
   XMarkIcon,
-  HomeIcon,
   BuildingOfficeIcon,
   RocketLaunchIcon,
-  UserGroupIcon,
-  StarIcon,
-  PhoneIcon
+  PhoneIcon,
+  NewspaperIcon,
+  HomeIcon,
+  UserGroupIcon
 } from "@heroicons/react/24/outline";
 import { TemplateConfig } from '../../types';
 import { createDebugger } from '@/utils/debug';
@@ -125,9 +125,9 @@ const Navbar: React.FC<NavbarProps> = ({
 
     if (typeof logo === 'string') {
       return {
-        desktop: { width: 56, height: 56, maxHeight: 72 },
-        mobile: { width: 48, height: 48, maxHeight: 64 },
-        navbarPadding: 'py-4'
+        desktop: { width: 64, height: 64, maxHeight: 72 },
+        mobile: { width: 52, height: 52, maxHeight: 60 },
+        navbarPadding: 'py-0'
       };
     }
 
@@ -137,25 +137,25 @@ const Navbar: React.FC<NavbarProps> = ({
 
       const aspectRatio = originalWidth / originalHeight;
 
-      const desktopHeight = 50;
+      const desktopHeight = 120;
       const desktopWidth = desktopHeight * aspectRatio;
 
-      const mobileHeight = 44;
+      const mobileHeight = 80;
       const mobileWidth = mobileHeight * aspectRatio;
 
-      const navbarPadding = 'py-4';
+      const navbarPadding = 'py-2';
 
       return {
-        desktop: { width: desktopWidth, height: desktopHeight, maxHeight: 50 },
-        mobile: { width: mobileWidth, height: mobileHeight, maxHeight: 44 },
+        desktop: { width: desktopWidth, height: desktopHeight, maxHeight: 120 },
+        mobile: { width: mobileWidth, height: mobileHeight, maxHeight: 80 },
         navbarPadding
       };
     }
 
     return {
-      desktop: { width: 56, height: 56, maxHeight: 72 },
-      mobile: { width: 48, height: 48, maxHeight: 64 },
-      navbarPadding: 'py-4'
+      desktop: { width: 64, height: 64, maxHeight: 72 },
+      mobile: { width: 52, height: 52, maxHeight: 60 },
+      navbarPadding: 'py-3'
     };
   }, [config.company.logo]);
 
@@ -220,12 +220,35 @@ const Navbar: React.FC<NavbarProps> = ({
     return <span className="text-2xl">🏢</span>;
   };
 
-  const baseMenuItems: MenuItemConfig[] = [
+  // Menu items para desktop (solo páginas principales)
+  const desktopMenuItems: MenuItemConfig[] = [
+    {
+      href: "/properties",
+      label: "Propiedades",
+      icon: BuildingOfficeIcon,
+      enabled: menuConfig.showProperties || false
+    },
+    {
+      href: "/developments",
+      label: "Emprendimientos",
+      icon: RocketLaunchIcon,
+      enabled: (menuConfig.showProjects || false) && (config.sections.showProjects || false)
+    },
+    {
+      href: "/blogs",
+      label: "Blogs",
+      icon: NewspaperIcon,
+      enabled: true
+    }
+  ];
+
+  // Menu items para mobile (incluye todas las opciones)
+  const mobileMenuItems: MenuItemConfig[] = [
     {
       href: "/",
       label: "Inicio",
       icon: HomeIcon,
-      enabled: menuConfig.showHome || false
+      enabled: menuConfig.showHome !== false
     },
     {
       href: "/properties",
@@ -240,26 +263,21 @@ const Navbar: React.FC<NavbarProps> = ({
       enabled: (menuConfig.showProjects || false) && (config.sections.showProjects || false)
     },
     {
+      href: "/blogs",
+      label: "Blogs",
+      icon: NewspaperIcon,
+      enabled: true
+    },
+    {
       href: "/#nosotros",
       label: "Nosotros",
       icon: UserGroupIcon,
-      enabled: menuConfig.showAbout || false
-    },
-    {
-      href: "/#equipo",
-      label: "Equipo",
-      icon: StarIcon,
-      enabled: (menuConfig.showTeam || false) && (config.sections.showTeam || false)
-    },
-    {
-      href: "/#contacto",
-      label: "Contacto",
-      icon: PhoneIcon,
-      enabled: menuConfig.showContact || false
+      enabled: menuConfig.showAbout !== false
     }
   ];
 
-  const menuItems = baseMenuItems.filter(item => item.enabled);
+  const filteredDesktopMenuItems = desktopMenuItems.filter(item => item.enabled);
+  const filteredMobileMenuItems = mobileMenuItems.filter(item => item.enabled);
 
   const handleContactClick = () => {
     setIsMenuOpen(false);
@@ -366,7 +384,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
       {/* Navbar con transparencia sutil */}
       <nav
-        className={`navbar-animate sticky top-0 z-50 border-b border-gray-200 ${logoSizes.navbarPadding}`}
+        className={`navbar-animate sticky top-0 z-50 ${logoSizes.navbarPadding}`}
         style={{
           backgroundColor: hexToRgba(config.colors.background, 0.95),
           backdropFilter: 'blur(8px)',
@@ -374,22 +392,22 @@ const Navbar: React.FC<NavbarProps> = ({
         }}
       >
         <div className="container mx-auto px-4 lg:px-6">
-          <div className="flex justify-between items-center min-h-[64px]">
-            {/* Logo */}
+          <div className="flex lg:grid lg:grid-cols-3 justify-between items-center min-h-[52px]">
+            {/* Logo - Izquierda */}
             <div className="flex items-center min-w-0 flex-shrink-0 transition-transform duration-200 hover:scale-105">
               {renderLogo('desktop')}
             </div>
 
-            {/* Desktop Menu */}
-            <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
-              {menuItems.map((item) => (
+            {/* Desktop Menu - Centro */}
+            <div className="hidden lg:flex items-center justify-center space-x-8 xl:space-x-10">
+              {filteredDesktopMenuItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   className="hover-underline relative transition-colors duration-200 text-sm xl:text-base py-2"
                   style={{
                     color: config.colors.textLight,
-                    fontWeight: config.typography.fontWeight.normal
+                    fontWeight: config.typography.fontWeight.medium
                   }}
                   onClick={(e) => handleMenuItemClick(e, item.href)}
                 >
@@ -402,33 +420,35 @@ const Navbar: React.FC<NavbarProps> = ({
                   />
                 </Link>
               ))}
-
-              {(menuConfig.showContactButton && !menuConfig.showContact) && (
-                <button
-                  onClick={handleContactClick}
-                  className="px-5 xl:px-7 py-2.5 rounded-lg text-sm xl:text-base whitespace-nowrap shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105 active:scale-95"
-                  style={{
-                    backgroundColor: config.colors.primary,
-                    color: adaptiveColors.primaryText,
-                    fontWeight: config.typography.fontWeight.semibold
-                  }}
-                >
-                  Contactar
-                </button>
-              )}
             </div>
 
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden p-2.5 relative z-50 flex-shrink-0 rounded-lg hover:bg-gray-100 transition-all duration-200 hover:scale-105 active:scale-95"
-            >
-              {isMenuOpen ? (
-                <XMarkIcon className="h-7 w-7 transition-transform duration-200" style={{ color: config.colors.text }} />
-              ) : (
-                <Bars3Icon className="h-7 w-7 transition-transform duration-200" style={{ color: config.colors.text }} />
-              )}
-            </button>
+            {/* Botón de contacto - Derecha (Desktop) / Mobile Menu Button */}
+            <div className="flex items-center justify-end">
+              {/* Botón de contacto - Solo Desktop */}
+              <button
+                onClick={handleContactClick}
+                className="hidden lg:block px-6 xl:px-8 py-2.5 rounded-lg text-sm xl:text-base whitespace-nowrap shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105 active:scale-95"
+                style={{
+                  backgroundColor: config.colors.primary,
+                  color: adaptiveColors.primaryText,
+                  fontWeight: config.typography.fontWeight.semibold
+                }}
+              >
+                Contacto
+              </button>
+
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="lg:hidden p-2.5 relative z-50 flex-shrink-0 rounded-lg hover:bg-gray-100 transition-all duration-200 hover:scale-105 active:scale-95"
+              >
+                {isMenuOpen ? (
+                  <XMarkIcon className="h-7 w-7 transition-transform duration-200" style={{ color: config.colors.text }} />
+                ) : (
+                  <Bars3Icon className="h-7 w-7 transition-transform duration-200" style={{ color: config.colors.text }} />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </nav>
@@ -455,7 +475,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
           {/* Menu Items */}
           <div className="flex-1 px-6 py-8 space-y-2 overflow-y-auto">
-            {menuItems.map((item, index) => {
+            {filteredMobileMenuItems.map((item, index) => {
               const IconComponent = item.icon;
               return (
                 <div
@@ -486,22 +506,21 @@ const Navbar: React.FC<NavbarProps> = ({
               );
             })}
 
-            {(menuConfig.showContactButton && !menuConfig.showContact) && (
-              <div className="pt-6">
-                <button
-                  onClick={handleContactClick}
-                  className="w-full flex items-center justify-center space-x-3 py-4 px-6 rounded-xl text-lg shadow-md hover:shadow-lg active:shadow-sm transition-all duration-200"
-                  style={{
-                    backgroundColor: config.colors.primary,
-                    color: adaptiveColors.primaryText,
-                    fontWeight: config.typography.fontWeight.semibold
-                  }}
-                >
-                  <PhoneIcon className="h-5 w-5" />
-                  <span>Contactar</span>
-                </button>
-              </div>
-            )}
+            {/* Botón de contacto - Siempre visible en mobile */}
+            <div className="pt-6">
+              <button
+                onClick={handleContactClick}
+                className="w-full flex items-center justify-center space-x-3 py-4 px-6 rounded-xl text-lg shadow-md hover:shadow-lg active:shadow-sm transition-all duration-200"
+                style={{
+                  backgroundColor: config.colors.primary,
+                  color: adaptiveColors.primaryText,
+                  fontWeight: config.typography.fontWeight.semibold
+                }}
+              >
+                <PhoneIcon className="h-5 w-5" />
+                <span>Contacto</span>
+              </button>
+            </div>
           </div>
 
           {/* Footer */}

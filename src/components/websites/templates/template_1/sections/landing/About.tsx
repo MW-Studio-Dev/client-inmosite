@@ -97,7 +97,7 @@ const AboutUsSection: React.FC<AboutUsSectionProps> = ({ config }) => {
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           {/* Columna izquierda - Contenido */}
-          <div className="space-y-8 order-1">
+          <div className="space-y-8 order-2 lg:order-1">
             <div>
               <h2
                 className="text-4xl md:text-5xl mb-4 leading-tight"
@@ -106,7 +106,10 @@ const AboutUsSection: React.FC<AboutUsSectionProps> = ({ config }) => {
                   fontWeight: config.typography.fontWeight.bold
                 }}
               >
-                {aboutUs.title}
+                {aboutUs.title}{' '}
+                <span style={{ color: config.colors.primary }}>
+                  {config.company?.name || ''}
+                </span>
               </h2>
               <p
                 className="text-lg md:text-xl leading-relaxed"
@@ -202,21 +205,21 @@ const AboutUsSection: React.FC<AboutUsSectionProps> = ({ config }) => {
             )}
           </div>
 
-          {/* Columna derecha - Imagen con máxima calidad */}
-          <div className="relative order-2">
+          {/* Columna derecha - Imagen redondeada sin contenedor */}
+          <div className="relative order-1 lg:order-2">
             {!imageLoaded && (
-              <div className="absolute inset-0 rounded-xl">
+              <div className="absolute inset-0 rounded-3xl">
                 <AboutSkeleton backgroundColor={config.colors.textLight + '30'} />
               </div>
             )}
             {aboutUs.image && aboutUs.image !== '' && aboutUs.image !== '/' ? (
-              <div className=" lg:aspect-[4/5] rounded-xl shadow-2xl">
+              <div className="relative aspect-[4/3] sm:aspect-[3/2] lg:aspect-[4/5] w-full rounded-3xl overflow-hidden shadow-2xl">
                 <Image
                   src={`${process.env.NEXT_PUBLIC_API_MEDIA}${aboutUs.image}`}
                   alt={aboutUs.title || "Sobre nosotros"}
                   fill
-                  className={`object-contain p-8 md:p-10 transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                  sizes="(max-width: 540px) 100vw, (max-width: 1024px) 50vw, 600px"
+                  className={`object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 600px"
                   quality={100}
                   priority
                   unoptimized={true}
@@ -228,15 +231,15 @@ const AboutUsSection: React.FC<AboutUsSectionProps> = ({ config }) => {
               </div>
             ) : (
               <div
-                className="lg:aspect-[4/5] rounded-xl shadow-2xl flex items-center justify-center"
+                className="aspect-[4/3] sm:aspect-[3/2] lg:aspect-[4/5] w-full rounded-3xl shadow-2xl flex items-center justify-center"
                 style={{ backgroundColor: config.colors.surface }}
               >
                 <span className="text-6xl">🏢</span>
               </div>
             )}
-            
+
             {/* Decoración de fondo */}
-            <div 
+            <div
               className="absolute -bottom-8 -right-8 w-64 h-64 lg:w-80 lg:h-80 rounded-3xl -z-20 blur-3xl opacity-40"
               style={{ backgroundColor: config.colors.secondary }}
             />

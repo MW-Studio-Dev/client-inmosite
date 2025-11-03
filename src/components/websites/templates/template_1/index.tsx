@@ -4,20 +4,17 @@ import React from 'react';
 import { TemplateConfig } from './types';
 import { useDynamicStyles } from './hooks/useDynamicStyles';
 
-// Importar todos los componentes
 
 import { RentSaleSection,
          CallToAction,
          ProjectsSection,
          TeamSection,
          HeroSection,
-         WhatsAppButton,
          FeaturedProperties,
          AboutUsSection,
          PartnersSection,
          Contact 
         } from './sections/landing';  
-import { Navbar,TopHeader,Footer } from './sections/layout'
 import HowItWorksSection from './sections/landing/HowItWorks';
 import FAQSection from './sections/landing/FAQ';
 import WhyInvestSection from './sections/landing/WhyInvest';

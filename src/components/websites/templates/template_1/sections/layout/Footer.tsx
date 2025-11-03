@@ -76,7 +76,7 @@ const Footer: React.FC<FooterProps> = ({ config, adaptiveColors }) => {
   ];
 
   return (
-    <footer className="py-8 sm:py-12 md:py-16" style={{ backgroundColor: config.colors.accent }}>
+    <footer className="py-8 sm:py-12 md:py-16" style={{ backgroundColor: config.colors.primary }}>
       <div className="container mx-auto px-4 sm:px-6 md:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {/* Información de la empresa */}
@@ -87,7 +87,7 @@ const Footer: React.FC<FooterProps> = ({ config, adaptiveColors }) => {
             <p
               className="mb-4 leading-relaxed text-sm sm:text-base"
               style={{
-                color: adaptiveColors.accentText + 'CC',
+                color: adaptiveColors.primaryText + 'CC',
                 fontWeight: config.typography.fontWeight.normal
               }}
             >
@@ -100,7 +100,7 @@ const Footer: React.FC<FooterProps> = ({ config, adaptiveColors }) => {
             <h4
               className="text-base sm:text-lg mb-3 sm:mb-4"
               style={{
-                color: adaptiveColors.accentText,
+                color: adaptiveColors.primaryText,
                 fontWeight: config.typography.fontWeight.semibold
               }}
             >
@@ -112,9 +112,9 @@ const Footer: React.FC<FooterProps> = ({ config, adaptiveColors }) => {
                   <Link
                     href={link.href}
                     className="transition-colors hover:opacity-100"
-                    style={{ color: adaptiveColors.accentText + 'CC' }}
-                    onMouseEnter={(e) => e.currentTarget.style.color = adaptiveColors.accentText}
-                    onMouseLeave={(e) => e.currentTarget.style.color = adaptiveColors.accentText + 'CC'}
+                    style={{ color: adaptiveColors.primaryText + 'CC' }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = adaptiveColors.primaryText}
+                    onMouseLeave={(e) => e.currentTarget.style.color = adaptiveColors.primaryText + 'CC'}
                   >
                     {link.label}
                   </Link>
@@ -128,7 +128,7 @@ const Footer: React.FC<FooterProps> = ({ config, adaptiveColors }) => {
             <h4
               className="text-base sm:text-lg mb-3 sm:mb-4"
               style={{
-                color: adaptiveColors.accentText,
+                color: adaptiveColors.primaryText,
                 fontWeight: config.typography.fontWeight.semibold
               }}
             >
@@ -140,9 +140,9 @@ const Footer: React.FC<FooterProps> = ({ config, adaptiveColors }) => {
                   <Link
                     href={link.href}
                     className="transition-colors hover:opacity-100"
-                    style={{ color: adaptiveColors.accentText + 'CC' }}
-                    onMouseEnter={(e) => e.currentTarget.style.color = adaptiveColors.accentText}
-                    onMouseLeave={(e) => e.currentTarget.style.color = adaptiveColors.accentText + 'CC'}
+                    style={{ color: adaptiveColors.primaryText + 'CC' }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = adaptiveColors.primaryText}
+                    onMouseLeave={(e) => e.currentTarget.style.color = adaptiveColors.primaryText + 'CC'}
                   >
                     {link.label}
                   </Link>
@@ -156,7 +156,7 @@ const Footer: React.FC<FooterProps> = ({ config, adaptiveColors }) => {
             <h4
               className="text-base sm:text-lg mb-3 sm:mb-4"
               style={{
-                color: adaptiveColors.accentText,
+                color: adaptiveColors.primaryText,
                 fontWeight: config.typography.fontWeight.semibold
               }}
             >
@@ -165,7 +165,7 @@ const Footer: React.FC<FooterProps> = ({ config, adaptiveColors }) => {
             <div className="space-y-3">
               <div 
                 className="flex items-center"
-                style={{ color: adaptiveColors.accentText + 'CC' }}
+                style={{ color: adaptiveColors.primaryText + 'CC' }}
               >
                 <PhoneIcon className="h-4 w-4 mr-2 flex-shrink-0" />
                 <a 
@@ -178,7 +178,7 @@ const Footer: React.FC<FooterProps> = ({ config, adaptiveColors }) => {
               </div>
               <div 
                 className="flex items-center"
-                style={{ color: adaptiveColors.accentText + 'CC' }}
+                style={{ color: adaptiveColors.primaryText + 'CC' }}
               >
                 <EnvelopeIcon className="h-4 w-4 mr-2 flex-shrink-0" />
                 <a 
@@ -191,7 +191,7 @@ const Footer: React.FC<FooterProps> = ({ config, adaptiveColors }) => {
               </div>
               <div 
                 className="flex items-start"
-                style={{ color: adaptiveColors.accentText + 'CC' }}
+                style={{ color: adaptiveColors.primaryText + 'CC' }}
               >
                 <MapPinIcon className="h-4 w-4 mr-2 mt-1 flex-shrink-0" />
                 <a 
@@ -211,12 +211,12 @@ const Footer: React.FC<FooterProps> = ({ config, adaptiveColors }) => {
         {/* Copyright y Powered by */}
         <div 
           className="border-t mt-8 pt-8"
-          style={{ borderColor: adaptiveColors.accentText + '30' }}
+          style={{ borderColor: adaptiveColors.primaryText + '30' }}
         >
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p 
               style={{ 
-                color: adaptiveColors.accentText + '80',
+                color: adaptiveColors.primaryText + '80',
                 fontWeight: config.typography.fontWeight.normal
               }}
             >
@@ -225,7 +225,7 @@ const Footer: React.FC<FooterProps> = ({ config, adaptiveColors }) => {
             <p 
               className="text-sm"
               style={{ 
-                color: adaptiveColors.accentText + '60',
+                color: adaptiveColors.primaryText + '60',
                 fontWeight: config.typography.fontWeight.normal
               }}
             >
@@ -236,7 +236,7 @@ const Footer: React.FC<FooterProps> = ({ config, adaptiveColors }) => {
                 rel="noopener noreferrer"
                 className="hover:opacity-100 transition-opacity"
                 style={{ 
-                  color: adaptiveColors.accentText,
+                  color: adaptiveColors.primaryText,
                   fontWeight: config.typography.fontWeight.semibold
                 }}
               >
