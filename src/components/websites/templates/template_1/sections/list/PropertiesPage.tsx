@@ -746,7 +746,7 @@ const PropertiesPage = ({subdomain}:{subdomain:string}) => {
   return (
     <div style={{ backgroundColor: config.colors.background }} className="min-h-screen">
       <TopHeader config={config} />
-      <Navbar config={config} adaptiveColors={adaptiveColors}/>
+      <Navbar config={config} adaptiveColors={adaptiveColors} subdomain={subdomain}/>
       <MobileMenu />
 
       <div className="flex">

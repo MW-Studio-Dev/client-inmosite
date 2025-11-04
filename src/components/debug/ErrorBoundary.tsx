@@ -33,16 +33,9 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('🔴 ErrorBoundary caught an error:', error);
-    console.error('🔴 Component Stack:', errorInfo.componentStack);
-
-    // Log detallado para debugging
-    console.group('🔍 Error Details');
-    console.log('Error Name:', error.name);
-    console.log('Error Message:', error.message);
-    console.log('Error Stack:', error.stack);
-    console.log('Component Stack:', errorInfo.componentStack);
-    console.groupEnd();
+    // Log simple y directo
+    console.error('❌ ERROR:', error.message);
+    console.error('📄 Stack:', error.stack);
 
     this.setState({
       error,
@@ -86,20 +79,20 @@ class ErrorBoundary extends Component<Props, State> {
             {process.env.NODE_ENV === 'development' && this.state.error && (
               <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
                 <h2 className="text-lg font-semibold text-red-900 mb-2">
-                  Debug Info (Development Only)
+                  Error Info
                 </h2>
                 <div className="text-sm text-red-800 mb-4">
-                  <p className="font-mono">
-                    <strong>Error:</strong> {this.state.error.message}
+                  <p className="font-mono mb-2">
+                    <strong>Mensaje:</strong> {this.state.error.message}
                   </p>
                 </div>
-                {this.state.errorInfo && (
+                {this.state.error.stack && (
                   <details className="mt-2">
                     <summary className="cursor-pointer font-semibold text-red-900 hover:text-red-700">
                       Ver Stack Trace
                     </summary>
                     <pre className="mt-2 p-2 bg-red-100 rounded overflow-x-auto text-xs">
-                      {this.state.errorInfo.componentStack}
+                      {this.state.error.stack}
                     </pre>
                   </details>
                 )}

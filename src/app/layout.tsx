@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins, Inter } from "next/font/google";
 import { ThemeProvider } from "@/context/ThemeContext";
 import DynamicFavicon from "@/components/common/DynamicFavicon";
+import { AuthMonitor } from "@/components/auth/AuthMonitor";
 import "./globals.css";
 
 // Poppins para textos generales
@@ -101,6 +102,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <DynamicFavicon />
+        <AuthMonitor />
         <ThemeProvider>
           {children}
         </ThemeProvider>

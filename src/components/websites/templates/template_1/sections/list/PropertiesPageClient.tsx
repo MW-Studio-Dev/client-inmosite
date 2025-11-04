@@ -422,7 +422,7 @@ const PropertiesPageClient: React.FC<PropertiesPageClientProps> = ({subdomain, i
   return (
     <div className="min-h-screen bg-white">
       <TopHeader config={config} />
-      <Navbar config={config} adaptiveColors={adaptiveColors}/>
+      <Navbar config={config} adaptiveColors={adaptiveColors} subdomain={subdomain}/>
       <MobileMenu />
       <MainContent />
       <Footer config={config} adaptiveColors={adaptiveColors} />

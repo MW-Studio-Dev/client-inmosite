@@ -1217,7 +1217,7 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
   return (
     <>
       {structuredData && <StructuredData data={structuredData} />}
-      <Navbar config={templateConfig} adaptiveColors={adaptiveColors}/>
+      <Navbar config={templateConfig} adaptiveColors={adaptiveColors} subdomain={subdomain}/>
       <div style={{ backgroundColor: templateConfig.colors.background }} className="min-h-screen">
       
       {/* Breadcrumb y navegación */}

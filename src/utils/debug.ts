@@ -3,7 +3,7 @@
  * Sistema de Debug Avanzado para rastrear errores de React DOM
  * Especialmente útil para errores como "Cannot read properties of null (reading 'removeChild')"
  */
-
+import React from 'react';
 // Colores para los logs
 const colors = {
   reset: '\x1b[0m',
@@ -51,7 +51,7 @@ class DebugTracker {
     console.error = (...args: any[]) => {
       // Detectar el error específico de removeChild
       const errorString = args.join(' ');
-      if (errorString.includes('removeChild') || errorString.includes('Cannot read properties of null')) {
+      if (errorString.includes('removeChild')) {
         console.group('🔴🔴🔴 CRITICAL ERROR DETECTED 🔴🔴🔴');
         console.error('Error:', ...args);
         console.log('📍 Last 20 execution points before error:');

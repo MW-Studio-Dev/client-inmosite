@@ -43,9 +43,10 @@ const WhatsAppButton: React.FC<{ config: any }> = ({ config }) => {
 
 interface SharedLayoutProps {
   children: React.ReactNode;
+  subdomain: string;
 }
 
-const SharedLayout: React.FC<SharedLayoutProps> = ({ children }) => {
+const SharedLayout: React.FC<SharedLayoutProps> = ({ children, subdomain }) => {
   const { config, loading, error } = useWebsiteConfigContext();
 
   // Mostrar loading mientras carga la config
@@ -91,7 +92,7 @@ const SharedLayout: React.FC<SharedLayoutProps> = ({ children }) => {
       <div style={{ backgroundColor: config.colors.background }} className="min-h-screen">
         {/* Header fijo - renderizado una sola vez */}
         <TopHeader config={config} />
-        <Navbar config={config} adaptiveColors={adaptiveColors} />
+        <Navbar config={config} adaptiveColors={adaptiveColors} subdomain={subdomain} />
 
         {/* Contenido dinámico de cada página */}
         <main className="min-h-[calc(100vh-200px)]">

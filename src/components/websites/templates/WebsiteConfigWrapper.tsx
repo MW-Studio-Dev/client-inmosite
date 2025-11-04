@@ -31,7 +31,7 @@ export const WebsiteConfigWrapper: React.FC<WebsiteConfigWrapperProps> = ({
   return (
     <WebsiteConfigProvider subdomain={subdomain}>
       <Suspense fallback={<LoadingFallback />}>
-        <SharedLayout>
+        <SharedLayout subdomain={subdomain}>
           {children}
         </SharedLayout>
       </Suspense>

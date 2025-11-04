@@ -16,6 +16,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { TemplateConfig } from '../../types';
 import { createDebugger } from '@/utils/debug';
+import { getCurrentDomainClient } from '@/lib/getCurrentDomainClient';
 
 const debug = createDebugger('Navbar');
 
@@ -35,6 +36,7 @@ interface NavbarProps {
     backgroundText: string;
     surfaceText: string;
   };
+  subdomain?: string;
   menuConfig?: {
     showHome?: boolean;
     showProperties?: boolean;
@@ -49,6 +51,7 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({
   config,
   adaptiveColors,
+  subdomain,
   menuConfig = {
     showHome: true,
     showProperties: true,
@@ -246,16 +249,30 @@ const Navbar: React.FC<NavbarProps> = ({
     return <span className="text-2xl">🏢</span>;
   };
 
+  // Construir la base URL con el dominio actual (obtenido del cliente)
+  const [baseUrl, setBaseUrl] = useState<string>('');
+
+  useEffect(() => {
+    const domain = getCurrentDomainClient();
+    setBaseUrl(domain);
+  }, []);
+
+  // Helper para construir URLs, usando URLs relativas si baseUrl aún no está disponible
+  const buildUrl = (path: string) => {
+    if (!baseUrl) return path;
+    return `${baseUrl}${path}`;
+  };
+
   // Menu items para desktop (solo páginas principales)
   const desktopMenuItems: MenuItemConfig[] = [
     {
-      href: "/properties",
+      href: buildUrl('/properties'),
       label: "Propiedades",
       icon: BuildingOfficeIcon,
       enabled: menuConfig.showProperties || false
     },
     {
-      href: "/developments",
+      href: buildUrl('/developments'),
       label: "Emprendimientos",
       icon: RocketLaunchIcon,
       enabled: (menuConfig.showProjects || false) && (config.sections.showProjects || false)
@@ -264,38 +281,32 @@ const Navbar: React.FC<NavbarProps> = ({
       href: "/blogs",
       label: "Blogs",
       icon: NewspaperIcon,
-      enabled: true
+      enabled: false
     }
   ];
 
   // Menu items para mobile (incluye todas las opciones)
   const mobileMenuItems: MenuItemConfig[] = [
     {
-      href: "/",
+      href: baseUrl || "/",
       label: "Inicio",
       icon: HomeIcon,
       enabled: menuConfig.showHome !== false
     },
     {
-      href: "/properties",
+      href: buildUrl('/properties'),
       label: "Propiedades",
       icon: BuildingOfficeIcon,
       enabled: menuConfig.showProperties || false
     },
     {
-      href: "/developments",
+      href: buildUrl('/developments'),
       label: "Emprendimientos",
       icon: RocketLaunchIcon,
       enabled: (menuConfig.showProjects || false) && (config.sections.showProjects || false)
     },
     {
-      href: "/blogs",
-      label: "Blogs",
-      icon: NewspaperIcon,
-      enabled: true
-    },
-    {
-      href: "/#nosotros",
+      href: baseUrl ? `${baseUrl}#nosotros` : '#nosotros',
       label: "Nosotros",
       icon: UserGroupIcon,
       enabled: menuConfig.showAbout !== false
@@ -314,16 +325,15 @@ const Navbar: React.FC<NavbarProps> = ({
   };
 
   const handleMenuItemClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    debug.track('handleMenuItemClick', { href, isMenuOpen }, 'Header.tsx', 270);
+    console.log('CLICK en menú:', href);
 
-    // Cerrar menú inmediatamente
+    // Cerrar menú
     setIsMenuOpen(false);
     document.body.style.overflow = 'unset';
-    debug.track('menu-closed', { href }, 'Header.tsx', 275);
 
-    // Si el href contiene un hash, manejar el scroll manualmente
+    // Si tiene hash, manejar scroll
     if (href.includes('#')) {
-      debug.track('hash-navigation', { href }, 'Header.tsx', 279);
+      console.log('Es navegación con hash');
       e.preventDefault();
       const hash = href.split('#')[1];
       const element = document.getElementById(hash);
