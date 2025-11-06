@@ -50,7 +50,7 @@ export default function MercadoLibreCallbackPage() {
       handleOAuthCallback(code, state);
     } else {
       setConnectionState('error');
-      setErrorMessage('No se recibieron los par�metros de autenticaci�n necesarios');
+      setErrorMessage('No se recibieron los parámetros de autenticación necesarios');
     }
   }, [searchParams]);
 
@@ -131,7 +131,7 @@ export default function MercadoLibreCallbackPage() {
             <p className={`text-sm ${
               isDark ? 'text-gray-400' : 'text-gray-600'
             }`}>
-              Por favor espera mientras establecemos la conexi�n...
+              Por favor espera mientras establecemos la conexión...
             </p>
 
             <div className="mt-6">
@@ -152,7 +152,7 @@ export default function MercadoLibreCallbackPage() {
     );
   }
 
-  // Estado de �xito
+  // Estado de éxito
   if (connectionState === 'success' && connectionData) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -174,7 +174,7 @@ export default function MercadoLibreCallbackPage() {
             <h2 className={`text-2xl font-bold mb-3 ${
               isDark ? 'text-gray-100' : 'text-gray-900'
             }`}>
-              �Conexi�n Exitosa!
+              ¡Conexión Exitosa!
             </h2>
 
             <p className={`text-sm mb-6 ${
@@ -234,7 +234,7 @@ export default function MercadoLibreCallbackPage() {
                   <span className={`text-xs font-medium ${
                     isDark ? 'text-gray-400' : 'text-gray-500'
                   }`}>
-                    Estado de Conexi�n
+                    Estado de conexión
                   </span>
                   <span className={`text-xs px-2 py-1 rounded-full font-bold ${
                     connectionData.connection_status === 'connected'
@@ -250,7 +250,7 @@ export default function MercadoLibreCallbackPage() {
                     <span className={`text-xs font-medium ${
                       isDark ? 'text-gray-400' : 'text-gray-500'
                     }`}>
-                      �ltima Sincronizaci�n
+                      Última Sincronización
                     </span>
                     <span className={`text-sm ${
                       isDark ? 'text-gray-200' : 'text-gray-900'
@@ -314,7 +314,7 @@ export default function MercadoLibreCallbackPage() {
             <h2 className={`text-2xl font-bold mb-3 ${
               isDark ? 'text-gray-100' : 'text-gray-900'
             }`}>
-              Error de Conexi�n
+              Error de Conexión
             </h2>
 
             <p className={`text-sm mb-2 ${
@@ -368,6 +368,6 @@ export default function MercadoLibreCallbackPage() {
     );
   }
 
-  // Estado inicial (no deber�a mostrarse)
+  // Estado inicial (no debería mostrarse)
   return null;
 }

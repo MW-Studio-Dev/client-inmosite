@@ -19,6 +19,7 @@ import {
   HiEye,
   HiPencil,
   HiTrash,
+  HiShoppingCart,
 } from 'react-icons/hi';
 import { HiHomeModern } from 'react-icons/hi2';
 import axiosInstance from '@/lib/api';
@@ -339,6 +340,20 @@ export default function PropiedadesPage() {
                 <HiFilter className="h-4 w-4" />
                 Filtros
               </button>
+              <Link
+                href='/dashboard/properties/integrations/mercadolibre'
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg relative ${
+                  isDark
+                    ? 'bg-yellow-600 hover:bg-yellow-500 text-white'
+                    : 'bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900'
+                }`}
+              >
+                <HiShoppingCart className="h-4 w-4" />
+                Mercado Libre
+                <span className="absolute -top-2 -right-2 px-2 py-0.5 text-xs font-bold rounded-full bg-red-500 text-white shadow-lg animate-pulse">
+                  NEW
+                </span>
+              </Link>
               <Link
                 href='/dashboard/properties/new'
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg ${

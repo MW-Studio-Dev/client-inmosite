@@ -101,7 +101,7 @@ const menuItems: MenuItem[] = [
 const bottomMenuItems: MenuItem[] = [
   {
     name: 'Configuración',
-    href: '/dashboard/settings',
+    href: '/dashboard/config',
     icon: HiCog,
     description: 'Ajustes del sistema',
   },
