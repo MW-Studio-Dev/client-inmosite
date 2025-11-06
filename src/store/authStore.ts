@@ -430,14 +430,9 @@ export const useAuthStore = create<ExtendedAuthState>()(
         // Se ejecuta después de que Zustand restaura el estado
         if (state) {
           state.setHydrated();
-          
-          // Si hay un usuario persistido, verificar que el token siga siendo válido
-          if (state.isAuthenticated && state.user) {
-            // Ejecutar checkAuth en el próximo tick para no bloquear la hidratación
-            setTimeout(() => {
-              state.checkAuth();
-            }, 0);
-          }
+
+          // No llamamos a checkAuth aquí porque AuthMonitor se encarga de ello
+          // Esto evita llamadas duplicadas y ciclos infinitos
         }
       },
     }

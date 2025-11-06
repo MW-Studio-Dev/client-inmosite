@@ -262,17 +262,30 @@ export default function MercadoLibreCallbackPage() {
               </div>
             </div>
 
-            <button
-              onClick={handleGoBack}
-              className={`w-full py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg ${
-                isDark
-                  ? 'bg-gray-600 hover:bg-gray-500 text-white'
-                  : 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white'
-              }`}
-            >
-              <HiArrowLeft className="h-4 w-4" />
-              Volver a Propiedades
-            </button>
+            <div className="space-y-2">
+              <button
+                onClick={() => router.push('/dashboard/config')}
+                className={`w-full py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg ${
+                  isDark
+                    ? 'bg-gray-600 hover:bg-gray-500 text-white'
+                    : 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white'
+                }`}
+              >
+                Ver Configuración
+              </button>
+
+              <button
+                onClick={handleGoBack}
+                className={`w-full py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 border ${
+                  isDark
+                    ? 'bg-gray-700 hover:bg-gray-600 text-gray-200 border-gray-600'
+                    : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-300'
+                }`}
+              >
+                <HiArrowLeft className="h-4 w-4" />
+                Volver a Propiedades
+              </button>
+            </div>
           </div>
         </div>
       </div>

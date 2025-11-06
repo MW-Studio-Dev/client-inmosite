@@ -15,4 +15,6 @@ export interface Company {
     is_trial_expired: boolean;
     timezone: string;
     is_company_owner: boolean;
+    email?: string;
+    
   }

@@ -6,18 +6,15 @@ import { useAuthStore } from '@/store/authStore';
 export const useAuth = () => {
   const authStore = useAuthStore();
   const interceptorSetup = useRef(false);
-  
-  // Extraer la función para evitar dependencias innecesarias del store completo
-  const refreshTokens = authStore.refreshTokens;
 
   // Configurar interceptor para refresh automático de tokens (solo una vez)
   useEffect(() => {
     if (interceptorSetup.current) return;
-    
+
     const setupTokenInterceptor = async () => {
       try {
         const axiosInstance = (await import('@/lib/api')).default;
-        
+
         // Interceptor para agregar el token a las requests
         axiosInstance.interceptors.request.use(
           (config) => {
@@ -40,8 +37,9 @@ export const useAuth = () => {
               originalRequest._retry = true;
 
               console.log('Token expirado, intentando refresh...');
-              const refreshResult = await refreshTokens(); // Usar la función extraída
-              
+              // Obtener refreshTokens directamente del store en el momento de la ejecución
+              const refreshResult = await useAuthStore.getState().refreshTokens();
+
               if (refreshResult.success) {
                 // Retry la request original con el nuevo token
                 const newToken = localStorage.getItem('access_token');
@@ -61,14 +59,15 @@ export const useAuth = () => {
 
         interceptorSetup.current = true;
         console.log('Axios interceptors configurados');
-        
+
       } catch (error) {
         console.error('Error configurando interceptors:', error);
       }
     };
 
     setupTokenInterceptor();
-  }, [refreshTokens]); // Incluir refreshTokens como dependencia
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Sin dependencias - solo se ejecuta una vez
 
   return {
     // Estado

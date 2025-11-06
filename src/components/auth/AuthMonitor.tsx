@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTokenMonitor } from '@/hooks/useTokenMonitor';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -14,11 +14,16 @@ import { useAuth } from '@/hooks/useAuth';
  */
 export const AuthMonitor = () => {
   const { checkAuth, isAuthenticated } = useAuth();
+  const hasCheckedAuth = useRef(false);
 
-  // Verificar autenticación al montar el componente
+  // Verificar autenticación solo UNA VEZ al montar el componente
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+    if (!hasCheckedAuth.current) {
+      hasCheckedAuth.current = true;
+      checkAuth();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Sin dependencias - solo se ejecuta una vez
 
   // Monitorear tokens si el usuario está autenticado
   useTokenMonitor({
