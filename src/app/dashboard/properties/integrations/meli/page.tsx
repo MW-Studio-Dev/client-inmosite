@@ -60,7 +60,7 @@ export default function MercadoLibreCallbackPage() {
 
     try {
       const response = await axiosInstance.post<MeliConnectionResponse>(
-        '/api/v1/integrations/mercadolibre/auth/oauth_callback/',
+        '/integrations/mercadolibre/auth/oauth_callback/',
         {
           code,
           state
