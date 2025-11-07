@@ -65,6 +65,31 @@ const Navbar: React.FC<NavbarProps> = ({
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const pathname = usePathname();
 
+  // Manejar el overflow del body cuando el menú móvil está abierto
+  useEffect(() => {
+    if (typeof window !== 'undefined' && document && document.body) {
+      try {
+        if (isMenuOpen) {
+          document.body.style.overflow = 'hidden';
+        } else {
+          document.body.style.overflow = 'unset';
+        }
+      } catch (error) {
+        console.warn('Error al modificar overflow del body:', error);
+      }
+    }
+
+    return () => {
+      if (typeof window !== 'undefined' && document && document.body) {
+        try {
+          document.body.style.overflow = 'unset';
+        } catch (error) {
+          console.warn('Error al restaurar overflow del body:', error);
+        }
+      }
+    };
+  }, [isMenuOpen]);
+
 
   const logoSizes = useMemo(() => {
     const logo = config.company.logo;
@@ -272,7 +297,11 @@ const Navbar: React.FC<NavbarProps> = ({
 
     // Cerrar menú
     setIsMenuOpen(false);
-    document.body.style.overflow = 'unset';
+
+    // Restaurar scroll de forma segura
+    if (typeof window !== 'undefined' && document.body) {
+      document.body.style.overflow = 'unset';
+    }
 
     // Si tiene hash, manejar scroll
     if (href.includes('#')) {

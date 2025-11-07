@@ -1,36 +1,19 @@
 "use client";
 
-import { useEffect, useRef } from 'react';
-import { useTokenMonitor } from '@/hooks/useTokenMonitor';
+import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 
 /**
- * Componente que monitorea el estado de autenticación del usuario.
- * - Verifica tokens periódicamente
- * - Renueva automáticamente cuando están próximos a expirar
- * - Cierra sesión cuando los tokens son inválidos o expirados
- *
- * Este componente debe ser incluido en el layout principal de la aplicación.
+ * Componente simplificado que solo verifica la autenticación al montar.
+ * Eliminado el monitoreo de tokens para prevenir ciclos.
  */
 export const AuthMonitor = () => {
   const { checkAuth, isAuthenticated } = useAuth();
-  const hasCheckedAuth = useRef(false);
 
-  // Verificar autenticación solo UNA VEZ al montar el componente
   useEffect(() => {
-    if (!hasCheckedAuth.current) {
-      hasCheckedAuth.current = true;
-      checkAuth();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Sin dependencias - solo se ejecuta una vez
-
-  // Monitorear tokens si el usuario está autenticado
-  useTokenMonitor({
-    checkInterval: 60000, // Verificar cada 1 minuto
-    autoRefreshThreshold: 300000, // Renovar si faltan menos de 5 minutos (300000 ms)
-    enabled: isAuthenticated,
-  });
+    // Solo verificar auth al montar para evitar ciclos
+    checkAuth();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Este componente no renderiza nada
   return null;

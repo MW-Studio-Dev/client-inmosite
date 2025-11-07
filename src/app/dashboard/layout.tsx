@@ -1,125 +1,24 @@
-// pages/admin/layout.tsx - Layout profesional actualizado
+// app/dashboard/layout.tsx
 'use client'
 
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import {
   HiMenuAlt3,
-  HiHome,
-  HiUsers,
-  HiOfficeBuilding,
-  HiCog,
-  HiCurrencyDollar,
   HiBell,
-  HiSupport,
   HiSearch,
   HiLogout,
   HiUserCircle,
-  HiMail,
-  HiChartBar,
   HiMoon,
-  HiSun,
-  HiBeaker
+  HiSun
 } from 'react-icons/hi'
-import { HiComputerDesktop } from 'react-icons/hi2'
 import { AdminSidebar } from '@/components/dashboard/admin/AdminSideBar'
-import { MenuItem } from '@/types/dashboard'
-import { useAuth } from '@/hooks'
+import { DashboardGuard } from '@/components/dashboard/DashboardGuard'
 import { DashboardThemeProvider, useDashboardTheme } from '@/context/DashboardThemeContext'
-import { ToastProvider } from '@/components/common/Toast'
+import { useAuth } from '@/hooks'
+import { dashboardMenuItems, dashboardBottomMenuItems } from '@/constants/dashboardMenu'
 
-// Configuración del menú principal
-const menuItems: MenuItem[] = [
-  {
-    name: 'Dashboard',
-    href: '/dashboard',
-    icon: HiHome,
-    description: 'Vista general del sistema',
-  },
-  {
-    name: 'Propiedades',
-    href: '/dashboard/properties',
-    icon: HiOfficeBuilding,
-    description: 'Gestionar inmuebles',
-    subItems: [
-      { name: 'Todas', href: '/dashboard/properties' },
-      { name: 'En Venta', href: '/dashboard/properties/sale' },
-      { name: 'En Alquiler', href: '/dashboard/properties/rent' },
-    ]
-  },
-  {
-    name: 'Sitio Web',
-    href: '/dashboard/website',
-    icon: HiComputerDesktop,
-    description: 'Administrar sitio web',
-    subItems: [
-      { name: 'Configuración', href: '/dashboard/website' },
-      { name: 'Preview', href: '/dashboard/website/preview' },
-    ]
-  },
-  {
-    name: 'Clientes',
-    href: '/dashboard/clients',
-    icon: HiUsers,
-    description: 'Base de datos de clientes',
-    subItems: [
-      { name: 'Inquilinos', href: '/dashboard/clients/tenants' },
-      { name: 'Propietarios', href: '/dashboard/clients/owners' },
-      { name: 'Otros', href: '/dashboard/clients/others' },
-    ]
-  },
-  {
-    name: 'Alquileres',
-    href: '/dashboard/rents',
-    icon: HiCurrencyDollar,
-    description: 'Información de alquileres',
-    subItems: [
-      { name: 'Alquileres', href: '/dashboard/rents' },
-      { name: 'Contratos', href: '/dashboard/rents/contracts' },
-      { name: 'Planes de Pago', href: '/dashboard/rents/payment-plans' },
-    ]
-  },
-  {
-    name: 'Ventas',
-    href: '/dashboard/sales',
-    icon: HiChartBar,
-    description: 'Gestión de ventas',
-    subItems: [
-      { name: 'Todas', href: '/dashboard/sales' },
-      { name: 'Boletos', href: '/dashboard/sales/receipts' },
-    ]
-  },
-  {
-    name: 'Contacto',
-    href: '/dashboard/contact',
-    icon: HiMail,
-    description: 'Consultas del formulario',
-    badge: 'NEW'
-  },
-  {
-    name: 'Test',
-    href: '/dashboard/test',
-    icon: HiBeaker,
-    description: 'Página de prueba',
-  },
-]
-
-// Menú inferior (Configuración y Soporte)
-const bottomMenuItems: MenuItem[] = [
-  {
-    name: 'Configuración',
-    href: '/dashboard/config',
-    icon: HiCog,
-    description: 'Ajustes del sistema',
-  },
-  {
-    name: 'Soporte',
-    href: '/dashboard/support',
-    icon: HiSupport,
-    description: 'Ayuda y asistencia',
-  }
-]
-
+// Componente interno que usa los hooks del contexto
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -131,7 +30,9 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
   const handleLogout = () => {
     logout()
-    window.location.href = '/login'
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login'
+    }
   }
 
   return (
@@ -144,9 +45,8 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         onClose={() => setSidebarOpen(false)}
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-        menuItems={menuItems}
-        bottomMenuItems={bottomMenuItems}
-        pathname={pathname}
+        menuItems={dashboardMenuItems}
+        bottomMenuItems={dashboardBottomMenuItems}
         user={user}
         company={company}
       />
@@ -308,7 +208,9 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         {/* Page content */}
         <main className="py-10">
           <div className="px-4 sm:px-6 lg:px-8">
-            {children}
+            <DashboardGuard>
+              {children}
+            </DashboardGuard>
           </div>
         </main>
       </div>
@@ -316,16 +218,14 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   )
 }
 
-export default function AdminLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   return (
     <DashboardThemeProvider>
-      <ToastProvider>
-        <DashboardContent>{children}</DashboardContent>
-      </ToastProvider>
+      <DashboardContent>{children}</DashboardContent>
     </DashboardThemeProvider>
   )
 }

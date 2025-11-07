@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Poppins, Inter } from "next/font/google";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { GlobalLoaderProvider } from "@/context/GlobalLoaderContext";
-import DynamicFavicon from "@/components/common/DynamicFavicon";
+import { AuthProvider } from "@/providers/AuthProvider";
 import { AuthMonitor } from "@/components/auth/AuthMonitor";
 import { GlobalLoaderWithHook } from "@/components/common/Loading";
 import "./globals.css";
@@ -104,11 +104,12 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <GlobalLoaderProvider>
-          <DynamicFavicon />
-          <AuthMonitor />
-          <ThemeProvider>
-            {children}
-          </ThemeProvider>
+          <AuthProvider>
+            <AuthMonitor />
+            <ThemeProvider>
+              {children}
+            </ThemeProvider>
+          </AuthProvider>
           <GlobalLoaderWithHook />
         </GlobalLoaderProvider>
       </body>

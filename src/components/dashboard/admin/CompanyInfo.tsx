@@ -34,9 +34,7 @@ export function CompanyInfo({ company }: CompanyInfoProps) {
           <p className="text-sm font-medium text-red-900 truncate">
             {company.name}
           </p>
-          <p className="text-xs text-red-700">
-            {company.phone || 'Sin teléfono'}
-          </p>
+          
         </div>
       </div>
     </div>

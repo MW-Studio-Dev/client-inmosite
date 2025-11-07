@@ -11,14 +11,9 @@ import {
   HiChevronRight
 } from 'react-icons/hi';
 import { useAuth } from '@/hooks/useAuth';
+import MercadoLibreIntegration from '@/components/dashboard/integrations/MercadoLibreIntegration';
+import IntegrationsGrid from '@/components/dashboard/integrations/IntegrationsGrid';
 
-// Importación dinámica para los componentes problemáticos
-const MercadoLibreIntegration = React.lazy(() => 
-  import('@/components/dashboard/integrations/MercadoLibreIntegration')
-);
-const IntegrationsGrid = React.lazy(() => 
-  import('@/components/dashboard/integrations/IntegrationsGrid')
-);
 
 type Section = 'general' | 'integrations';
 
@@ -390,7 +385,7 @@ export default function ConfiguracionPage() {
                       : 'bg-white border-gray-200'
                   }`}>
                     <div className="min-h-[200px]">
-                      <IntegrationsGrid />
+                      <IntegrationsGrid />  
                     </div>
                   </div>
                 </Suspense>
