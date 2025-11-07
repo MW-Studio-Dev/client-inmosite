@@ -135,6 +135,7 @@ export function generatePropertySchema({
   area?: string | number;
   price?: string | number;
   currency?: string;
+  meta_description?: string;
 }): PropertySchema {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://inmosite.com';
   

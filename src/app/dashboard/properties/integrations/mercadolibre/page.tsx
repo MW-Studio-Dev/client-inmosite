@@ -471,7 +471,7 @@ export default function MercadoLibrePropertyPublishPage() {
               <select
                 value={filters.operation_type || ''}
                 onChange={(e) => handleFilterChange({
-                  operation_type: e.target.value as 'venta' | 'alquiler' | undefined || undefined
+                  operation_type: e.target.value === '' ? undefined : e.target.value as 'venta' | 'alquiler'
                 })}
                 className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200 ${
                   isDark
@@ -494,7 +494,7 @@ export default function MercadoLibrePropertyPublishPage() {
               <select
                 value={filters.status || ''}
                 onChange={(e) => handleFilterChange({
-                  status: e.target.value as 'disponible' | 'vendido' | 'reservado' | 'no_disponible' | undefined || undefined
+                  status: e.target.value === '' ? undefined : e.target.value as 'disponible' | 'vendido' | 'reservado' | 'no_disponible'
                 })}
                 className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200 ${
                   isDark
@@ -664,7 +664,7 @@ export default function MercadoLibrePropertyPublishPage() {
         <ConfirmModal
           isOpen={showPublishModal}
           title={`Publicar "${selectedProperty.title}" en MercadoLibre`}
-          message={null}
+          message={""}
           confirmText={publishing ? "Publicando..." : "Publicar"}
           cancelText="Cancelar"
           onConfirm={handlePublish}

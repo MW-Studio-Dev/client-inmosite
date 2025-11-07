@@ -32,11 +32,20 @@ export default function AdminDashboard() {
   // Calcular días restantes del trial
   const getTrialDaysLeft = () => {
     if (!company?.trial_end_date) return 0
-    const endDate = new Date(company.trial_end_date)
-    const today = new Date()
-    const diffTime = endDate.getTime() - today.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    return Math.max(0, diffDays)
+    try {
+      const endDate = new Date(company.trial_end_date)
+      const today = new Date()
+
+      // Verificar si la fecha es válida
+      if (isNaN(endDate.getTime())) return 0
+
+      const diffTime = endDate.getTime() - today.getTime()
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      return Math.max(0, diffDays)
+    } catch (error) {
+      console.error('Error calculating trial days left:', error)
+      return 0
+    }
   }
 
   const trialDaysLeft = getTrialDaysLeft()
@@ -200,12 +209,12 @@ export default function AdminDashboard() {
             <StatCard
               title="Estado del Sitio"
               value="Público"
-              subtitle={`${company?.subdomain}.${process.env.NEXT_PUBLIC_BASE_DOMAIN}`}
+              subtitle={`${company?.subdomain}.${process.env.NEXT_PUBLIC_BASE_DOMAIN || 'localhost:3000'}`}
               icon={<HiComputerDesktop className="h-7 w-7" />}
               color="red"
               action={
                 <button 
-                  onClick={() => window.open(`${company?.subdomain}.${process.env.NEXT_PUBLIC_BASE_DOMAIN}`, '_blank')}
+                  onClick={() => window.open(`${company?.subdomain}.${process.env.NEXT_PUBLIC_BASE_DOMAIN || 'localhost:3000'}`, '_blank')}
                   className="group text-sm text-red-600 hover:text-red-800 flex items-center gap-2 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-lg transition-all duration-300"
                 >
                   <HiEye className="h-4 w-4 group-hover:scale-110 transition-transform" />
@@ -242,7 +251,7 @@ export default function AdminDashboard() {
                 description="Publicar una nueva propiedad"
                 icon={<HiHome className="h-8 w-8" />}
                 disabled={!company?.can_add_properties}
-                disabledMessage={!company?.can_add_properties ? 'Límite alcanzado' : undefined}
+                disabledMessage={!company?.can_add_properties ? 'Límite alcanzado' :''}
               />
               
               <QuickActionCard

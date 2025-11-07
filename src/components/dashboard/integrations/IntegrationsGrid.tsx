@@ -26,7 +26,7 @@ interface IntegrationCard {
   externalUrl?: string;
 }
 
-export const IntegrationsGrid: React.FC = () => {
+const IntegrationsGrid: React.FC = () => {
   const { theme } = useDashboardTheme();
   const isDark = theme === 'dark';
   const { showSuccess, showError } = useToast();
@@ -294,3 +294,5 @@ export const IntegrationsGrid: React.FC = () => {
     </div>
   );
 };
+
+export default IntegrationsGrid;

@@ -7,7 +7,7 @@ import { PropertyCard } from '@/components/dashboard/properties/PropertyCard';
 import { Property, PropertyFilters } from '@/types/property';
 import { useAuth } from '@/hooks/useAuth';
 import { useDashboardTheme } from '@/context/DashboardThemeContext';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   HiPlus,
   HiFilter,
@@ -33,6 +33,7 @@ export default function PropiedadesPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const router = useRouter();
   const { company } = useAuth();
   const { theme } = useDashboardTheme();
   const isDark = theme === 'dark';
@@ -93,6 +94,14 @@ export default function PropiedadesPage() {
 
   const handleView = (property: Property) => {
     return window.open(`/dashboard/properties/${property.id}`, '_blank');
+  };
+
+  const handleNavigateToIntegrations = () => {
+    router.push('/dashboard/properties/integrations/mercadolibre');
+  };
+
+  const handleNavigateToNew = () => {
+    router.push('/dashboard/properties/new');
   };
 
   // Componente para la vista de tabla
@@ -340,8 +349,8 @@ export default function PropiedadesPage() {
                 <HiFilter className="h-4 w-4" />
                 Filtros
               </button>
-              <Link
-                href='/dashboard/properties/integrations/mercadolibre'
+              <button
+                onClick={handleNavigateToIntegrations}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg relative ${
                   isDark
                     ? 'bg-yellow-600 hover:bg-yellow-500 text-white'
@@ -353,9 +362,9 @@ export default function PropiedadesPage() {
                 <span className="absolute -top-2 -right-2 px-2 py-0.5 text-xs font-bold rounded-full bg-red-500 text-white shadow-lg animate-pulse">
                   NEW
                 </span>
-              </Link>
-              <Link
-                href='/dashboard/properties/new'
+              </button>
+              <button
+                onClick={handleNavigateToNew}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg ${
                   isDark
                     ? 'bg-gray-600 hover:bg-gray-500 text-white'
@@ -364,7 +373,7 @@ export default function PropiedadesPage() {
               >
                 <HiPlus className="h-4 w-4" />
                 Nueva
-              </Link>
+              </button>
             </div>
           </div>
 
@@ -385,7 +394,7 @@ export default function PropiedadesPage() {
                   <select
                     value={filters.operation_type || ''}
                     onChange={(e) => handleFilterChange({
-                      operation_type: e.target.value as 'venta' | 'alquiler' | undefined || undefined
+                      operation_type: e.target.value as 'venta' | 'alquiler' | undefined
                     })}
                     className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
                       isDark
@@ -408,7 +417,7 @@ export default function PropiedadesPage() {
                   <select
                     value={filters.status || ''}
                     onChange={(e) => handleFilterChange({
-                      status: e.target.value as 'disponible' | 'vendido' | 'reservado' | 'no_disponible' | undefined || undefined
+                      status: e.target.value as 'disponible' | 'vendido' | 'reservado' | 'no_disponible' 
                     })}
                     className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
                       isDark
@@ -550,8 +559,8 @@ export default function PropiedadesPage() {
                     Limpiar Filtros
                   </button>
                 ) : (
-                  <Link
-                    href='/dashboard/properties/new'
+                  <button
+                    onClick={handleNavigateToNew}
                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center gap-2 ${
                       isDark
                         ? 'bg-gray-600 hover:bg-gray-500 text-white'
@@ -560,7 +569,7 @@ export default function PropiedadesPage() {
                   >
                     <HiPlus className="h-4 w-4" />
                     Agregar Propiedad
-                  </Link>
+                  </button>
                 )}
               </div>
             </div>

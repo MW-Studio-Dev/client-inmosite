@@ -15,10 +15,9 @@ import {
   UserGroupIcon
 } from "@heroicons/react/24/outline";
 import { TemplateConfig } from '../../types';
-import { createDebugger } from '@/utils/debug';
 import { getCurrentDomainClient } from '@/lib/getCurrentDomainClient';
 
-const debug = createDebugger('Navbar');
+
 
 interface MenuItemConfig {
   href: string;
@@ -62,66 +61,10 @@ const Navbar: React.FC<NavbarProps> = ({
     showContactButton: true
   }
 }) => {
-  debug.render({ pathname: typeof window !== 'undefined' ? window.location.pathname : 'SSR' }, 'Header.tsx', 59);
-
+ 
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const pathname = usePathname();
 
-  // MOUNT/UNMOUNT tracking
-  useEffect(() => {
-    debug.mount('Header.tsx', 65);
-    return () => {
-      debug.unmount('Header.tsx', 67);
-    };
-  }, []);
-
-  // Cerrar menú cuando cambia la ruta (navegación)
-  useEffect(() => {
-    debug.effect('pathname-change', { pathname, prevOpen: isMenuOpen }, 'Header.tsx', 73);
-    setIsMenuOpen(false);
-    document.body.style.overflow = 'unset';
-  }, [pathname]);
-
-  // Cleanup: cerrar menú cuando el componente se desmonte
-  useEffect(() => {
-    debug.effect('cleanup-setup', undefined, 'Header.tsx', 80);
-    return () => {
-      debug.track('cleanup-execute', undefined, 'Header.tsx', 82);
-      setIsMenuOpen(false);
-      document.body.style.overflow = 'unset';
-    };
-  }, []);
-
-  useEffect(() => {
-    debug.effect('resize-listener-setup', undefined, 'Header.tsx', 89);
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        debug.track('resize-close-menu', { width: window.innerWidth }, 'Header.tsx', 92);
-        setIsMenuOpen(false);
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => {
-      debug.track('resize-listener-cleanup', undefined, 'Header.tsx', 99);
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  useEffect(() => {
-    debug.effect('menu-overflow', { isMenuOpen }, 'Header.tsx', 105);
-    if (isMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-
-    // Cleanup function to restore scroll when component unmounts
-    return () => {
-      debug.track('overflow-cleanup', undefined, 'Header.tsx', 114);
-      document.body.style.overflow = 'unset';
-    };
-  }, [isMenuOpen]);
 
   const logoSizes = useMemo(() => {
     const logo = config.company.logo;

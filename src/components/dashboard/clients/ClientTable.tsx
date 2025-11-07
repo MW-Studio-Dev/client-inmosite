@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Client, ClientType, ClientStatus } from '@/types/client';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,7 @@ interface ClientTableProps {
 }
 
 export function ClientTable({ clients }: ClientTableProps) {
+  const router = useRouter();
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const { theme } = useDashboardTheme();
   const isDark = theme === 'dark';
@@ -262,16 +263,18 @@ export function ClientTable({ clients }: ClientTableProps) {
                     {/* Acciones */}
                     <td className="px-3 py-3">
                       <div className="flex justify-end gap-1.5">
-                        <Link href={`/dashboard/clients/${client.id}`} onClick={(e) => e.stopPropagation()}>
-                          <Button
+                        <Button
                             variant="outline"
                             size="sm"
                             title="Ver detalle"
                             className="h-8 w-8 p-0"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/dashboard/clients/${client.id}`);
+                            }}
                           >
                             <HiEye className="h-3.5 w-3.5" />
                           </Button>
-                        </Link>
                         <Button
                           variant="outline"
                           size="sm"

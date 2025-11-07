@@ -1,10 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useDashboardTheme } from '@/context/DashboardThemeContext';
-import { MercadoLibreIntegration } from '@/components/dashboard/integrations/MercadoLibreIntegration';
-import { IntegrationsGrid } from '@/components/dashboard/integrations/IntegrationsGrid';
-import {
+import { 
   HiUser,
   HiLockClosed,
   HiCreditCard,
@@ -14,13 +12,70 @@ import {
 } from 'react-icons/hi';
 import { useAuth } from '@/hooks/useAuth';
 
+// Importación dinámica para los componentes problemáticos
+const MercadoLibreIntegration = React.lazy(() => 
+  import('@/components/dashboard/integrations/MercadoLibreIntegration')
+);
+const IntegrationsGrid = React.lazy(() => 
+  import('@/components/dashboard/integrations/IntegrationsGrid')
+);
+
 type Section = 'general' | 'integrations';
+
+// Componente de carga simple
+const LoadingSpinner = () => (
+  <div className="flex justify-center items-center h-64">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
+  </div>
+);
+
+// Componente de envoltura para manejar errores
+const ErrorBoundary = ({ children, fallback }: { 
+  children: React.ReactNode; 
+  fallback: React.ReactNode 
+}) => {
+  const [hasError, setHasError] = useState(false);
+  
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      console.error('Error caught by boundary:', event.error);
+      setHasError(true);
+    };
+    
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
+  
+  if (hasError) {
+    return <>{fallback}</>;
+  }
+  
+  return <>{children}</>;
+};
 
 export default function ConfiguracionPage() {
   const { theme } = useDashboardTheme();
   const isDark = theme === 'dark';
-  const { user, company } = useAuth();
+  const { user, company, isLoading: authLoading } = useAuth();
   const [activeSection, setActiveSection] = useState<Section>('general');
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Asegurarse de que el componente está montado antes de renderizar
+  useEffect(() => {
+    setIsMounted(true);
+    return () => {
+      setIsMounted(false);
+    };
+  }, []);
+
+  // Mostrar el componente de carga mientras se autentica o el componente no está montado
+  if (authLoading || !isMounted) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -284,7 +339,7 @@ export default function ConfiguracionPage() {
             </div>
           )}
 
-          {/* Integrations Section */}
+          {/* Integrations Section - Con manejo de errores y carga diferida */}
           {activeSection === 'integrations' && (
             <div className="space-y-6">
               <div>
@@ -300,13 +355,87 @@ export default function ConfiguracionPage() {
                 </p>
               </div>
 
-              {/* Integrations Grid */}
-              <IntegrationsGrid />
+              {/* Integrations Grid con Suspense y ErrorBoundary */}
+              <ErrorBoundary 
+                fallback={
+                  <div className={`rounded-xl border p-6 ${
+                    isDark
+                      ? 'bg-gray-800 border-gray-700'
+                      : 'bg-white border-gray-200'
+                  }`}>
+                    <div className="text-center py-8">
+                      <p className={`text-lg font-medium ${
+                        isDark ? 'text-gray-300' : 'text-gray-700'
+                      }`}>
+                        No se pudieron cargar las integraciones
+                      </p>
+                      <button 
+                        onClick={() => window.location.reload()}
+                        className={`mt-4 px-4 py-2 rounded-lg font-medium ${
+                          isDark
+                            ? 'bg-red-600 hover:bg-red-700 text-white'
+                            : 'bg-red-600 hover:bg-red-700 text-white'
+                        }`}
+                      >
+                        Recargar página
+                      </button>
+                    </div>
+                  </div>
+                }
+              >
+                <Suspense fallback={<LoadingSpinner />}>
+                  <div className={`rounded-xl border p-6 overflow-hidden ${
+                    isDark
+                      ? 'bg-gray-800 border-gray-700'
+                      : 'bg-white border-gray-200'
+                  }`}>
+                    <div className="min-h-[200px]">
+                      <IntegrationsGrid />
+                    </div>
+                  </div>
+                </Suspense>
+              </ErrorBoundary>
 
-              {/* Current Connection Status */}
-              <div className="mt-8">
-                <MercadoLibreIntegration />
-              </div>
+              {/* Current Connection Status con Suspense y ErrorBoundary */}
+              <ErrorBoundary 
+                fallback={
+                  <div className={`rounded-xl border p-6 ${
+                    isDark
+                      ? 'bg-gray-800 border-gray-700'
+                      : 'bg-white border-gray-200'
+                  }`}>
+                    <div className="text-center py-8">
+                      <p className={`text-lg font-medium ${
+                        isDark ? 'text-gray-300' : 'text-gray-700'
+                      }`}>
+                        No se pudo cargar la configuración de Mercado Libre
+                      </p>
+                      <button 
+                        onClick={() => window.location.reload()}
+                        className={`mt-4 px-4 py-2 rounded-lg font-medium ${
+                          isDark
+                            ? 'bg-red-600 hover:bg-red-700 text-white'
+                            : 'bg-red-600 hover:bg-red-700 text-white'
+                        }`}
+                      >
+                        Recargar página
+                      </button>
+                    </div>
+                  </div>
+                }
+              >
+                <Suspense fallback={<LoadingSpinner />}>
+                  <div className={`rounded-xl border p-6 overflow-hidden ${
+                    isDark
+                      ? 'bg-gray-800 border-gray-700'
+                      : 'bg-white border-gray-200'
+                  }`}>
+                    <div className="min-h-[200px]">
+                      <MercadoLibreIntegration />
+                    </div>
+                  </div>
+                </Suspense>
+              </ErrorBoundary>
             </div>
           )}
         </div>
@@ -314,4 +443,3 @@ export default function ConfiguracionPage() {
     </div>
   );
 }
-  

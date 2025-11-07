@@ -35,7 +35,6 @@ import { usePropertyDetail } from '@/hooks/usePropertyDetail';
 import { useWebsiteConfigContext } from '@/contexts/WebsiteConfigContext';
 import { PropertyDetail as PropertyDetailType } from '@/types/property';
 import Navbar from '../layout/Header';
-import StructuredData from '@/components/common/StructuredData';
 import { generatePropertySchema, generateBreadcrumbSchema } from '@/lib/seo';
 interface PropertyDetailPageProps {
   subdomain: string;
@@ -456,7 +455,7 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
   const propertyUrl = property ? `${siteUrl}/s/${subdomain}/properties/${propertyId}` : '';
   
   const structuredData = useMemo(() => {
-    if (!property) return null;
+    if (!property || !apiProperty) return null;
 
     const propertyImages = displayImages.map(img => {
       const imgUrl = img.url.startsWith('http') ? img.url : `${siteUrl}${img.url}`;
@@ -466,20 +465,20 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
     const schemas = [
       generatePropertySchema({
         name: property.title,
-        description: property.description || property.meta_description || '',
+        description: property.description || '',
         image: propertyImages,
         url: propertyUrl,
         address: {
-          street: property.address,
-          city: property.city,
-          state: property.province,
+          street: apiProperty.address,
+          city: apiProperty.city,
+          state: apiProperty.province,
         },
-        rooms: property.bedrooms,
-        area: property.surface_total ? parseFloat(property.surface_total) : undefined,
-        price: property.operation_type === 'venta' 
-          ? (property.price_usd || property.price_ars) 
+        rooms: apiProperty.bedrooms,
+        area: apiProperty.surface_total ? parseFloat(apiProperty.surface_total) : undefined,
+        price: apiProperty.operation_type === 'venta' 
+          ? (apiProperty.price_usd || apiProperty.price_ars) 
           : undefined,
-        currency: property.price_usd ? 'USD' : 'ARS',
+        currency: apiProperty.price_usd ? 'USD' : 'ARS',
       }),
       generateBreadcrumbSchema([
         { name: 'Inicio', url: `${siteUrl}/s/${subdomain}` },
@@ -489,7 +488,7 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
     ];
 
     return schemas;
-  }, [property, subdomain, propertyId, siteUrl, propertyUrl, displayImages]);
+  }, [property, apiProperty, subdomain, propertyId, siteUrl, propertyUrl, displayImages]);
 
   // Reset image index when property changes
   useEffect(() => {
@@ -1216,7 +1215,7 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
 
   return (
     <>
-      {structuredData && <StructuredData data={structuredData} />}
+    
       <Navbar config={templateConfig} adaptiveColors={adaptiveColors} subdomain={subdomain}/>
       <div style={{ backgroundColor: templateConfig.colors.background }} className="min-h-screen">
       

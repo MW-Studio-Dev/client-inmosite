@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Poppins, Inter } from "next/font/google";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { GlobalLoaderProvider } from "@/context/GlobalLoaderContext";
 import DynamicFavicon from "@/components/common/DynamicFavicon";
 import { AuthMonitor } from "@/components/auth/AuthMonitor";
+import { GlobalLoaderWithHook } from "@/components/common/Loading";
 import "./globals.css";
 
 // Poppins para textos generales
@@ -101,11 +103,14 @@ export default function RootLayout({
         className={`${poppins.variable} ${inter.variable} antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 font-sans`}
         suppressHydrationWarning
       >
-        <DynamicFavicon />
-        <AuthMonitor />
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        <GlobalLoaderProvider>
+          <DynamicFavicon />
+          <AuthMonitor />
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
+          <GlobalLoaderWithHook />
+        </GlobalLoaderProvider>
       </body>
     </html>
   );

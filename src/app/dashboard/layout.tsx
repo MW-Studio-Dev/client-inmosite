@@ -18,7 +18,8 @@ import {
   HiMail,
   HiChartBar,
   HiMoon,
-  HiSun
+  HiSun,
+  HiBeaker
 } from 'react-icons/hi'
 import { HiComputerDesktop } from 'react-icons/hi2'
 import { AdminSidebar } from '@/components/dashboard/admin/AdminSideBar'
@@ -94,6 +95,12 @@ const menuItems: MenuItem[] = [
     icon: HiMail,
     description: 'Consultas del formulario',
     badge: 'NEW'
+  },
+  {
+    name: 'Test',
+    href: '/dashboard/test',
+    icon: HiBeaker,
+    description: 'Página de prueba',
   },
 ]
 

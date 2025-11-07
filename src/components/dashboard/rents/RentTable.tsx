@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Rent, PaymentStatus, RentStatus, AdjustmentIndex } from '@/types/rent';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,7 @@ interface RentTableProps {
 }
 
 export function RentTable({ rents }: RentTableProps) {
+  const router = useRouter();
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const { theme } = useDashboardTheme();
   const isDark = theme === 'dark';
@@ -284,16 +285,18 @@ export function RentTable({ rents }: RentTableProps) {
                     {/* Acciones */}
                     <td className="px-3 py-3">
                       <div className="flex justify-end gap-1.5">
-                        <Link href={`/dashboard/rents/${rent.id}`} onClick={(e) => e.stopPropagation()}>
-                          <Button
+                        <Button
                             variant="outline"
                             size="sm"
                             title="Ver detalle"
                             className="h-8 w-8 p-0"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/dashboard/rents/${rent.id}`);
+                            }}
                           >
                             <HiEye className="h-3.5 w-3.5" />
                           </Button>
-                        </Link>
                         <Button
                           variant="outline"
                           size="sm"

@@ -11,9 +11,11 @@ interface ConfirmModalProps {
   message: string;
   confirmText?: string;
   cancelText?: string;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   onCancel: () => void;
   type?: 'danger' | 'warning' | 'info';
+  disabled?: boolean;
+  children?: React.ReactNode;
 }
 
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -24,7 +26,9 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   cancelText = 'Cancelar',
   onConfirm,
   onCancel,
-  type = 'danger'
+  type = 'danger',
+  disabled = false,
+  children
 }) => {
   const { theme } = useDashboardTheme();
   const isDark = theme === 'dark';
@@ -138,33 +142,41 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             {title}
           </h3>
 
-          {/* Message */}
-          <p className={`text-center mb-6 ${
-            isDark ? 'text-gray-300' : 'text-gray-600'
-          }`}>
-            {message}
-          </p>
+          {/* Message or Children */}
+          {children ? (
+            <div className="mb-6">
+              {children}
+            </div>
+          ) : (
+            <>
+              <p className={`text-center mb-6 ${
+                isDark ? 'text-gray-300' : 'text-gray-600'
+              }`}>
+                {message}
+              </p>
 
-          {/* Warning box */}
-          <div className={`rounded-lg p-3 mb-6 border ${styles.border} ${
-            isDark
-              ? type === 'danger'
-                ? 'bg-red-900/10'
-                : type === 'warning'
-                ? 'bg-yellow-900/10'
-                : 'bg-blue-900/10'
-              : type === 'danger'
-              ? 'bg-red-50'
-              : type === 'warning'
-              ? 'bg-yellow-50'
-              : 'bg-blue-50'
-          }`}>
-            <p className={`text-sm text-center ${
-              isDark ? 'text-gray-400' : 'text-gray-600'
-            }`}>
-              ⚠️ Esta acción no se puede deshacer
-            </p>
-          </div>
+              {/* Warning box */}
+              <div className={`rounded-lg p-3 mb-6 border ${styles.border} ${
+                isDark
+                  ? type === 'danger'
+                    ? 'bg-red-900/10'
+                    : type === 'warning'
+                    ? 'bg-yellow-900/10'
+                    : 'bg-blue-900/10'
+                  : type === 'danger'
+                  ? 'bg-red-50'
+                  : type === 'warning'
+                  ? 'bg-yellow-50'
+                  : 'bg-blue-50'
+              }`}>
+                <p className={`text-sm text-center ${
+                  isDark ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  ⚠️ Esta acción no se puede deshacer
+                </p>
+              </div>
+            </>
+          )}
 
           {/* Buttons */}
           <div className="flex gap-3">
@@ -180,7 +192,8 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             </button>
             <button
               onClick={onConfirm}
-              className={`flex-1 px-4 py-2.5 rounded-lg font-medium transition-all duration-200 ${styles.confirmBg} ${styles.confirmText} shadow-md hover:shadow-lg active:scale-95`}
+              disabled={disabled}
+              className={`flex-1 px-4 py-2.5 rounded-lg font-medium transition-all duration-200 ${styles.confirmBg} ${styles.confirmText} shadow-md hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-md`}
             >
               {confirmText}
             </button>

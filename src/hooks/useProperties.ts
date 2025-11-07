@@ -46,7 +46,7 @@ export const useProperties = ({
       const queryParams = new URLSearchParams();
       if (filters) {
         Object.entries(filters).forEach(([key, value]) => {
-          if (value !== undefined) {
+          if (value !== null) {
             queryParams.append(key, value.toString());
           }
         });

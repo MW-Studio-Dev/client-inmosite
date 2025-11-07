@@ -58,11 +58,20 @@ export default function SubscriptionPage() {
   // Calcular días restantes del trial
   const getTrialDaysLeft = () => {
     if (!company?.trial_end_date) return 0
-    const endDate = new Date(company.trial_end_date)
-    const today = new Date()
-    const diffTime = endDate.getTime() - today.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    return Math.max(0, diffDays)
+    try {
+      const endDate = new Date(company.trial_end_date)
+      const today = new Date()
+
+      // Verificar si la fecha es válida
+      if (isNaN(endDate.getTime())) return 0
+
+      const diffTime = endDate.getTime() - today.getTime()
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      return Math.max(0, diffDays)
+    } catch (error) {
+      console.error('Error calculating trial days left:', error)
+      return 0
+    }
   }
 
   const trialDaysLeft = getTrialDaysLeft()

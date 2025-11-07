@@ -43,7 +43,7 @@ interface MeliStats {
 
 type LoadingState = 'idle' | 'loading' | 'connecting' | 'disconnecting';
 
-export const MercadoLibreIntegration: React.FC = () => {
+const MercadoLibreIntegration: React.FC = () => {
   const { theme } = useDashboardTheme();
   const isDark = theme === 'dark';
   const { showSuccess, showError } = useToast();
@@ -518,3 +518,5 @@ export const MercadoLibreIntegration: React.FC = () => {
     </div>
   );
 };
+
+export default MercadoLibreIntegration;
