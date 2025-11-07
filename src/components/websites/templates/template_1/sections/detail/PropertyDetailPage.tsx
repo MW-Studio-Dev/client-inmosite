@@ -472,6 +472,7 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
           street: apiProperty.address,
           city: apiProperty.city,
           state: apiProperty.province,
+          
         },
         rooms: apiProperty.bedrooms,
         area: apiProperty.surface_total ? parseFloat(apiProperty.surface_total) : undefined,
