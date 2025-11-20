@@ -63,6 +63,8 @@ export interface CreatePropertyForm {
   address: string;
   floor: number | '';
   unit: string;
+  zip_code: string;
+  currency: string;
   
   // Características físicas
   bedrooms: number | '';
@@ -107,6 +109,8 @@ export interface CreatePropertyPayload {
   address: string;
   floor?: number;
   unit?: string;
+  zip_code?: string;
+  currency?: string;
   bedrooms: number;
   bathrooms: number;
   half_bathrooms: number;

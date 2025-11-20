@@ -154,6 +154,8 @@ export const useCreateProperty = (): UseCreatePropertyReturn => {
       // Agregar campos opcionales solo si tienen valor
       if (formData.floor) payload.floor = Number(formData.floor);
       if (formData.unit) payload.unit = formData.unit.trim();
+      if (formData.zip_code) payload.zip_code = formData.zip_code.trim();
+      if (formData.currency) payload.currency = formData.currency.trim();
       if (formData.surface_covered) payload.surface_covered = Number(formData.surface_covered);
       if (formData.surface_semicovered) payload.surface_semicovered = Number(formData.surface_semicovered);
       if (formData.surface_uncovered) payload.surface_uncovered = Number(formData.surface_uncovered);

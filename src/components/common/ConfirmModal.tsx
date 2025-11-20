@@ -7,8 +7,8 @@ import { useDashboardTheme } from '@/context/DashboardThemeContext';
 
 interface ConfirmModalProps {
   isOpen: boolean;
-  title: string;
-  message: string;
+  title: React.ReactNode; // Cambiado de string a React.ReactNode
+  message?: string; // Hacemos message opcional
   confirmText?: string;
   cancelText?: string;
   onConfirm: () => void | Promise<void>;
@@ -135,19 +135,19 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             <HiExclamationCircle className={`h-8 w-8 ${styles.iconColor}`} />
           </div>
 
-          {/* Title */}
-          <h3 className={`text-xl font-bold text-center mb-2 ${
+          {/* Title - Modificado para aceptar React.ReactNode */}
+          <div className={`text-xl font-bold text-center mb-2 ${
             isDark ? 'text-white' : 'text-gray-900'
           }`}>
             {title}
-          </h3>
+          </div>
 
           {/* Message or Children */}
           {children ? (
             <div className="mb-6">
               {children}
             </div>
-          ) : (
+          ) : message ? (
             <>
               <p className={`text-center mb-6 ${
                 isDark ? 'text-gray-300' : 'text-gray-600'
@@ -176,7 +176,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
                 </p>
               </div>
             </>
-          )}
+          ) : null}
 
           {/* Buttons */}
           <div className="flex gap-3">
@@ -203,4 +203,3 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
     </div>
   );
 };
-

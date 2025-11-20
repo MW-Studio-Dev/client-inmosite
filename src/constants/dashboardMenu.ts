@@ -5,16 +5,16 @@ import {
   HiDesktopComputer,
   HiUsers,
   HiCurrencyDollar,
-  HiShoppingCart,
   HiCog,
   HiSupport,
   HiChartBar,
   HiMail,
-  HiBeaker
+  HiDocumentReport,
+  HiCash,
+  HiBell
 } from 'react-icons/hi'
 import type { MenuItem } from '@/types/dashboard'
 
-// Menú principal del dashboard
 export const dashboardMenuItems: MenuItem[] = [
   {
     name: 'Dashboard',
@@ -23,24 +23,24 @@ export const dashboardMenuItems: MenuItem[] = [
     description: 'Vista general del sistema',
   },
   {
+    name: 'Notificaciones',
+    href: '/dashboard/notifications',
+    icon: HiBell,
+    description: 'Centro de notificaciones',
+    badge: 'NEW',
+  },
+  {
     name: 'Propiedades',
     href: '/dashboard/properties',
     icon: HiOfficeBuilding,
     description: 'Gestionar inmuebles',
     subItems: [
-      { name: 'Todas', href: '/dashboard/properties' },
-      { name: 'En Venta', href: '/dashboard/properties/sale' },
-      { name: 'En Alquiler', href: '/dashboard/properties/rent' },
-    ]
-  },
-  {
-    name: 'Sitio Web',
-    href: '/dashboard/website',
-    icon: HiDesktopComputer,
-    description: 'Administrar sitio web',
-    subItems: [
-      { name: 'Configuración', href: '/dashboard/website' },
-      { name: 'Preview', href: '/dashboard/website/preview' },
+      { name: 'Todas las Propiedades', href: '/dashboard/properties' },
+      { name: 'Disponibles para Venta', href: '/dashboard/properties/sale' },
+      { name: 'Disponibles para Alquiler', href: '/dashboard/properties/rent' },
+      { name: 'Alquiladas', href: '/dashboard/properties/rented' },
+      { name: 'Vendidas', href: '/dashboard/properties/sold' },
+      { name: 'Crear Propiedad', href: '/dashboard/properties/new/' },
     ]
   },
   {
@@ -49,9 +49,11 @@ export const dashboardMenuItems: MenuItem[] = [
     icon: HiUsers,
     description: 'Base de datos de clientes',
     subItems: [
+      { name: 'Todos los Clientes', href: '/dashboard/clients' },
       { name: 'Inquilinos', href: '/dashboard/clients/tenants' },
       { name: 'Propietarios', href: '/dashboard/clients/owners' },
-      { name: 'Otros', href: '/dashboard/clients/others' },
+      { name: 'Compradores', href: '/dashboard/clients/buyers' },
+      { name: 'Interesados', href: '/dashboard/clients/leads' },
     ]
   },
   {
@@ -60,9 +62,12 @@ export const dashboardMenuItems: MenuItem[] = [
     icon: HiCurrencyDollar,
     description: 'Gestión de alquileres',
     subItems: [
-      { name: 'Alquileres', href: '/dashboard/rents' },
-      { name: 'Contratos', href: '/dashboard/rents/contracts' },
-      { name: 'Planes de Pago', href: '/dashboard/rents/payment-plans' },
+      { name: 'Contratos Activos', href: '/dashboard/rents/active' },
+      { name: 'Solicitudes Pendientes', href: '/dashboard/rents/pending' },
+      { name: 'Próximos Vencimientos', href: '/dashboard/rents/expiring' },
+      { name: 'Gestión de Cobranzas', href: '/dashboard/rents/payments' },
+      { name: 'Contratos Finalizados', href: '/dashboard/rents/finished' },
+      { name: 'Crear Contrato', href: '/dashboard/rents/contracts/new' },
     ]
   },
   {
@@ -71,25 +76,62 @@ export const dashboardMenuItems: MenuItem[] = [
     icon: HiChartBar,
     description: 'Gestión de ventas',
     subItems: [
-      { name: 'Todas', href: '/dashboard/sales' },
-      { name: 'Boletos', href: '/dashboard/sales/receipts' },
+      { name: 'Ventas Activas', href: '/dashboard/sales/active' },
+      { name: 'Reservas', href: '/dashboard/sales/reservations' },
+      { name: 'Boletos de Compraventa', href: '/dashboard/sales/receipts' },
+      { name: 'Escrituras', href: '/dashboard/sales/deeds' },
+      { name: 'Ventas Concretadas', href: '/dashboard/sales/completed' },
     ]
   },
   {
-    name: 'Contacto',
+    name: 'Cobranzas',
+    href: '/dashboard/collections',
+    icon: HiCash, // o el que prefieras
+    description: 'Control de pagos',
+    subItems: [
+      { name: 'Pagos Pendientes', href: '/dashboard/collections/pending' },
+      { name: 'Pagos Realizados', href: '/dashboard/collections/completed' },
+      { name: 'Morosos', href: '/dashboard/collections/overdue' },
+      { name: 'Reportes de Cobranza', href: '/dashboard/collections/reports' },
+    ]
+  },
+  {
+    name: 'Sitio Web',
+    href: '/dashboard/website',
+    icon: HiDesktopComputer,
+    description: 'Administrar sitio web',
+    subItems: [
+      { name: 'Configuración General', href: '/dashboard/website/settings' },
+      { name: 'Personalización', href: '/dashboard/website/customization' },
+      { name: 'Vista Previa', href: '/dashboard/website/preview' },
+      { name: 'SEO y Analytics', href: '/dashboard/website/seo' },
+    ]
+  },
+  {
+    name: 'Consultas',
     href: '/dashboard/contact',
     icon: HiMail,
     description: 'Consultas del formulario',
-    badge: 'NEW'
+    badge: 'NEW',
+    subItems: [
+      { name: 'Nuevas', href: '/dashboard/contact/new' },
+      { name: 'En Seguimiento', href: '/dashboard/contact/following' },
+      { name: 'Finalizadas', href: '/dashboard/contact/closed' },
+    ]
   },
   {
-    name: 'Test',
-    href: '/dashboard/test',
-    icon: HiBeaker,
-    description: 'Página de prueba',
+    name: 'Reportes',
+    href: '/dashboard/reports',
+    icon: HiDocumentReport,
+    description: 'Informes y estadísticas',
+    subItems: [
+      { name: 'Dashboard Ejecutivo', href: '/dashboard/reports/executive' },
+      { name: 'Alquileres', href: '/dashboard/reports/rents' },
+      { name: 'Ventas', href: '/dashboard/reports/sales' },
+      { name: 'Propiedades', href: '/dashboard/reports/properties' },
+    ]
   },
 ]
-
 // Menú inferior (Configuración y Soporte)
 export const dashboardBottomMenuItems: MenuItem[] = [
   {

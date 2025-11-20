@@ -1,4 +1,4 @@
-// app/dashboard/propiedades/nueva/page.tsx
+// app/dashboard/propiedades/new/page.tsx
 'use client';
 
 import React from 'react';

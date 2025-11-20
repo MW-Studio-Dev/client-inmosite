@@ -47,6 +47,12 @@ const nextConfig = {
         port: '8002', // Puerto de tu Django server
         pathname: '/**',
       },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '8000', // Puerto de tu Django server
+        pathname: '/**',
+      },
     ],
     // Configuraciones opcionales adicionales
     formats: ['image/webp', 'image/avif'], // Formatos optimizados

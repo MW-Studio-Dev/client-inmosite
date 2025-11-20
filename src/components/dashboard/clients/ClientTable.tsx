@@ -1,106 +1,424 @@
+// components/dashboard/clients/ClientTable.tsx
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Client, ClientType, ClientStatus } from '@/types/client';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react';
+import Link from 'next/link';
 import {
   HiEye,
   HiPencil,
   HiMail,
   HiPhone,
+  HiDocumentText,
+  HiChevronLeft,
+  HiChevronRight,
+  HiDownload,
+  HiTrash,
+  HiX,
+  HiFolderOpen,
   HiLocationMarker,
-  HiUserCircle,
-  HiOfficeBuilding,
+  HiChatAlt2,
 } from 'react-icons/hi';
 import { useDashboardTheme } from '@/context/DashboardThemeContext';
+import { Client, ClientDocument } from '@/hooks/useClients';
 
 interface ClientTableProps {
   clients: Client[];
+  loading?: boolean;
+  pagination?: {
+    current_page: number;
+    total_pages: number;
+    total_count: number;
+    has_next: boolean;
+    has_previous: boolean;
+    next_page: number | null;
+    previous_page: number | null;
+    page_size: number;
+    start_index: number;
+    end_index: number;
+  };
+  onPageChange?: (page: number) => void;
+  onDocumentDelete?: (clientId: string, documentId: string) => void;
 }
 
-export function ClientTable({ clients }: ClientTableProps) {
-  const router = useRouter();
-  const [expandedRow, setExpandedRow] = useState<string | null>(null);
+// Modal para vista rápida de documentos
+const DocumentsModal: React.FC<{
+  client: Client;
+  isOpen: boolean;
+  onClose: () => void;
+  onDocumentDelete: (documentId: string) => void;
+}> = ({ client, isOpen, onClose, onDocumentDelete }) => {
   const { theme } = useDashboardTheme();
   const isDark = theme === 'dark';
 
-  const getClientTypeBadge = (type: ClientType) => {
-    const variants = {
-      owner: { variant: 'success' as const, label: 'Propietario' },
-      tenant: { variant: 'warning' as const, label: 'Inquilino' },
-      both: { variant: 'outline' as const, label: 'Ambos' },
-      other: { variant: 'default' as const, label: 'Otro' },
-    };
-    return variants[type];
+  if (!isOpen) return null;
+
+  const handleDownload = (document: ClientDocument) => {
+    const link = document.createElement('a');
+    link.href = document.file_url;
+    link.download = document.file_name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
-  const getClientStatusBadge = (status: ClientStatus) => {
-    const variants = {
-      active: { variant: 'success' as const, label: 'Activo' },
-      inactive: { variant: 'error' as const, label: 'Inactivo' },
-      pending: { variant: 'warning' as const, label: 'Pendiente' },
-    };
-    return variants[status];
-  };
-
-  const formatDate = (dateString: string) => {
-    if (dateString === 'N/A') return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-AR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
+  const handleDelete = (documentId: string) => {
+    if (confirm('¿Estás seguro de que deseas eliminar este documento? Esta acción no se puede deshacer.')) {
+      onDocumentDelete(documentId);
+    }
   };
 
   return (
-    <div className={`overflow-hidden rounded-lg border shadow-xl transition-colors duration-300 ${
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black opacity-50" onClick={onClose} />
+        <div className={`relative w-full max-w-4xl rounded-lg shadow-xl ${
+          isDark ? 'bg-slate-800' : 'bg-white'
+        }`}>
+          <div className={`flex items-center justify-between p-6 border-b ${
+            isDark ? 'border-slate-700' : 'border-gray-200'
+          }`}>
+            <h3 className={`text-lg font-semibold ${
+              isDark ? 'text-white' : 'text-gray-900'
+            }`}>
+              Documentos de {client.full_name}
+            </h3>
+            <button
+              onClick={onClose}
+              className={`p-1 rounded-lg transition-colors ${
+                isDark
+                  ? 'hover:bg-slate-700 text-slate-400'
+                  : 'hover:bg-gray-100 text-gray-500'
+              }`}
+            >
+              <HiX className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div className="p-6">
+            {client.documents.length === 0 ? (
+              <div className="text-center py-8">
+                <HiFolderOpen className={`mx-auto h-12 w-12 ${
+                  isDark ? 'text-slate-600' : 'text-gray-400'
+                }`} />
+                <p className={`mt-2 text-sm ${
+                  isDark ? 'text-slate-400' : 'text-gray-600'
+                }`}>
+                  Este cliente no tiene documentos registrados
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {client.documents.map((document) => (
+                  <div key={document.id} className={`p-4 rounded-lg border ${
+                    isDark
+                      ? 'border-slate-700 bg-slate-900/50'
+                      : 'border-gray-200 bg-gray-50'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <h4 className={`font-medium ${
+                          isDark ? 'text-white' : 'text-gray-900'
+                        }`}>
+                          {document.description}
+                        </h4>
+                        <p className={`text-sm ${
+                          isDark ? 'text-slate-400' : 'text-gray-600'
+                        }`}>
+                          {document.document_type_display} • {document.file_size_formatted}
+                        </p>
+                        <p className={`text-xs mt-1 ${
+                          isDark ? 'text-slate-500' : 'text-gray-500'
+                        }`}>
+                          {new Date(document.created_at).toLocaleDateString('es-AR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 ml-4">
+                        <button
+                          onClick={() => handleDownload(document)}
+                          className={`p-2 rounded-lg transition-colors ${
+                            isDark
+                              ? 'hover:bg-slate-700 text-slate-400'
+                              : 'hover:bg-gray-200 text-gray-600'
+                          }`}
+                          title="Descargar documento"
+                        >
+                          <HiDownload className="h-4 w-4" />
+                        </button>
+                        <a
+                          href={document.file_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`p-2 rounded-lg transition-colors ${
+                            isDark
+                              ? 'hover:bg-slate-700 text-slate-400'
+                              : 'hover:bg-gray-200 text-gray-600'
+                          }`}
+                          title="Ver documento"
+                        >
+                          <HiEye className="h-4 w-4" />
+                        </a>
+                        <button
+                          onClick={() => handleDelete(document.id)}
+                          className={`p-2 rounded-lg transition-colors ${
+                            isDark
+                              ? 'hover:bg-red-900/50 text-red-400'
+                              : 'hover:bg-red-100 text-red-600'
+                          }`}
+                          title="Eliminar documento"
+                        >
+                          <HiTrash className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export function ClientTable({ clients, loading, pagination, onPageChange, onDocumentDelete }: ClientTableProps) {
+  const { theme } = useDashboardTheme();
+  const isDark = theme === 'dark';
+
+  // Estado para el modal de documentos
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [isDocumentsModalOpen, setIsDocumentsModalOpen] = useState(false);
+
+  const handleDocumentsClick = (client: Client) => {
+    setSelectedClient(client);
+    setIsDocumentsModalOpen(true);
+  };
+
+  const handleDocumentsModalClose = () => {
+    setIsDocumentsModalOpen(false);
+    setSelectedClient(null);
+  };
+
+  const handleDocumentDelete = (documentId: string) => {
+    if (selectedClient && onDocumentDelete) {
+      onDocumentDelete(selectedClient.id, documentId);
+      // Actualizar la lista local de clientes
+      setSelectedClient({
+        ...selectedClient,
+        documents: selectedClient.documents.filter(doc => doc.id !== documentId),
+        documents_count: selectedClient.documents_count - 1
+      });
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'ACTIVO':
+        return isDark
+          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+          : 'bg-emerald-50 text-emerald-600 border-emerald-200';
+      case 'INACTIVO':
+        return isDark
+          ? 'bg-red-500/10 text-red-400 border-red-500/20'
+          : 'bg-red-50 text-red-600 border-red-200';
+      default:
+        return isDark
+          ? 'bg-gray-500/10 text-gray-400 border-gray-500/20'
+          : 'bg-gray-50 text-gray-600 border-gray-200';
+    }
+  };
+
+  const getClientTypeColor = (clientType: string) => {
+    switch (clientType) {
+      case 'PROPIETARIO':
+        return isDark
+          ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+          : 'bg-purple-50 text-purple-600 border-purple-200';
+      case 'INQUILINO':
+        return isDark
+          ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+          : 'bg-blue-50 text-blue-600 border-blue-200';
+      case 'INVERSOR':
+        return isDark
+          ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+          : 'bg-yellow-50 text-yellow-600 border-yellow-200';
+      case 'GARANTE':
+        return isDark
+          ? 'bg-orange-500/10 text-orange-400 border-orange-500/20'
+          : 'bg-orange-50 text-orange-600 border-orange-200';
+      case 'OTRO':
+        return isDark
+          ? 'bg-gray-500/10 text-gray-400 border-gray-500/20'
+          : 'bg-gray-50 text-gray-600 border-gray-200';
+      default:
+        return isDark
+          ? 'bg-gray-500/10 text-gray-400 border-gray-500/20'
+          : 'bg-gray-50 text-gray-600 border-gray-200';
+    }
+  };
+
+  const formatPhoneNumber = (phone: string | null) => {
+    if (!phone) return '';
+    // Eliminar todos los caracteres no numéricos excepto +
+    const cleaned = phone.replace(/[^\d+]/g, '');
+    return cleaned;
+  };
+
+  const formatAddress = (address: string | null) => {
+    if (!address) return 'Sin ubicación';
+    // Limpiar caracteres raros y normalizar el texto
+    return address
+      .trim() // Eliminar espacios al inicio y final
+      .replace(/\s+/g, ' ') // Reemplazar múltiples espacios por uno solo
+      .replace(/[^\w\s\-\.,°ºª]/g, '') // Eliminar caracteres especiales raros
+      .replace(/,,+/g, ',') // Reemplazar comas múltiples por una sola
+      .replace(/,+/g, ', '); // Asegurar una sola coma
+  };
+
+  const getActivityColor = (activity: string) => {
+    switch (activity) {
+      case 'BUSCANDO_ALQUILER':
+        return isDark
+          ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+          : 'bg-blue-50 text-blue-600 border-blue-200';
+      case 'ALQUILANDO':
+        return isDark
+          ? 'bg-green-500/10 text-green-400 border-green-500/20'
+          : 'bg-green-50 text-green-600 border-green-200';
+      case 'VENDIENDO':
+        return isDark
+          ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+          : 'bg-purple-50 text-purple-600 border-purple-200';
+      default:
+        return isDark
+          ? 'bg-gray-500/10 text-gray-400 border-gray-500/20'
+          : 'bg-gray-50 text-gray-600 border-gray-200';
+    }
+  };
+
+  const formatClientType = (type: string) => {
+    switch (type) {
+      case 'PROPIETARIO':
+        return 'Propietario';
+      case 'INQUILINO':
+        return 'Inquilino';
+      case 'INVERSOR':
+        return 'Inversor';
+      case 'GARANTE':
+        return 'Garante';
+      case 'OTRO':
+        return 'Otro';
+      default:
+        return type;
+    }
+  };
+
+  const formatStatus = (status: string) => {
+    switch (status) {
+      case 'ACTIVO':
+        return 'Activo';
+      case 'INACTIVO':
+        return 'Inactivo';
+      default:
+        return status;
+    }
+  };
+
+  const formatActivity = (activity: string) => {
+    switch (activity) {
+      case 'BUSCANDO_ALQUILER':
+        return 'Buscando Alquiler';
+      case 'ALQUILANDO':
+        return 'Alquilando';
+      case 'VENDIENDO':
+        return 'Vendiendo';
+      case 'NINGUNA':
+        return 'Ninguna';
+      default:
+        return activity;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className={`rounded-lg border shadow-xl transition-colors duration-300 ${
+        isDark
+          ? 'border-slate-700/50 bg-slate-900'
+          : 'border-gray-200 bg-white'
+      }`}>
+        <div className="flex items-center justify-center py-12">
+          <div className="flex items-center gap-3">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
+            <span className={`text-sm ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+              Cargando clientes...
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`rounded-lg border shadow-xl transition-colors duration-300 ${
       isDark
         ? 'border-slate-700/50 bg-slate-900'
         : 'border-gray-200 bg-white'
     }`}>
       <div className="overflow-x-auto">
-        <table className="w-full table-auto">
-          <thead className={`border-b transition-colors duration-300 ${
-            isDark
-              ? 'bg-slate-800/80 border-slate-700'
-              : 'bg-gray-50 border-gray-200'
-          }`}>
+        <table className={`w-full transition-colors duration-300`}>
+          <thead className={isDark ? 'bg-slate-800' : 'bg-gray-50'}>
             <tr>
-              <th className={`px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider transition-colors duration-300 ${
-                isDark ? 'text-slate-300' : 'text-gray-700'
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${
+                isDark ? 'text-slate-300' : 'text-gray-500'
               }`}>
                 Cliente
               </th>
-              <th className={`px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider transition-colors duration-300 ${
-                isDark ? 'text-slate-300' : 'text-gray-700'
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${
+                isDark ? 'text-slate-300' : 'text-gray-500'
               }`}>
                 Contacto
               </th>
-              <th className={`px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider transition-colors duration-300 ${
-                isDark ? 'text-slate-300' : 'text-gray-700'
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${
+                isDark ? 'text-slate-300' : 'text-gray-500'
               }`}>
-                Tipo
+                Ubicación
               </th>
-              <th className={`px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider transition-colors duration-300 ${
-                isDark ? 'text-slate-300' : 'text-gray-700'
-              }`}>
-                Propiedades
-              </th>
-              <th className={`px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider transition-colors duration-300 ${
-                isDark ? 'text-slate-300' : 'text-gray-700'
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${
+                isDark ? 'text-slate-300' : 'text-gray-500'
               }`}>
                 Estado
               </th>
-              <th className={`px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider transition-colors duration-300 ${
-                isDark ? 'text-slate-300' : 'text-gray-700'
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${
+                isDark ? 'text-slate-300' : 'text-gray-500'
+              }`}>
+                Actividad
+              </th>
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${
+                isDark ? 'text-slate-300' : 'text-gray-500'
+              }`}>
+                Documentos
+              </th>
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${
+                isDark ? 'text-slate-300' : 'text-gray-500'
               }`}>
                 Registrado
               </th>
-              <th className={`px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider transition-colors duration-300 ${
-                isDark ? 'text-slate-300' : 'text-gray-700'
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${
+                isDark ? 'text-slate-300' : 'text-gray-500'
               }`}>
                 Acciones
               </th>
@@ -109,376 +427,129 @@ export function ClientTable({ clients }: ClientTableProps) {
           <tbody className={`divide-y transition-colors duration-300 ${
             isDark ? 'divide-slate-700/50' : 'divide-gray-200'
           }`}>
-            {clients.map((client) => {
-              const typeBadge = getClientTypeBadge(client.type);
-              const statusBadge = getClientStatusBadge(client.status);
-              const isExpanded = expandedRow === client.id;
-
-              return (
-                <>
-                  <tr
-                    key={client.id}
-                    className={`cursor-pointer transition-colors duration-200 ${
-                      isDark ? 'hover:bg-slate-800/40' : 'hover:bg-gray-50'
-                    }`}
-                    onClick={() => setExpandedRow(isExpanded ? null : client.id)}
-                  >
-                    {/* Cliente */}
-                    <td className="px-3 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full transition-colors duration-300 ${
-                          isDark ? 'bg-slate-800' : 'bg-gray-100'
-                        }`}>
-                          <HiUserCircle className={`h-6 w-6 transition-colors duration-300 ${
-                            isDark ? 'text-slate-400' : 'text-gray-500'
-                          }`} />
-                        </div>
-                        <div className="min-w-0 max-w-[180px]">
-                          <p className={`truncate font-semibold text-sm transition-colors duration-300 ${
-                            isDark ? 'text-slate-100' : 'text-gray-900'
-                          }`}>
-                            {client.fullName}
-                          </p>
-                          <p className={`truncate text-xs transition-colors duration-300 ${
-                            isDark ? 'text-slate-400' : 'text-gray-500'
-                          }`}>
-                            DNI: {client.dni}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Contacto */}
-                    <td className="px-3 py-3">
-                      <div className="max-w-[140px] space-y-1">
-                        <div className="flex items-center gap-1.5">
-                          <HiPhone className={`h-3.5 w-3.5 transition-colors duration-300 ${
-                            isDark ? 'text-slate-500' : 'text-gray-400'
-                          }`} />
-                          <p className={`truncate text-xs transition-colors duration-300 ${
-                            isDark ? 'text-slate-300' : 'text-gray-700'
-                          }`}>
-                            {client.contact.phone}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <HiMail className={`h-3.5 w-3.5 transition-colors duration-300 ${
-                            isDark ? 'text-slate-500' : 'text-gray-400'
-                          }`} />
-                          <p className={`truncate text-xs transition-colors duration-300 ${
-                            isDark ? 'text-slate-300' : 'text-gray-700'
-                          }`}>
-                            {client.contact.email}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Tipo */}
-                    <td className="px-3 py-3">
-                      <Badge {...typeBadge} rounded size="sm">
-                        {typeBadge.label}
-                      </Badge>
-                    </td>
-
-                    {/* Propiedades */}
-                    <td className="px-3 py-3">
-                      <div className="space-y-0.5">
-                        {client.properties.owned > 0 && (
-                          <div className="flex items-center gap-1.5">
-                            <HiOfficeBuilding className={`h-3.5 w-3.5 transition-colors duration-300 ${
-                              isDark ? 'text-emerald-400' : 'text-emerald-600'
-                            }`} />
-                            <span className={`text-xs font-medium transition-colors duration-300 ${
-                              isDark ? 'text-emerald-400' : 'text-emerald-600'
-                            }`}>
-                              {client.properties.owned} propias
-                            </span>
-                          </div>
-                        )}
-                        {client.properties.rented > 0 && (
-                          <div className="flex items-center gap-1.5">
-                            <HiOfficeBuilding className={`h-3.5 w-3.5 transition-colors duration-300 ${
-                              isDark ? 'text-blue-400' : 'text-blue-600'
-                            }`} />
-                            <span className={`text-xs font-medium transition-colors duration-300 ${
-                              isDark ? 'text-blue-400' : 'text-blue-600'
-                            }`}>
-                              {client.properties.rented} alquiladas
-                            </span>
-                          </div>
-                        )}
-                        {client.properties.owned === 0 && client.properties.rented === 0 && (
-                          <span className={`text-xs transition-colors duration-300 ${
-                            isDark ? 'text-slate-500' : 'text-gray-500'
-                          }`}>
-                            Sin propiedades
-                          </span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Estado */}
-                    <td className="px-3 py-3">
-                      <Badge {...statusBadge} rounded size="sm">
-                        {statusBadge.label}
-                      </Badge>
-                    </td>
-
-                    {/* Registrado */}
-                    <td className="px-3 py-3">
-                      <div className="space-y-0.5">
-                        <p className={`text-xs transition-colors duration-300 ${
-                          isDark ? 'text-slate-300' : 'text-gray-700'
-                        }`}>
-                          {formatDate(client.createdAt)}
-                        </p>
-                        <p className={`text-xs transition-colors duration-300 ${
-                          isDark ? 'text-slate-500' : 'text-gray-500'
-                        }`}>
-                          {client.tags && client.tags.length > 0 && (
-                            <span className="inline-flex items-center gap-1">
-                              {client.tags.slice(0, 2).map((tag, index) => (
-                                <span key={index} className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${
-                                  tag === 'VIP' 
-                                    ? isDark ? 'bg-yellow-500/20 text-yellow-400' : 'bg-yellow-100 text-yellow-800'
-                                    : isDark ? 'bg-slate-600 text-slate-300' : 'bg-gray-100 text-gray-600'
-                                }`}>
-                                  {tag}
-                                </span>
-                              ))}
-                              {client.tags.length > 2 && (
-                                <span className={`text-xs transition-colors duration-300 ${
-                                  isDark ? 'text-slate-500' : 'text-gray-500'
-                                }`}>
-                                  +{client.tags.length - 2}
-                                </span>
-                              )}
-                            </span>
-                          )}
-                        </p>
-                      </div>
-                    </td>
-
-                    {/* Acciones */}
-                    <td className="px-3 py-3">
-                      <div className="flex justify-end gap-1.5">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            title="Ver detalle"
-                            className="h-8 w-8 p-0"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              router.push(`/dashboard/clients/${client.id}`);
-                            }}
-                          >
-                            <HiEye className="h-3.5 w-3.5" />
-                          </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            console.log('Editar', client.id);
-                          }}
-                          title="Editar"
-                          className="h-8 w-8 p-0"
-                        >
-                          <HiPencil className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-
-                  {/* Fila expandida con más detalles */}
-                  {isExpanded && (
-                    <tr className={`transition-colors duration-300 ${
-                      isDark ? 'bg-slate-800/60' : 'bg-gray-50'
+            {clients.map((client) => (
+              <tr key={client.id} className={`transition-colors duration-300 ${
+                isDark ? 'hover:bg-slate-800/50' : 'hover:bg-gray-50'
+              }`}>
+                <td className={`px-6 py-4 transition-colors duration-300`}>
+                  <div>
+                    <div className={`text-sm font-medium transition-colors duration-300 ${
+                      isDark ? 'text-slate-100' : 'text-gray-900'
                     }`}>
-                      <td colSpan={7} className="px-4 py-6">
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                          {/* Información Personal */}
-                          <div className={`rounded-lg border p-4 transition-colors duration-300 ${
+                      {client.full_name || 'Sin nombre'}
+                    </div>
+                    <div className="mt-1">
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border ${getClientTypeColor(client.client_type)}`}>
+                        {formatClientType(client.client_type)}
+                      </span>
+                    </div>
+                  </div>
+                </td>
+                <td className={`px-6 py-4 transition-colors duration-300`}>
+                  <div className="space-y-1">
+                    {client.email && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <HiMail className={`h-4 w-4 ${isDark ? 'text-slate-400' : 'text-gray-400'}`} />
+                        <span className={isDark ? 'text-slate-300' : 'text-gray-700'}>
+                          {client.email}
+                        </span>
+                      </div>
+                    )}
+                    {client.phone && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <HiPhone className={`h-4 w-4 ${isDark ? 'text-slate-400' : 'text-gray-400'}`} />
+                        <span className={isDark ? 'text-slate-300' : 'text-gray-700'}>
+                          {client.phone}
+                        </span>
+                        <a
+                          href={`https://wa.me/${formatPhoneNumber(client.phone)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`p-1 rounded transition-colors ${
                             isDark
-                              ? 'border-slate-700 bg-slate-800/80'
-                              : 'border-gray-200 bg-white'
-                          }`}>
-                            <h4 className={`mb-3 flex items-center gap-2 text-sm font-bold transition-colors duration-300 ${
-                              isDark ? 'text-slate-200' : 'text-gray-900'
-                            }`}>
-                              <HiUserCircle className={`h-4 w-4 transition-colors duration-300 ${
-                                isDark ? 'text-blue-400' : 'text-blue-500'
-                              }`} />
-                              Información Personal
-                            </h4>
-                            <div className="space-y-2 text-sm">
-                              <p className={`transition-colors duration-300 ${
-                                isDark ? 'text-slate-300' : 'text-gray-700'
-                              }`}>
-                                <span className={`font-semibold transition-colors duration-300 ${
-                                  isDark ? 'text-slate-200' : 'text-gray-900'
-                                }`}>DNI:</span> {client.dni}
-                              </p>
-                              {client.dateOfBirth && (
-                                <p className={`transition-colors duration-300 ${
-                                  isDark ? 'text-slate-300' : 'text-gray-700'
-                                }`}>
-                                  <span className={`font-semibold transition-colors duration-300 ${
-                                    isDark ? 'text-slate-200' : 'text-gray-900'
-                                  }`}>Fecha de Nacimiento:</span> {formatDate(client.dateOfBirth)}
-                                </p>
-                              )}
-                              {client.nationality && (
-                                <p className={`transition-colors duration-300 ${
-                                  isDark ? 'text-slate-300' : 'text-gray-700'
-                                }`}>
-                                  <span className={`font-semibold transition-colors duration-300 ${
-                                    isDark ? 'text-slate-200' : 'text-gray-900'
-                                  }`}>Nacionalidad:</span> {client.nationality}
-                                </p>
-                              )}
-                              <p className={`transition-colors duration-300 ${
-                                isDark ? 'text-slate-300' : 'text-gray-700'
-                              }`}>
-                                <span className={`font-semibold transition-colors duration-300 ${
-                                  isDark ? 'text-slate-200' : 'text-gray-900'
-                                }`}>Registrado:</span> {formatDate(client.createdAt)}
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Información de Contacto Completa */}
-                          <div className={`rounded-lg border p-4 transition-colors duration-300 ${
-                            isDark
-                              ? 'border-slate-700 bg-slate-800/80'
-                              : 'border-gray-200 bg-white'
-                          }`}>
-                            <h4 className={`mb-3 flex items-center gap-2 text-sm font-bold transition-colors duration-300 ${
-                              isDark ? 'text-slate-200' : 'text-gray-900'
-                            }`}>
-                              <HiPhone className={`h-4 w-4 transition-colors duration-300 ${
-                                isDark ? 'text-green-400' : 'text-green-600'
-                              }`} />
-                              Contacto Completo
-                            </h4>
-                            <div className="space-y-2 text-sm">
-                              <div className="flex items-center gap-2">
-                                <HiPhone className={`h-4 w-4 transition-colors duration-300 ${
-                                  isDark ? 'text-slate-500' : 'text-gray-400'
-                                }`} />
-                                <a
-                                  href={`tel:${client.contact.phone}`}
-                                  className={`hover:underline transition-colors duration-300 ${
-                                    isDark ? 'text-blue-400' : 'text-blue-600'
-                                  }`}
-                                >
-                                  {client.contact.phone}
-                                </a>
-                              </div>
-                              {client.contact.alternativePhone && (
-                                <div className="flex items-center gap-2">
-                                  <HiPhone className={`h-4 w-4 transition-colors duration-300 ${
-                                    isDark ? 'text-slate-500' : 'text-gray-400'
-                                  }`} />
-                                  <a
-                                    href={`tel:${client.contact.alternativePhone}`}
-                                    className={`hover:underline transition-colors duration-300 ${
-                                      isDark ? 'text-blue-400' : 'text-blue-600'
-                                    }`}
-                                  >
-                                    {client.contact.alternativePhone}
-                                  </a>
-                                </div>
-                              )}
-                              <div className="flex items-center gap-2">
-                                <HiMail className={`h-4 w-4 transition-colors duration-300 ${
-                                  isDark ? 'text-slate-500' : 'text-gray-400'
-                                }`} />
-                                <a
-                                  href={`mailto:${client.contact.email}`}
-                                  className={`hover:underline transition-colors duration-300 ${
-                                    isDark ? 'text-blue-400' : 'text-blue-600'
-                                  }`}
-                                >
-                                  {client.contact.email}
-                                </a>
-                              </div>
-                              <p className={`transition-colors duration-300 ${
-                                isDark ? 'text-slate-400' : 'text-gray-600'
-                              }`}>
-                                <span className={`font-semibold transition-colors duration-300 ${
-                                  isDark ? 'text-slate-300' : 'text-gray-700'
-                                }`}>Contacto preferido:</span> {client.contact.preferredContact}
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Dirección y Propiedades */}
-                          <div className={`rounded-lg border p-4 transition-colors duration-300 ${
-                            isDark
-                              ? 'border-slate-700 bg-slate-800/80'
-                              : 'border-gray-200 bg-white'
-                          }`}>
-                            <h4 className={`mb-3 flex items-center gap-2 text-sm font-bold transition-colors duration-300 ${
-                              isDark ? 'text-slate-200' : 'text-gray-900'
-                            }`}>
-                              <HiLocationMarker className={`h-4 w-4 transition-colors duration-300 ${
-                                isDark ? 'text-purple-400' : 'text-purple-600'
-                              }`} />
-                              Dirección y Propiedades
-                            </h4>
-                            <div className={`space-y-2 text-sm transition-colors duration-300 ${
-                              isDark ? 'text-slate-300' : 'text-gray-700'
-                            }`}>
-                              <div className="flex items-start gap-2">
-                                <HiLocationMarker className={`h-4 w-4 mt-0.5 flex-shrink-0 transition-colors duration-300 ${
-                                  isDark ? 'text-slate-500' : 'text-gray-400'
-                                }`} />
-                                <div>
-                                  <p>{client.address.street}</p>
-                                  <p>{client.address.city}, {client.address.state}</p>
-                                  <p>CP: {client.address.zipCode}</p>
-                                </div>
-                              </div>
-                              <div className="mt-3 pt-3 border-t border-slate-700">
-                                <p className={`font-semibold transition-colors duration-300 ${
-                                  isDark ? 'text-slate-200' : 'text-gray-900'
-                                }`}>Propiedades:</p>
-                                <div className="mt-1 space-y-1">
-                                  {client.properties.owned > 0 && (
-                                    <p className={`text-xs transition-colors duration-300 ${
-                                      isDark ? 'text-emerald-400' : 'text-emerald-600'
-                                    }`}>
-                                      • {client.properties.owned} en propiedad
-                                    </p>
-                                  )}
-                                  {client.properties.rented > 0 && (
-                                    <p className={`text-xs transition-colors duration-300 ${
-                                      isDark ? 'text-blue-400' : 'text-blue-600'
-                                    }`}>
-                                      • {client.properties.rented} alquiladas
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                              {client.notes && (
-                                <div className="mt-3 pt-3 border-t border-slate-700">
-                                  <p className={`font-semibold transition-colors duration-300 ${
-                                    isDark ? 'text-slate-200' : 'text-gray-900'
-                                  }`}>Notas:</p>
-                                  <p className="mt-1 text-xs">{client.notes}</p>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </>
-              );
-            })}
+                              ? 'hover:bg-green-900/30 text-green-400'
+                              : 'hover:bg-green-100 text-green-600'
+                          }`}
+                          title="Enviar mensaje por WhatsApp"
+                        >
+                          <HiChatAlt2 className="h-4 w-4" />
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </td>
+                <td className={`px-6 py-4 text-sm transition-colors duration-300`}>
+                  <div className="flex items-center gap-2">
+                    <HiLocationMarker className={`h-4 w-4 ${isDark ? 'text-slate-400' : 'text-gray-400'}`} />
+                    <div className={isDark ? 'text-slate-300' : 'text-gray-700'}>
+                      {formatAddress(client.full_address)}
+                    </div>
+                  </div>
+                </td>
+                <td className={`px-6 py-4 transition-colors duration-300`}>
+                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border ${getStatusColor(client.status)}`}>
+                    {formatStatus(client.status)}
+                  </span>
+                </td>
+                <td className={`px-6 py-4 transition-colors duration-300`}>
+                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border ${getActivityColor(client.current_activity)}`}>
+                    {formatActivity(client.current_activity)}
+                  </span>
+                </td>
+                <td className={`px-6 py-4 transition-colors duration-300`}>
+                  <button
+                    onClick={() => handleDocumentsClick(client)}
+                    className={`flex items-center gap-2 text-sm transition-colors ${
+                      client.documents_count > 0
+                        ? isDark
+                          ? 'text-blue-400 hover:text-blue-300 hover:bg-slate-700/50 px-2 py-1 rounded'
+                          : 'text-blue-600 hover:text-blue-700 hover:bg-gray-100 px-2 py-1 rounded'
+                        : isDark
+                          ? 'text-slate-400'
+                          : 'text-gray-500'
+                    }`}
+                    disabled={client.documents_count === 0}
+                  >
+                    <HiDocumentText className="h-4 w-4" />
+                    <span>{client.documents_count}</span>
+                    {client.documents_count > 0 && (
+                      <span className="text-xs">Ver</span>
+                    )}
+                  </button>
+                </td>
+                <td className={`px-6 py-4 text-sm transition-colors duration-300`}>
+                  <div className={isDark ? 'text-slate-300' : 'text-gray-700'}>
+                    {formatDate(client.created_at)}
+                  </div>
+                </td>
+                <td className={`px-6 py-4 text-right text-sm font-medium transition-colors duration-300`}>
+                  <div className="flex items-center justify-end gap-2">
+                    <Link
+                      href={`/dashboard/clients/${client.id}`}
+                      className={`p-1 rounded transition-colors ${
+                        isDark
+                          ? 'hover:bg-slate-700 text-slate-400 hover:text-slate-200'
+                          : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+                      }`}
+                      title="Ver detalles"
+                    >
+                      <HiEye className="h-4 w-4" />
+                    </Link>
+                    <Link
+                      href={`/dashboard/clients/${client.id}/edit`}
+                      className={`p-1 rounded transition-colors ${
+                        isDark
+                          ? 'hover:bg-slate-700 text-slate-400 hover:text-slate-200'
+                          : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+                      }`}
+                      title="Editar cliente"
+                    >
+                      <HiPencil className="h-4 w-4" />
+                    </Link>
+                  </div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
@@ -489,6 +560,98 @@ export function ClientTable({ clients }: ClientTableProps) {
             isDark ? 'text-slate-400' : 'text-gray-500'
           }`}>No hay clientes registrados</p>
         </div>
+      )}
+
+      {/* Paginación */}
+      {pagination && pagination.total_pages > 1 && (
+        <div className={`px-6 py-4 border-t transition-colors duration-300 ${
+          isDark ? 'border-slate-700/50 bg-slate-800' : 'border-gray-200 bg-gray-50'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className={`text-sm transition-colors duration-300 ${
+              isDark ? 'text-slate-400' : 'text-gray-700'
+            }`}>
+              Mostrando {pagination.start_index + 1} a {Math.min(pagination.end_index + 1, pagination.total_count)} de{' '}
+              {pagination.total_count} clientes
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onPageChange?.(pagination.current_page - 1)}
+                disabled={!pagination.has_previous}
+                className={`p-2 rounded-lg border transition-colors ${
+                  !pagination.has_previous
+                    ? isDark
+                      ? 'border-slate-700 bg-slate-900 text-slate-700 cursor-not-allowed'
+                      : 'border-gray-200 bg-white text-gray-300 cursor-not-allowed'
+                    : isDark
+                      ? 'border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700'
+                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <HiChevronLeft className="h-4 w-4" />
+              </button>
+
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, pagination.total_pages) }, (_, i) => {
+                  let pageNum;
+                  if (pagination.total_pages <= 5) {
+                    pageNum = i + 1;
+                  } else if (pagination.current_page <= 3) {
+                    pageNum = i + 1;
+                  } else if (pagination.current_page >= pagination.total_pages - 2) {
+                    pageNum = pagination.total_pages - 4 + i;
+                  } else {
+                    pageNum = pagination.current_page - 2 + i;
+                  }
+
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => onPageChange?.(pageNum)}
+                      className={`px-3 py-1 rounded-lg text-sm transition-colors ${
+                        pagination.current_page === pageNum
+                          ? isDark
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-blue-600 text-white'
+                          : isDark
+                            ? 'border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700'
+                            : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => onPageChange?.(pagination.current_page + 1)}
+                disabled={!pagination.has_next}
+                className={`p-2 rounded-lg border transition-colors ${
+                  !pagination.has_next
+                    ? isDark
+                      ? 'border-slate-700 bg-slate-900 text-slate-700 cursor-not-allowed'
+                      : 'border-gray-200 bg-white text-gray-300 cursor-not-allowed'
+                    : isDark
+                      ? 'border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700'
+                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <HiChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Documentos */}
+      {selectedClient && (
+        <DocumentsModal
+          client={selectedClient}
+          isOpen={isDocumentsModalOpen}
+          onClose={handleDocumentsModalClose}
+          onDocumentDelete={handleDocumentDelete}
+        />
       )}
     </div>
   );

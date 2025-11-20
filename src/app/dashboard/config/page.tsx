@@ -391,46 +391,6 @@ export default function ConfiguracionPage() {
                 </Suspense>
               </ErrorBoundary>
 
-              {/* Current Connection Status con Suspense y ErrorBoundary */}
-              <ErrorBoundary 
-                fallback={
-                  <div className={`rounded-xl border p-6 ${
-                    isDark
-                      ? 'bg-gray-800 border-gray-700'
-                      : 'bg-white border-gray-200'
-                  }`}>
-                    <div className="text-center py-8">
-                      <p className={`text-lg font-medium ${
-                        isDark ? 'text-gray-300' : 'text-gray-700'
-                      }`}>
-                        No se pudo cargar la configuración de Mercado Libre
-                      </p>
-                      <button 
-                        onClick={() => window.location.reload()}
-                        className={`mt-4 px-4 py-2 rounded-lg font-medium ${
-                          isDark
-                            ? 'bg-red-600 hover:bg-red-700 text-white'
-                            : 'bg-red-600 hover:bg-red-700 text-white'
-                        }`}
-                      >
-                        Recargar página
-                      </button>
-                    </div>
-                  </div>
-                }
-              >
-                <Suspense fallback={<LoadingSpinner />}>
-                  <div className={`rounded-xl border p-6 overflow-hidden ${
-                    isDark
-                      ? 'bg-gray-800 border-gray-700'
-                      : 'bg-white border-gray-200'
-                  }`}>
-                    <div className="min-h-[200px]">
-                      <MercadoLibreIntegration />
-                    </div>
-                  </div>
-                </Suspense>
-              </ErrorBoundary>
             </div>
           )}
         </div>

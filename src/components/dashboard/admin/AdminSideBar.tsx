@@ -1,4 +1,4 @@
-// components/admin/AdminSidebar.tsx - Versión corregida
+// components/admin/AdminSidebar.tsx - Versión mejorada para modo claro y oscuro
 'use client'
 
 import React from 'react'
@@ -48,13 +48,13 @@ export function AdminSidebar({
   // Error boundary fallback
   if (error) {
     return (
-      <div className="w-72 bg-red-50 border-r border-red-200 p-4">
-        <div className="text-red-800">
+      <div className={`w-72 p-4 ${isDark ? 'bg-red-900 border-red-700' : 'bg-red-50 border-red-200'} border-r`}>
+        <div className={isDark ? 'text-red-100' : 'text-red-800'}>
           <h3 className="font-semibold mb-2">Error en el Sidebar</h3>
-          <p className="text-sm text-red-600">{error}</p>
+          <p className={`text-sm ${isDark ? 'text-red-200' : 'text-red-600'}`}>{error}</p>
           <button
             onClick={() => setError(null)}
-            className="mt-2 px-3 py-1 bg-red-100 text-red-700 rounded text-sm hover:bg-red-200"
+            className={`mt-2 px-3 py-1 rounded text-sm ${isDark ? 'bg-red-800 text-red-100 hover:bg-red-700' : 'bg-red-100 text-red-700 hover:bg-red-200'}`}
           >
             Reintentar
           </button>
@@ -67,13 +67,23 @@ export function AdminSidebar({
   const renderSidebarContent = () => (
     <div 
       ref={sidebarRef}
-      className={`flex grow flex-col overflow-y-auto bg-white shadow-sm transition-colors duration-300 dark:bg-gray-900 dark:border-r dark:border-gray-700 border-r border-gray-200`}
+      className={`flex grow flex-col overflow-y-auto shadow-sm transition-colors duration-300 border-r ${
+        isDark 
+          ? 'bg-gray-900 border-gray-700' 
+          : 'bg-white border-gray-200'
+      }`}
     >
       {/* Header con logo */}
-      <div className={`flex h-16 shrink-0 items-center justify-center border-b border-gray-200 px-6 transition-colors duration-300 dark:border-gray-700 ${isCollapsed ? 'px-2' : ''}`}>
+      <div className={`flex h-16 shrink-0 items-center justify-center px-6 transition-colors duration-300 border-b ${
+        isDark 
+          ? 'border-gray-700' 
+          : 'border-gray-200'
+      } ${isCollapsed ? 'px-2' : ''}`}>
         {isCollapsed ? (
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
-            <span className="font-bold text-lg text-gray-900 dark:text-white">I</span>
+          <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+            isDark ? 'bg-gray-800' : 'bg-gray-100'
+          }`}>
+            <span className={`font-bold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>I</span>
           </div>
         ) : (
           <Image
@@ -95,7 +105,11 @@ export function AdminSidebar({
             ))}
           </ul>
         </div>
-        <div className="border-t border-gray-200 py-3 dark:border-gray-700">
+        <div className={`border-t py-3 ${
+          isDark 
+            ? 'border-gray-700' 
+            : 'border-gray-200'
+        }`}>
           <ul role="list" className="space-y-1 px-2">
             {bottomMenuItems.map((item) => (
               <SidebarItem key={item.href} item={item} pathname={pathname} isCollapsed={isCollapsed} isDark={isDark} router={router} />
@@ -105,10 +119,18 @@ export function AdminSidebar({
       </nav>
 
       {/* Footer */}
-      <div className="flex shrink-0 items-center justify-center border-t border-gray-200 bg-gray-50 py-3 px-6 transition-colors duration-300 dark:border-gray-700 dark:bg-gray-800">
+      <div className={`flex shrink-0 items-center justify-center py-3 px-6 transition-colors duration-300 border-t ${
+        isDark 
+          ? 'border-gray-700 bg-gray-800' 
+          : 'border-gray-200 bg-gray-50'
+      }`}>
         <div className="flex items-center space-x-2">
           <div className="h-2 w-2 rounded-full bg-green-500"></div>
-          {!isCollapsed && <p className="text-xs font-medium text-gray-600 dark:text-gray-400">© 2025 InmoSite</p>}
+          {!isCollapsed && <p className={`text-xs font-medium ${
+            isDark 
+              ? 'text-gray-400' 
+              : 'text-gray-600'
+          }`}>© 2025 InmoSite</p>}
         </div>
       </div>
     </div>
@@ -124,7 +146,11 @@ export function AdminSidebar({
             <div className="relative mr-16 flex w-full max-w-xs flex-1">
               <button
                 type="button"
-                className="absolute -right-14 top-5 flex h-12 w-12 items-center justify-center rounded-full bg-gray-800 text-white shadow-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                className={`absolute -right-14 top-5 flex h-12 w-12 items-center justify-center rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                  isDark 
+                    ? 'bg-gray-800 text-white hover:bg-gray-700 focus:ring-gray-500' 
+                    : 'bg-gray-800 text-white hover:bg-gray-700 focus:ring-gray-500'
+                }`}
                 onClick={onClose}
               >
                 <HiX className="h-6 w-6" />
@@ -179,7 +205,6 @@ function SidebarItem({ item, pathname, isCollapsed, isDark, router }: {
   const isActive = item.href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(item.href) || isSubItemActive
 
   const [isOpen, setIsOpen] = React.useState(isSubItemActive)
-  // Corregido: usar HTMLLIElement en lugar de HTMLDivElement
   const itemRef = React.useRef<HTMLLIElement>(null)
 
   // Ensure component is mounted before performing state updates
@@ -226,34 +251,85 @@ function SidebarItem({ item, pathname, isCollapsed, isDark, router }: {
     group flex w-full items-center rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-all duration-200
     ${isCollapsed ? 'justify-center px-2 py-3' : ''}
     ${isActive
-      ? 'bg-gray-900 text-white shadow-sm dark:bg-gray-700'
-      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white'
+      ? isDark 
+        ? 'bg-gray-700 text-white shadow-sm' 
+        : 'bg-blue-50 text-blue-700 shadow-sm border-l-4 border-blue-700'
+      : isDark
+        ? 'text-gray-300 hover:bg-gray-800 hover:text-white'
+        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
     }
   `
 
   return (
     <li ref={itemRef}>
       <div onClick={handleClick} className={itemClasses} title={isCollapsed ? item.name : undefined}>
-        <IconComponent className={`h-5 w-5 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'} ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300'}`} />
+        <IconComponent className={`h-5 w-5 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'} ${
+          isActive 
+            ? isDark ? 'text-white' : 'text-blue-700'
+            : isDark 
+              ? 'text-gray-400 group-hover:text-gray-300' 
+              : 'text-gray-500 group-hover:text-gray-700'
+        }`} />
         
         {!isCollapsed && (
           <>
             <span className="flex-1 truncate">{item.name}</span>
-            {item.badge && <span className="ml-2 rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300 group-hover:bg-gray-300 dark:group-hover:bg-gray-600">{item.badge}</span>}
-            {hasSubItems && <svg className={`ml-2 h-4 w-4 transform transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>}
+            {item.badge && (
+              <span className={`ml-2 rounded-full px-2 py-0.5 text-xs font-medium ${
+                isActive
+                  ? isDark 
+                    ? 'bg-gray-600 text-white' 
+                    : 'bg-blue-100 text-blue-700'
+                  : isDark 
+                    ? 'bg-gray-700 text-gray-300' 
+                    : 'bg-gray-200 text-gray-700'
+              }`}>
+                {item.badge}
+              </span>
+            )}
+            {hasSubItems && (
+              <svg className={`ml-2 h-4 w-4 transform transition-transform duration-200 ${
+                isOpen ? 'rotate-180' : ''
+              } ${isActive ? (isDark ? 'text-white' : 'text-blue-700') : (isDark ? 'text-gray-400' : 'text-gray-500')}`} 
+                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            )}
           </>
         )}
       </div>
 
       {hasSubItems && !isCollapsed && (
-        <ul className={`mt-1 ml-9 space-y-1 overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+        <ul className={`mt-1 ml-9 space-y-1 overflow-hidden transition-all duration-300 ${
+          isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        }`}>
           {item.subItems?.map((subItem) => {
             const isSubActive = pathname.startsWith(subItem.href)
             return (
               <li key={subItem.href}>
-                <Link href={subItem.href} className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${isSubActive ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200'}`}>
+                <Link href={subItem.href} className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${
+                  isSubActive 
+                    ? isDark 
+                      ? 'bg-gray-800 font-medium text-white' 
+                      : 'bg-blue-50 font-medium text-blue-700'
+                    : isDark 
+                      ? 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' 
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}>
                   <span className="flex-1">{subItem.name}</span>
-                  {subItem.badge && <span className={`ml-2 rounded-full px-2 py-0.5 text-xs font-medium ${isSubActive ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}>{subItem.badge}</span>}
+                  {subItem.badge && (
+                    <span className={`ml-2 rounded-full px-2 py-0.5 text-xs font-medium ${
+                      isSubActive 
+                        ? isDark 
+                          ? 'bg-gray-700 text-white' 
+                          : 'bg-blue-100 text-blue-700'
+                        : isDark 
+                          ? 'bg-gray-700 text-gray-300' 
+                          : 'bg-gray-200 text-gray-700'
+                    }`}>
+                      {subItem.badge}
+                    </span>
+                  )}
                 </Link>
               </li>
             )

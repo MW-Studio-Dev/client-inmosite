@@ -1,16 +1,16 @@
 // components/admin/AdminHeader.tsx - Header del admin rediseñado
 'use client'
 
-import { 
+import {
   HiMenu,
   HiLogout,
-  HiBell,
   HiEye,
   HiStatusOnline
 } from 'react-icons/hi'
 import { User } from '@/interfaces'
 import type { Company } from '@/interfaces/company'
 import { UserAvatar } from '@/components/dashboard/admin/UserAvatar'
+import { NotificationBadge } from '@/components/common/NotificationBadge'
 
 interface AdminHeaderProps {
   onMenuClick: () => void
@@ -29,7 +29,7 @@ export function AdminHeader({
   company,
   subdomain
 }: AdminHeaderProps) {
-  return (
+    return (
     <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
       {/* Mobile menu button */}
       <button
@@ -76,16 +76,9 @@ export function AdminHeader({
           )}
 
           {/* Notifications button */}
-          <button
-            type="button"
+          <NotificationBadge
             className="relative rounded-full bg-white p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 transition-all duration-200"
-          >
-            <HiBell className="h-5 w-5" aria-hidden="true" />
-            {/* Notification badge */}
-            <span className="absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full bg-red-500 flex items-center justify-center">
-              <span className="text-[8px] text-white font-bold leading-none">3</span>
-            </span>
-          </button>
+          />
 
           {/* Separator */}
           <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200" aria-hidden="true" />

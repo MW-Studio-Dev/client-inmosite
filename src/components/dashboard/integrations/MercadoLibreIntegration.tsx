@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import axiosInstance from '@/lib/api';
 import { useDashboardTheme } from '@/context/DashboardThemeContext';
 import { useToast } from '@/components/common/Toast';
+import MercadoLibreErrorModal from './MercadoLibreErrorModal';
 import {
   HiCheckCircle,
   HiXCircle,
@@ -41,6 +42,18 @@ interface MeliStats {
   connection_date?: string;
 }
 
+interface MeliApiError {
+  success: false;
+  message: string;
+  error_code: string;
+  errors: {
+    action: string;
+  };
+  data: null;
+  timestamp: string;
+  request_id: string;
+}
+
 type LoadingState = 'idle' | 'loading' | 'connecting' | 'disconnecting';
 
 const MercadoLibreIntegration: React.FC = () => {
@@ -52,6 +65,8 @@ const MercadoLibreIntegration: React.FC = () => {
   const [stats, setStats] = useState<MeliStats | null>(null);
   const [loadingState, setLoadingState] = useState<LoadingState>('idle');
   const [showStats, setShowStats] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [lastError, setLastError] = useState<MeliApiError | null>(null);
 
   useEffect(() => {
     loadAuthStatus();
@@ -63,6 +78,19 @@ const MercadoLibreIntegration: React.FC = () => {
     }
   }, [authStatus?.connected]);
 
+  const handleApiError = (error: any) => {
+    // Verificar si es un error de token expirado de MercadoLibre
+    if (error?.response?.data?.error_code === 'MELI_TOKEN_EXPIRED') {
+      setLastError(error.response.data);
+      setShowErrorModal(true);
+      return;
+    }
+
+    // Para otros errores, mostrar el toast normal
+    const errorMsg = error?.response?.data?.message || error?.message || 'Error desconocido';
+    showError(errorMsg);
+  };
+
   const loadAuthStatus = async () => {
     setLoadingState('loading');
     try {
@@ -70,7 +98,7 @@ const MercadoLibreIntegration: React.FC = () => {
       setAuthStatus(response.data.data);
     } catch (error: any) {
       console.error('Error loading MercadoLibre auth status:', error);
-      showError('Error al cargar el estado de MercadoLibre');
+      handleApiError(error);
     } finally {
       setLoadingState('idle');
     }
@@ -82,6 +110,7 @@ const MercadoLibreIntegration: React.FC = () => {
       setStats(response.data.data);
     } catch (error: any) {
       console.error('Error loading MercadoLibre stats:', error);
+      handleApiError(error);
     }
   };
 
@@ -98,8 +127,7 @@ const MercadoLibreIntegration: React.FC = () => {
       window.location.href = oauth_url;
     } catch (error: any) {
       console.error('Error connecting to MercadoLibre:', error);
-      const errorMsg = error.response?.data?.message || 'Error al conectar con MercadoLibre';
-      showError(errorMsg);
+      handleApiError(error);
       setLoadingState('idle');
     }
   };
@@ -117,8 +145,7 @@ const MercadoLibreIntegration: React.FC = () => {
       setStats(null);
     } catch (error: any) {
       console.error('Error disconnecting from MercadoLibre:', error);
-      const errorMsg = error.response?.data?.message || 'Error al desconectar de MercadoLibre';
-      showError(errorMsg);
+      handleApiError(error);
     } finally {
       setLoadingState('idle');
     }
@@ -132,6 +159,12 @@ const MercadoLibreIntegration: React.FC = () => {
     showSuccess('Estado actualizado');
   };
 
+  const handleModalReconnect = async () => {
+    setShowErrorModal(false);
+    // Usar la misma lógica que handleConnect
+    await handleConnect();
+  };
+
   if (loadingState === 'loading') {
     return (
       <div className={`rounded-xl border p-6 ${
@@ -140,382 +173,180 @@ const MercadoLibreIntegration: React.FC = () => {
           : 'bg-white border-gray-200'
       }`}>
         <div className="flex items-center justify-center py-8">
-          <div className={`animate-spin rounded-full h-8 w-8 border-2 border-t-transparent ${
-            isDark ? 'border-gray-600' : 'border-gray-300'
-          }`}></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`rounded-xl border overflow-hidden ${
-      isDark
-        ? 'bg-gray-800 border-gray-700'
-        : 'bg-white border-gray-200'
-    }`}>
-      {/* Header */}
-      <div className={`p-6 border-b ${
-        isDark ? 'border-gray-700' : 'border-gray-200'
+    <>
+      <div className={`rounded-xl border p-6 ${
+        isDark
+          ? 'bg-gray-800 border-gray-700'
+          : 'bg-white border-gray-200'
       }`}>
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-4">
-            <div className={`p-3 rounded-lg ${
-              isDark
-                ? 'bg-yellow-500/10 border border-yellow-500/20'
-                : 'bg-yellow-50 border border-yellow-200'
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className={`text-xl font-semibold ${
+              isDark ? 'text-white' : 'text-gray-900'
             }`}>
-              <HiShoppingCart className="h-8 w-8 text-yellow-400" />
-            </div>
-            <div>
-              <h3 className={`text-lg font-bold ${
-                isDark ? 'text-gray-100' : 'text-gray-900'
-              }`}>
-                MercadoLibre
-              </h3>
-              <p className={`text-sm ${
-                isDark ? 'text-gray-400' : 'text-gray-600'
-              }`}>
-                Publica y sincroniza tus propiedades automáticamente
-              </p>
-            </div>
+              MercadoLibre Integration
+            </h2>
+            <p className={`text-sm ${
+              isDark ? 'text-gray-400' : 'text-gray-600'
+            }`}>
+              Publica tus propiedades en MercadoLibre
+            </p>
           </div>
-
           <button
             onClick={handleRefreshStatus}
-            disabled={loadingState !== 'idle'}
-            className={`p-2 rounded-lg transition-all duration-200 ${
+            className={`p-2 rounded-lg transition-colors ${
               isDark
-                ? 'hover:bg-gray-700 text-gray-400 hover:text-gray-200'
-                : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                ? 'hover:bg-gray-700 text-gray-400'
+                : 'hover:bg-gray-100 text-gray-500'
+            }`}
             title="Actualizar estado"
           >
-            <HiRefresh className={`h-5 w-5 ${loadingState !== 'idle' ? 'animate-spin' : ''}`} />
+            <HiRefresh className="w-5 h-5" />
           </button>
         </div>
-      </div>
 
-      {/* Status */}
-      <div className="p-6">
-        {authStatus?.connected && authStatus.auth ? (
-          <>
-            {/* Connected Status */}
-            <div className={`rounded-lg p-4 mb-4 ${
-              authStatus.auth.is_active
-                ? isDark
-                  ? 'bg-green-500/10 border border-green-500/20'
-                  : 'bg-green-50 border border-green-200'
-                : isDark
-                  ? 'bg-yellow-500/10 border border-yellow-500/20'
-                  : 'bg-yellow-50 border border-yellow-200'
+        {!authStatus?.connected ? (
+          <div className="text-center py-8">
+            <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
+              isDark ? 'bg-gray-700' : 'bg-gray-100'
             }`}>
-              <div className="flex items-center gap-3">
-                {authStatus.auth.is_active ? (
-                  <HiCheckCircle className="h-6 w-6 text-green-500 flex-shrink-0" />
-                ) : (
-                  <HiExclamationCircle className="h-6 w-6 text-yellow-500 flex-shrink-0" />
-                )}
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className={`font-semibold text-sm ${
-                      authStatus.auth.is_active
-                        ? 'text-green-700 dark:text-green-400'
-                        : 'text-yellow-700 dark:text-yellow-400'
-                    }`}>
-                      {authStatus.auth.is_active ? 'Conectado' : 'Requiere Reautenticación'}
-                    </span>
-                  </div>
-                  <p className={`text-xs mt-0.5 ${
-                    authStatus.auth.is_active
-                      ? 'text-green-600 dark:text-green-500'
-                      : 'text-yellow-600 dark:text-yellow-500'
-                  }`}>
-                    Usuario: {authStatus.auth.meli_nickname}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Account Info */}
-            <div className={`rounded-lg p-4 mb-4 ${
-              isDark
-                ? 'bg-gray-900/50 border border-gray-700'
-                : 'bg-gray-50 border border-gray-200'
-            }`}>
-              <h4 className={`text-sm font-semibold mb-3 ${
-                isDark ? 'text-gray-200' : 'text-gray-900'
-              }`}>
-                Información de la Cuenta
-              </h4>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className={`text-xs ${
-                    isDark ? 'text-gray-400' : 'text-gray-600'
-                  }`}>
-                    Usuario ML
-                  </span>
-                  <span className={`text-xs font-medium ${
-                    isDark ? 'text-gray-200' : 'text-gray-900'
-                  }`}>
-                    {authStatus.auth.meli_nickname}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className={`text-xs ${
-                    isDark ? 'text-gray-400' : 'text-gray-600'
-                  }`}>
-                    ID de Usuario
-                  </span>
-                  <span className={`text-xs font-medium ${
-                    isDark ? 'text-gray-200' : 'text-gray-900'
-                  }`}>
-                    {authStatus.auth.meli_user_id}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className={`text-xs ${
-                    isDark ? 'text-gray-400' : 'text-gray-600'
-                  }`}>
-                    Fecha de Conexión
-                  </span>
-                  <span className={`text-xs font-medium ${
-                    isDark ? 'text-gray-200' : 'text-gray-900'
-                  }`}>
-                    {new Date(authStatus.auth.created_at).toLocaleDateString('es-AR')}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Stats Toggle */}
-            {stats && (
-              <button
-                onClick={() => setShowStats(!showStats)}
-                className={`w-full mb-4 p-3 rounded-lg text-left transition-all duration-200 flex items-center justify-between ${
-                  isDark
-                    ? 'bg-gray-900/50 hover:bg-gray-900 border border-gray-700'
-                    : 'bg-gray-50 hover:bg-gray-100 border border-gray-200'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <HiChartBar className={`h-5 w-5 ${
-                    isDark ? 'text-gray-400' : 'text-gray-600'
-                  }`} />
-                  <span className={`text-sm font-medium ${
-                    isDark ? 'text-gray-200' : 'text-gray-900'
-                  }`}>
-                    Estadísticas de Sincronización
-                  </span>
-                </div>
-                <span className={`text-xs ${
-                  isDark ? 'text-gray-400' : 'text-gray-600'
-                }`}>
-                  {showStats ? '▼' : '▶'}
-                </span>
-              </button>
-            )}
-
-            {/* Stats Panel */}
-            {showStats && stats && (
-              <div className={`rounded-lg p-4 mb-4 ${
-                isDark
-                  ? 'bg-gray-900/50 border border-gray-700'
-                  : 'bg-gray-50 border border-gray-200'
-              }`}>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <p className={`text-xs ${
-                      isDark ? 'text-gray-400' : 'text-gray-600'
-                    }`}>
-                      Total Publicadas
-                    </p>
-                    <p className={`text-xl font-bold ${
-                      isDark ? 'text-gray-100' : 'text-gray-900'
-                    }`}>
-                      {stats.total_synced}
-                    </p>
-                  </div>
-                  <div>
-                    <p className={`text-xs ${
-                      isDark ? 'text-gray-400' : 'text-gray-600'
-                    }`}>
-                      Activas
-                    </p>
-                    <p className="text-xl font-bold text-green-500">
-                      {stats.active_listings}
-                    </p>
-                  </div>
-                  <div>
-                    <p className={`text-xs ${
-                      isDark ? 'text-gray-400' : 'text-gray-600'
-                    }`}>
-                      Pausadas
-                    </p>
-                    <p className="text-xl font-bold text-yellow-500">
-                      {stats.paused_listings}
-                    </p>
-                  </div>
-                  <div>
-                    <p className={`text-xs ${
-                      isDark ? 'text-gray-400' : 'text-gray-600'
-                    }`}>
-                      Con Error
-                    </p>
-                    <p className="text-xl font-bold text-red-500">
-                      {stats.error_listings}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className={`text-xs ${
-                      isDark ? 'text-gray-400' : 'text-gray-600'
-                    }`}>
-                      Estado de Salud
-                    </span>
-                    <span className={`text-xs font-bold ${
-                      stats.sync_health_score >= 80
-                        ? 'text-green-500'
-                        : stats.sync_health_score >= 50
-                        ? 'text-yellow-500'
-                        : 'text-red-500'
-                    }`}>
-                      {stats.sync_health_score.toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className={`h-2 rounded-full overflow-hidden ${
-                    isDark ? 'bg-gray-700' : 'bg-gray-200'
-                  }`}>
-                    <div
-                      className={`h-full transition-all duration-500 ${
-                        stats.sync_health_score >= 80
-                          ? 'bg-green-500'
-                          : stats.sync_health_score >= 50
-                          ? 'bg-yellow-500'
-                          : 'bg-red-500'
-                      }`}
-                      style={{ width: `${stats.sync_health_score}%` }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Actions */}
-            <div className="space-y-2">
-              {authStatus.auth.needs_reauth && (
-                <button
-                  onClick={handleConnect}
-                  disabled={loadingState === 'connecting'}
-                  className={`w-full py-2.5 px-4 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
-                    isDark
-                      ? 'bg-yellow-600 hover:bg-yellow-500 text-white'
-                      : 'bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white'
-                  } disabled:opacity-50 disabled:cursor-not-allowed`}
-                >
-                  {loadingState === 'connecting' ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                      Reconectando...
-                    </>
-                  ) : (
-                    <>
-                      <HiRefresh className="h-4 w-4" />
-                      Reconectar Cuenta
-                    </>
-                  )}
-                </button>
-              )}
-
-              <button
-                onClick={handleDisconnect}
-                disabled={loadingState === 'disconnecting'}
-                className={`w-full py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 border ${
-                  isDark
-                    ? 'bg-gray-700 hover:bg-gray-600 text-gray-200 border-gray-600'
-                    : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-300'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-              >
-                {loadingState === 'disconnecting' ? (
-                  <>
-                    <div className={`animate-spin rounded-full h-4 w-4 border-2 border-t-transparent ${
-                      isDark ? 'border-gray-400' : 'border-gray-600'
-                    }`}></div>
-                    Desconectando...
-                  </>
-                ) : (
-                  <>
-                    <HiXCircle className="h-4 w-4" />
-                    Desconectar Cuenta
-                  </>
-                )}
-              </button>
-
-              <a
-                href="https://www.mercadolibre.com.ar/publicaciones/listado"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`w-full py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 border ${
-                  isDark
-                    ? 'bg-gray-800 hover:bg-gray-700 text-gray-200 border-gray-700'
-                    : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200'
-                }`}
-              >
-                <HiExternalLink className="h-4 w-4" />
-                Ver en MercadoLibre
-              </a>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Not Connected */}
-            <div className={`rounded-lg p-4 mb-4 text-center ${
-              isDark
-                ? 'bg-gray-900/50 border border-gray-700'
-                : 'bg-gray-50 border border-gray-200'
-            }`}>
-              <HiXCircle className={`h-12 w-12 mx-auto mb-3 ${
-                isDark ? 'text-gray-600' : 'text-gray-400'
-              }`} />
-              <h4 className={`text-sm font-semibold mb-2 ${
-                isDark ? 'text-gray-200' : 'text-gray-900'
-              }`}>
-                No Conectado
-              </h4>
-              <p className={`text-xs ${
+              <HiShoppingCart className={`w-8 h-8 ${
                 isDark ? 'text-gray-400' : 'text-gray-600'
-              }`}>
-                Conecta tu cuenta de MercadoLibre para comenzar a publicar propiedades automáticamente
-              </p>
+              }`} />
             </div>
-
+            <h3 className={`text-lg font-medium mb-2 ${
+              isDark ? 'text-white' : 'text-gray-900'
+            }`}>
+              Conecta tu cuenta de MercadoLibre
+            </h3>
+            <p className={`text-sm mb-6 ${
+              isDark ? 'text-gray-400' : 'text-gray-600'
+            }`}>
+              Publica tus propiedades automáticamente en la plataforma de MercadoLibre
+            </p>
             <button
               onClick={handleConnect}
               disabled={loadingState === 'connecting'}
-              className={`w-full py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg ${
-                isDark
-                  ? 'bg-yellow-600 hover:bg-yellow-500 text-white'
-                  : 'bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900'
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
+              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {loadingState === 'connecting' ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                  Conectando...
-                </>
-              ) : (
-                <>
-                  <HiShoppingCart className="h-5 w-5" />
-                  Conectar con MercadoLibre
-                </>
-              )}
+              {loadingState === 'connecting' ? 'Conectando...' : 'Conectar Cuenta'}
             </button>
-          </>
+          </div>
+        ) : (
+          <div>
+            <div className={`flex items-center gap-3 p-4 rounded-lg mb-4 ${
+              isDark ? 'bg-green-900/20 border border-green-700/30' : 'bg-green-50 border border-green-200'
+            }`}>
+              <HiCheckCircle className="w-5 h-5 text-green-600" />
+              <div className="flex-1">
+                <p className="font-medium text-green-800">Conectado exitosamente</p>
+                <p className="text-sm text-green-700">
+                  Usuario: {authStatus.auth?.meli_nickname}
+                </p>
+              </div>
+            </div>
+
+            {stats && (
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className={`font-medium ${
+                    isDark ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    Estadísticas de Publicación
+                  </h4>
+                  <button
+                    onClick={() => setShowStats(!showStats)}
+                    className={`text-sm ${
+                      isDark ? 'text-blue-400' : 'text-blue-600'
+                    } hover:underline`}
+                  >
+                    {showStats ? 'Ocultar' : 'Mostrar'} detalles
+                  </button>
+                </div>
+
+                {showStats && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className={`p-3 rounded-lg ${
+                      isDark ? 'bg-gray-700' : 'bg-gray-50'
+                    }`}>
+                      <div className="text-2xl font-bold text-blue-600">{stats.total_synced}</div>
+                      <div className={`text-xs ${
+                        isDark ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
+                        Total Sincronizados
+                      </div>
+                    </div>
+                    <div className={`p-3 rounded-lg ${
+                      isDark ? 'bg-gray-700' : 'bg-gray-50'
+                    }`}>
+                      <div className="text-2xl font-bold text-green-600">{stats.active_listings}</div>
+                      <div className={`text-xs ${
+                        isDark ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
+                        Activos
+                      </div>
+                    </div>
+                    <div className={`p-3 rounded-lg ${
+                      isDark ? 'bg-gray-700' : 'bg-gray-50'
+                    }`}>
+                      <div className="text-2xl font-bold text-yellow-600">{stats.paused_listings}</div>
+                      <div className={`text-xs ${
+                        isDark ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
+                        Pausados
+                      </div>
+                    </div>
+                    <div className={`p-3 rounded-lg ${
+                      isDark ? 'bg-gray-700' : 'bg-gray-50'
+                    }`}>
+                      <div className="text-2xl font-bold text-red-600">{stats.error_listings}</div>
+                      <div className={`text-xs ${
+                        isDark ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
+                        Errores
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleDisconnect}
+                disabled={loadingState === 'disconnecting'}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  loadingState === 'disconnecting'
+                    ? 'opacity-50 cursor-not-allowed'
+                    : ''
+                } ${
+                  isDark
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                    : 'bg-red-600 hover:bg-red-700 text-white'
+                }`}
+              >
+                {loadingState === 'disconnecting' ? 'Desconectando...' : 'Desconectar'}
+              </button>
+            </div>
+          </div>
         )}
       </div>
-    </div>
+
+      {/* Modal para errores de MercadoLibre */}
+      <MercadoLibreErrorModal
+        isOpen={showErrorModal}
+        onClose={() => setShowErrorModal(false)}
+        error={lastError}
+        onReconnect={handleModalReconnect}
+      />
+    </>
   );
 };
 

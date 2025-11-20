@@ -5,7 +5,6 @@ import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import {
   HiMenuAlt3,
-  HiBell,
   HiSearch,
   HiLogout,
   HiUserCircle,
@@ -17,6 +16,8 @@ import { DashboardGuard } from '@/components/dashboard/DashboardGuard'
 import { DashboardThemeProvider, useDashboardTheme } from '@/context/DashboardThemeContext'
 import { useAuth } from '@/hooks'
 import { dashboardMenuItems, dashboardBottomMenuItems } from '@/constants/dashboardMenu'
+import { NotificationBadge } from '@/components/common/NotificationBadge'
+import { NotificationProvider } from '@/providers/NotificationProvider'
 
 // Componente interno que usa los hooks del contexto
 function DashboardContent({ children }: { children: React.ReactNode }) {
@@ -139,20 +140,13 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
               </button>
 
               {/* Notificaciones */}
-              <button
-                type="button"
+              <NotificationBadge
                 className={`relative p-2 rounded-lg transition-all duration-200 ${
                   isDark
                     ? 'text-gray-300 hover:bg-gray-800'
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
-                title="Notificaciones"
-              >
-                <span className="sr-only">Ver notificaciones</span>
-                <HiBell className="h-6 w-6" aria-hidden="true" />
-                {/* Badge de notificaciones */}
-                <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
-              </button>
+              />
 
               {/* Separator */}
               <div className={`hidden lg:block h-6 w-px ${
@@ -224,8 +218,10 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   return (
-    <DashboardThemeProvider>
-      <DashboardContent>{children}</DashboardContent>
-    </DashboardThemeProvider>
+    <NotificationProvider>
+      <DashboardThemeProvider>
+        <DashboardContent>{children}</DashboardContent>
+      </DashboardThemeProvider>
+    </NotificationProvider>
   )
 }

@@ -17,8 +17,9 @@ import {
   HiFunnel,
   HiSquares2X2,
   HiListBullet,
-  HiBuildingOffice
+  HiBuildingOffice,
 } from 'react-icons/hi2';
+import { HiExternalLink } from 'react-icons/hi';
 
 interface PublishResponse {
   success: boolean;
@@ -31,6 +32,16 @@ interface PublishResponse {
     listing_type: string;
     message: string;
     check_status_url: string;
+  };
+}
+
+interface OAuthResponse {
+  success: boolean;
+  message: string;
+  data: {
+    oauth_url: string;
+    state: string;
+    expires_in: number;
   };
 }
 
@@ -48,6 +59,14 @@ export default function MercadoLibrePropertyPublishPage() {
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [listingType, setListingType] = useState<'silver' | 'gold' | 'premium'>('silver');
+  
+  // Estados para manejar la reconexión con MercadoLibre
+  const [tokenExpired, setTokenExpired] = useState(false);
+  const [oauthUrl, setOauthUrl] = useState<string | null>(null);
+  const [gettingOAuthUrl, setGettingOAuthUrl] = useState(false);
+  
+  // Nuevo estado para manejar errores de publicación
+  const [publishError, setPublishError] = useState<string | null>(null);
 
   const { properties, loading, refetch, totalProperties } = useProperties({
     filters,
@@ -65,13 +84,42 @@ export default function MercadoLibrePropertyPublishPage() {
   const handlePublishClick = (property: Property) => {
     setSelectedProperty(property);
     setListingType('silver');
+    setTokenExpired(false);
+    setOauthUrl(null);
+    setPublishError(null); // Limpiar errores anteriores
     setShowPublishModal(true);
+  };
+
+  // Función para obtener la URL de OAuth de MercadoLibre
+  const getOAuthUrl = async () => {
+    setGettingOAuthUrl(true);
+    try {
+      const response = await axiosInstance.get<OAuthResponse>(
+        '/integrations/mercadolibre/auth/get_oauth_url/'
+      );
+
+      if (response.data.success) {
+        setOauthUrl(response.data.data.oauth_url);
+        // Redirigir a la URL de OAuth
+        window.location.href = response.data.data.oauth_url;
+      } else {
+        showError('No se pudo obtener la URL de autenticación de MercadoLibre');
+      }
+    } catch (error: any) {
+      console.error('Error getting OAuth URL:', error);
+      const errorMsg = error.response?.data?.message || 'Error al obtener la URL de autenticación';
+      showError(errorMsg);
+    } finally {
+      setGettingOAuthUrl(false);
+    }
   };
 
   const handlePublish = async () => {
     if (!selectedProperty) return;
 
     setPublishing(true);
+    setPublishError(null); // Limpiar errores anteriores
+    
     try {
       const response = await axiosInstance.post<PublishResponse>(
         '/integrations/mercadolibre/sync/publish_property/',
@@ -82,8 +130,11 @@ export default function MercadoLibrePropertyPublishPage() {
       );
 
       if (response.data.success) {
-        showSuccess(response.data.message);
-        showInfo('La publicación se ha creado exitosamente. Recuerda que debes pagar por la difusión para que sea visible públicamente.');
+        // Mensaje de éxito específico de la API
+        const successMessage = response.data.data.message || 'Publicación iniciada correctamente.';
+        showSuccess(successMessage);
+        
+        showInfo('Recuerda que debes pagar por la difusión en MercadoLibre para que la publicación sea visible públicamente.');
 
         setShowPublishModal(false);
         setSelectedProperty(null);
@@ -93,12 +144,37 @@ export default function MercadoLibrePropertyPublishPage() {
           checkPublicationStatus(response.data.data.check_status_url);
         }, 3000);
       } else {
-        showError(response.data.message || 'Error al iniciar la publicación');
+        // Este bloque podría no ser necesario si la API siempre devuelve 200 con success: false
+        // pero lo mantenemos como fallback.
+        setPublishError(response.data.message || 'Error al iniciar la publicación');
       }
     } catch (error: any) {
       console.error('Error publishing property:', error);
-      const errorMsg = error.response?.data?.message || 'Error al publicar la propiedad en MercadoLibre';
-      showError(errorMsg);
+      
+      // Verificar si el error es por token expirado
+      if (error.response?.data?.error_code === 'MELI_TOKEN_EXPIRED') {
+        setTokenExpired(true);
+        setPublishError(error.response.data.message || 'La conexión con MercadoLibre ha expirado');
+      } else {
+        // Manejo detallado de errores de validación
+        const errorData = error.response?.data;
+        let errorMessage = 'Error al publicar la propiedad en MercadoLibre.'; // Mensaje por defecto
+
+        if (errorData?.errors && typeof errorData.errors === 'object') {
+          // Extraer mensajes de error específicos del objeto 'errors'
+          const detailedErrors = Object.values(errorData.errors).flat();
+          if (detailedErrors.length > 0) {
+            const mainMessage = errorData.message || 'Error de validación';
+            errorMessage = `${mainMessage}: ${detailedErrors.join(', ')}`;
+          }
+        } else if (errorData?.message) {
+          // Fallback al mensaje general si no hay detalles
+          errorMessage = errorData.message;
+        }
+        
+        // Guardar el error en el estado en lugar de solo mostrarlo en un toast
+        setPublishError(errorMessage);
+      }
     } finally {
       setPublishing(false);
     }
@@ -550,31 +626,6 @@ export default function MercadoLibrePropertyPublishPage() {
         </div>
       )}
 
-      {/* Disclaimer */}
-      <div className={`rounded-xl border p-4 ${
-        isDark
-          ? 'bg-yellow-500/10 border-yellow-500/20'
-          : 'bg-yellow-50 border-yellow-200'
-      }`}>
-        <div className="flex items-start gap-3">
-          <HiExclamationCircle className={`h-5 w-5 mt-0.5 ${
-            isDark ? 'text-yellow-400' : 'text-yellow-600'
-          }`} />
-          <div>
-            <h4 className={`text-sm font-semibold mb-1 ${
-              isDark ? 'text-yellow-400' : 'text-yellow-700'
-            }`}>
-              Importante sobre la publicación
-            </h4>
-            <p className={`text-sm leading-relaxed ${
-              isDark ? 'text-yellow-300' : 'text-yellow-600'
-            }`}>
-              Al publicar una propiedad en MercadoLibre, se creará la publicación pero no será visible públicamente hasta que pagues por la difusión correspondiente.
-              El proceso de publicación puede tardar unos minutos en completarse.
-            </p>
-          </div>
-        </div>
-      </div>
 
       {/* Loading State */}
       {loading && (
@@ -663,117 +714,216 @@ export default function MercadoLibrePropertyPublishPage() {
       {selectedProperty && (
         <ConfirmModal
           isOpen={showPublishModal}
-          title={`Publicar "${selectedProperty.title}" en MercadoLibre`}
-          message={""}
-          confirmText={publishing ? "Publicando..." : "Publicar"}
+          title={tokenExpired ? "Reconectar con MercadoLibre" : `Publicar "${selectedProperty.title}" en MercadoLibre`}
+          message={tokenExpired ? "" : ""}
+          confirmText={tokenExpired ? "" : publishing ? "Publicando..." : "Publicar"}
           cancelText="Cancelar"
-          onConfirm={handlePublish}
+          onConfirm={tokenExpired ? () => {} : handlePublish}
           onCancel={() => {
             setShowPublishModal(false);
             setSelectedProperty(null);
+            setTokenExpired(false);
+            setPublishError(null); // Limpiar errores al cerrar
           }}
           type="info"
           disabled={publishing}
         >
-          <div className="space-y-4">
-            {/* Property Preview */}
-            <div className={`rounded-lg p-3 ${
-              isDark ? 'bg-gray-700' : 'bg-gray-50'
-            }`}>
-              <div className="flex items-center gap-3">
-                {selectedProperty.featured_image_url ? (
-                  <img
-                    src={selectedProperty.featured_image_url}
-                    alt={selectedProperty.title}
-                    className="w-16 h-16 rounded object-cover"
-                  />
-                ) : (
-                  <div className={`w-16 h-16 rounded flex items-center justify-center ${
-                    isDark ? 'bg-gray-600' : 'bg-gray-200'
-                  }`}>
-                    <HiBuildingOffice className="h-8 w-8 text-gray-400" />
+          {tokenExpired ? (
+            <div className="space-y-4">
+              {/* Error Message */}
+              <div className={`rounded-lg p-4 ${
+                isDark
+                  ? 'bg-red-500/10 border border-red-500/20'
+                  : 'bg-red-50 border border-red-200'
+              }`}>
+                <div className="flex items-start gap-3">
+                  <HiExclamationCircle className={`h-5 w-5 mt-0.5 ${
+                    isDark ? 'text-red-400' : 'text-red-600'
+                  }`} />
+                  <div>
+                    <h4 className={`text-sm font-semibold mb-1 ${
+                      isDark ? 'text-red-400' : 'text-red-700'
+                    }`}>
+                      Conexión con MercadoLibre expirada
+                    </h4>
+                    <p className={`text-sm leading-relaxed ${
+                      isDark ? 'text-red-300' : 'text-red-600'
+                    }`}>
+                      Tu conexión con MercadoLibre ha expirado. Para poder publicar propiedades, necesitas volver a autorizar el acceso a tu cuenta.
+                    </p>
                   </div>
+                </div>
+              </div>
+
+              {/* Reconnect Button */}
+              <button
+                onClick={getOAuthUrl}
+                disabled={gettingOAuthUrl}
+                className={`w-full py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+                  gettingOAuthUrl
+                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                    : isDark
+                      ? 'bg-yellow-600 hover:bg-yellow-500 text-white'
+                      : 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                }`}
+              >
+                {gettingOAuthUrl ? (
+                  <>
+                    <div className={`inline-block animate-spin rounded-full h-4 w-4 border-2 ${
+                      isDark
+                        ? 'border-gray-300 border-t-transparent'
+                        : 'border-gray-100 border-t-transparent'
+                    }`}></div>
+                    Obteniendo URL de autenticación...
+                  </>
+                ) : (
+                  <>
+                    <HiExternalLink className="h-4 w-4" />
+                    Reconectar con MercadoLibre
+                  </>
                 )}
-                <div className="flex-1">
-                  <h4 className={`font-semibold text-sm ${
-                    isDark ? 'text-gray-100' : 'text-gray-900'
-                  }`}>
-                    {selectedProperty.title}
-                  </h4>
-                  <p className={`text-xs ${
-                    isDark ? 'text-gray-400' : 'text-gray-600'
-                  }`}>
-                    {selectedProperty.location_display}
-                  </p>
-                  <p className={`text-sm font-medium mt-1 ${
+              </button>
+
+              {/* Instructions */}
+              <div className={`rounded-lg p-3 ${
+                isDark ? 'bg-gray-700' : 'bg-gray-50'
+              }`}>
+                <p className={`text-xs ${
+                  isDark ? 'text-gray-300' : 'text-gray-700'
+                }`}>
+                  Al hacer clic en "Reconectar", serás redirigido a MercadoLibre para autorizar el acceso a tu cuenta. 
+                  Después de autorizar, podrás volver a intentar publicar la propiedad.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/* Property Preview */}
+              <div className={`rounded-lg p-3 ${
+                isDark ? 'bg-gray-700' : 'bg-gray-50'
+              }`}>
+                <div className="flex items-center gap-3">
+                  {selectedProperty.featured_image_url ? (
+                    <img
+                      src={selectedProperty.featured_image_url}
+                      alt={selectedProperty.title}
+                      className="w-16 h-16 rounded object-cover"
+                    />
+                  ) : (
+                    <div className={`w-16 h-16 rounded flex items-center justify-center ${
+                      isDark ? 'bg-gray-600' : 'bg-gray-200'
+                    }`}>
+                      <HiBuildingOffice className="h-8 w-8 text-gray-400" />
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <h4 className={`font-semibold text-sm ${
+                      isDark ? 'text-gray-100' : 'text-gray-900'
+                    }`}>
+                      {selectedProperty.title}
+                    </h4>
+                    <p className={`text-xs ${
+                      isDark ? 'text-gray-400' : 'text-gray-600'
+                    }`}>
+                      {selectedProperty.location_display}
+                    </p>
+                    <p className={`text-sm font-medium mt-1 ${
+                      isDark ? 'text-yellow-400' : 'text-yellow-600'
+                    }`}>
+                      {selectedProperty.price_display}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Error Display - NUEVO */}
+              {publishError && (
+                <div className={`rounded-lg p-4 ${
+                  isDark
+                    ? 'bg-red-500/10 border border-red-500/20'
+                    : 'bg-red-50 border border-red-200'
+                }`}>
+                  <div className="flex items-start gap-3">
+                    <HiExclamationCircle className={`h-5 w-5 mt-0.5 ${
+                      isDark ? 'text-red-400' : 'text-red-600'
+                    }`} />
+                    <div>
+                      <h4 className={`text-sm font-semibold mb-1 ${
+                        isDark ? 'text-red-400' : 'text-red-700'
+                      }`}>
+                        Error al publicar
+                      </h4>
+                      <p className={`text-sm leading-relaxed ${
+                        isDark ? 'text-red-300' : 'text-red-600'
+                      }`}>
+                        {publishError}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Listing Type Selection */}
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${
+                  isDark ? 'text-gray-200' : 'text-gray-900'
+                }`}>
+                  Tipo de Publicación
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { value: 'silver', label: 'Silver', desc: 'Básico' },
+                    { value: 'gold', label: 'Gold', desc: 'Destacado' },
+                    { value: 'premium', label: 'Premium', desc: 'Premium' }
+                  ].map((type) => (
+                    <button
+                      key={type.value}
+                      onClick={() => setListingType(type.value as any)}
+                      disabled={publishing}
+                      className={`p-2 rounded-lg border-2 transition-all duration-200 disabled:opacity-50 ${
+                        listingType === type.value
+                          ? isDark
+                            ? 'border-yellow-500 bg-yellow-500/10'
+                            : 'border-yellow-400 bg-yellow-50'
+                          : isDark
+                            ? 'border-gray-600 hover:border-gray-500'
+                            : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      <p className={`font-semibold text-xs ${
+                        isDark ? 'text-gray-200' : 'text-gray-900'
+                      }`}>
+                        {type.label}
+                      </p>
+                      <p className={`text-xs ${
+                        isDark ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
+                        {type.desc}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Warning */}
+              <div className={`rounded-lg p-3 ${
+                isDark
+                  ? 'bg-yellow-500/10 border border-yellow-500/20'
+                  : 'bg-yellow-50 border border-yellow-200'
+              }`}>
+                <div className="flex items-start gap-2">
+                  <HiExclamationCircle className={`h-4 w-4 mt-0.5 ${
                     isDark ? 'text-yellow-400' : 'text-yellow-600'
+                  }`} />
+                  <p className={`text-xs leading-relaxed ${
+                    isDark ? 'text-yellow-300' : 'text-yellow-600'
                   }`}>
-                    {selectedProperty.price_display}
+                    La publicación se creará pero no será visible hasta que pagues por la difusión.
                   </p>
                 </div>
               </div>
             </div>
-
-            {/* Listing Type Selection */}
-            <div>
-              <label className={`block text-sm font-medium mb-2 ${
-                isDark ? 'text-gray-200' : 'text-gray-900'
-              }`}>
-                Tipo de Publicación
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { value: 'silver', label: 'Silver', desc: 'Básico' },
-                  { value: 'gold', label: 'Gold', desc: 'Destacado' },
-                  { value: 'premium', label: 'Premium', desc: 'Premium' }
-                ].map((type) => (
-                  <button
-                    key={type.value}
-                    onClick={() => setListingType(type.value as any)}
-                    disabled={publishing}
-                    className={`p-2 rounded-lg border-2 transition-all duration-200 disabled:opacity-50 ${
-                      listingType === type.value
-                        ? isDark
-                          ? 'border-yellow-500 bg-yellow-500/10'
-                          : 'border-yellow-400 bg-yellow-50'
-                        : isDark
-                          ? 'border-gray-600 hover:border-gray-500'
-                          : 'border-gray-300 hover:border-gray-400'
-                    }`}
-                  >
-                    <p className={`font-semibold text-xs ${
-                      isDark ? 'text-gray-200' : 'text-gray-900'
-                    }`}>
-                      {type.label}
-                    </p>
-                    <p className={`text-xs ${
-                      isDark ? 'text-gray-400' : 'text-gray-600'
-                    }`}>
-                      {type.desc}
-                    </p>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Warning */}
-            <div className={`rounded-lg p-3 ${
-              isDark
-                ? 'bg-yellow-500/10 border border-yellow-500/20'
-                : 'bg-yellow-50 border border-yellow-200'
-            }`}>
-              <div className="flex items-start gap-2">
-                <HiExclamationCircle className={`h-4 w-4 mt-0.5 ${
-                  isDark ? 'text-yellow-400' : 'text-yellow-600'
-                }`} />
-                <p className={`text-xs leading-relaxed ${
-                  isDark ? 'text-yellow-300' : 'text-yellow-600'
-                }`}>
-                  La publicación se creará pero no será visible hasta que pagues por la difusión.
-                </p>
-              </div>
-            </div>
-          </div>
+          )}
         </ConfirmModal>
       )}
     </div>

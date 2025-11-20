@@ -7,14 +7,12 @@ import {
   MapPinIcon,
   XMarkIcon,
   HomeIcon,
-
   Square3Stack3DIcon,
   PhoneIcon,
   EnvelopeIcon,
   ArrowLeftIcon,
   ShareIcon,
   HeartIcon,
-
   ChevronLeftIcon,
   ChevronRightIcon,
   BuildingOfficeIcon,
@@ -36,6 +34,7 @@ import { useWebsiteConfigContext } from '@/contexts/WebsiteConfigContext';
 import { PropertyDetail as PropertyDetailType } from '@/types/property';
 import Navbar from '../layout/Header';
 import { generatePropertySchema, generateBreadcrumbSchema } from '@/lib/seo';
+
 interface PropertyDetailPageProps {
   subdomain: string;
   propertyId: string;
@@ -79,7 +78,7 @@ const transformApiPropertyToInternal = (apiProperty: PropertyDetailType): Intern
       state: apiProperty.province,
       country: 'Argentina',
       coordinates: {
-        lat: -34.6037, // Default coordinates, you might want to add these to your API
+        lat: -34.6037,
         lng: -58.3816
       }
     },
@@ -221,7 +220,6 @@ const getFeatureIcon = (featureName: string) => {
   return <Square3Stack3DIcon className="h-6 w-6" />;
 };
 
-
 // Mock data para propiedades relacionadas
 const mockRelatedProperties = [
   {
@@ -256,7 +254,7 @@ const mockRelatedProperties = [
   }
 ];
 
-// Componente de Zoom de Imágenes
+// Componente de Zoom de Imágenes (MANTENIDO IGUAL)
 const ImageZoomModal: React.FC<{
   isOpen: boolean;
   images: Array<{
@@ -283,7 +281,6 @@ const ImageZoomModal: React.FC<{
       document.body.style.overflow = 'unset';
     }
 
-    // Cleanup function
     return () => {
       document.body.style.overflow = 'unset';
     };
@@ -434,6 +431,16 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
   const [relatedProperties] = useState(mockRelatedProperties);
   const [showUSD, setShowUSD] = useState(true);
   const [showMap, setShowMap] = useState(false);
+  
+  // NUEVO: Estado para el modal de contacto
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [contactFormData, setContactFormData] = useState({
+    name: '',
+    phone: '',
+    message: ''
+  });
+  const [isSubmittingContact, setIsSubmittingContact] = useState(false);
+  const [contactSubmitted, setContactSubmitted] = useState(false);
 
   // API calls - hooks must always be called
   const { config: templateConfig, loading: configLoading } = useWebsiteConfigContext();
@@ -472,7 +479,6 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
           street: apiProperty.address,
           city: apiProperty.city,
           state: apiProperty.province,
-          
         },
         rooms: apiProperty.bedrooms,
         area: apiProperty.surface_total ? parseFloat(apiProperty.surface_total) : undefined,
@@ -518,6 +524,43 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
 
   const openZoom = () => {
     setIsZoomModalOpen(true);
+  };
+
+  // NUEVAS: Funciones para el modal de contacto
+  const openContactModal = () => {
+    setIsContactModalOpen(true);
+    setContactSubmitted(false);
+    setContactFormData({ name: '', phone: '', message: '' });
+  };
+
+  const closeContactModal = () => {
+    setIsContactModalOpen(false);
+    setContactSubmitted(false);
+    setContactFormData({ name: '', phone: '', message: '' });
+  };
+
+  const handleContactFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setContactFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmittingContact(true);
+    
+    // Simulación de envío del formulario
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    setIsSubmittingContact(false);
+    setContactSubmitted(true);
+    
+    // Resetear el formulario después de 3 segundos
+    setTimeout(() => {
+      closeContactModal();
+    }, 3000);
   };
 
   // Función para formatear precios usando los datos reales de la API
@@ -585,7 +628,7 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
     surfaceText: getAdaptiveTextColor(templateConfig.colors.surface)
   };
 
-  // Componente para el switch de moneda
+  // Componente para el switch de moneda (MANTENIDO IGUAL)
   const CurrencyToggle: React.FC = () => (
     <div className="flex items-center space-x-3 mb-4">
       <span style={{ color: templateConfig.colors.textLight }} className="text-sm font-medium">
@@ -616,11 +659,9 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
     </div>
   );
 
-  // Componente del mapa con Google Maps embebido
+  // Componente del mapa con Google Maps embebido (MANTENIDO IGUAL)
   const MapSection: React.FC = () => {
-    // Generar URL de Google Maps embed usando coordenadas
     const getGoogleMapsEmbedUrl = (lat: number, lng: number, address: string) => {
-      // URL de Google Maps embed que funciona sin API key
       return `https://maps.google.com/maps?q=${lat},${lng}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
     };
 
@@ -646,7 +687,6 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
           </button>
         </div>
         
-        {/* Información de ubicación */}
         <div className="mb-4">
           <div className="flex items-start space-x-3">
             <MapPinIcon className="h-5 w-5 flex-shrink-0 mt-1" style={{ color: templateConfig.colors.primary }} />
@@ -664,7 +704,6 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
           </div>
         </div>
 
-        {/* Google Maps embed */}
         {showMap && (
           <div className="mt-6">
             <div className="relative h-64 lg:h-80 bg-gray-100 rounded-lg overflow-hidden">
@@ -684,7 +723,6 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
                 className="rounded-lg"
               />
               
-              {/* Overlay con controles adicionales */}
               <div className="absolute top-3 right-3 flex space-x-2">
                 <a
                   href={`https://www.google.com/maps/search/?api=1&query=${property.location.coordinates.lat},${property.location.coordinates.lng}`}
@@ -714,7 +752,6 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
               </div>
             </div>
             
-            {/* Lugares cercanos */}
             {property.nearbyPlaces && property.nearbyPlaces.length > 0 && (
               <div className="mt-4">
                 <h4 style={{ color: templateConfig.colors.text }} className="font-semibold mb-3">
@@ -749,7 +786,6 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
                   })}
                 </div>
                 
-                {/* Botón para ver todos los lugares cercanos */}
                 <div className="mt-3 text-center">
                   <button
                     onClick={() => {
@@ -770,10 +806,9 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
     );
   };
 
-  // Galería de imágenes mejorada
+  // Galería de imágenes mejorada (MANTENIDA IGUAL)
   const ImageGallery: React.FC = () => (
     <div className="space-y-4">
-      {/* Imagen principal */}
       <div className="relative h-96 lg:h-[500px] rounded-xl overflow-hidden group cursor-pointer" onClick={openZoom}>
         {displayImages[currentImageIndex]?.url ? (
           <Image
@@ -782,11 +817,6 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
             priority
-            // onError={(e) => {
-            //   // Handle image load error
-            //   const target = e.target as HTMLImageElement;
-            //   target.src = '/placeholder-property.jpg';
-            // }}
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
@@ -797,14 +827,12 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
           </div>
         )}
         
-        {/* Overlay de zoom */}
         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
           <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white bg-opacity-90 rounded-full p-3">
             <MagnifyingGlassIcon className="h-6 w-6 text-gray-800" />
           </div>
         </div>
         
-        {/* Controles de navegación */}
         {displayImages.length > 1 && (
           <>
             <button
@@ -822,7 +850,6 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
           </>
         )}
 
-        {/* Badges de estado */}
         <div className="absolute top-4 left-4 flex space-x-2">
           <span 
             style={{ 
@@ -835,7 +862,6 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
           </span>
         </div>
 
-        {/* Acciones */}
         <div className="absolute top-4 right-4 flex space-x-2">
           <button 
             style={{ backgroundColor: templateConfig.colors.surface }}
@@ -853,12 +879,10 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
           </button>
         </div>
 
-        {/* Contador de imágenes */}
         <div className="absolute bottom-4 right-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
           {currentImageIndex + 1} / {displayImages.length}
         </div>
 
-        {/* Views counter */}
         {apiProperty && (
           <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
             <EyeIcon className="h-4 w-4" />
@@ -867,7 +891,6 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
         )}
       </div>
 
-      {/* Thumbnails */}
       {displayImages.length > 1 && (
         <div className="flex space-x-2 overflow-x-auto pb-2">
           {displayImages.map((image, index) => (
@@ -886,10 +909,6 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
                   alt={image.alt}
                   fill
                   className="object-cover"
-                  // onError={(e) => {
-                  //   const target = e.target as HTMLImageElement;
-                  //   target.src = '/placeholder-property.jpg';
-                  // }}
                 />
               ) : (
                 <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -903,7 +922,7 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
     </div>
   );
 
-  // Información principal con iconos mejorados
+  // Información principal con iconos mejorados (MANTENIDA IGUAL)
   const PropertyInfo: React.FC = () => (
     <div style={{ backgroundColor: templateConfig.colors.surface }} className="rounded-xl p-6 lg:p-8">
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start mb-6">
@@ -933,14 +952,12 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
               <span className="text-lg text-gray-500">/mes</span>
             )}
           </div>
-          {/* Mostrar precio alternativo más pequeño */}
           <div
             style={{ color: templateConfig.colors.textLight }}
             className="text-sm mt-1"
           >
             {formatPrice(showUSD ? 'ARS' : 'USD')}
           </div>
-          {/* Property code and main features */}
           {apiProperty && (
             <div className="text-sm text-gray-500 mt-2">
               <p>Código: {apiProperty.internal_code}</p>
@@ -950,7 +967,6 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
         </div>
       </div>
 
-      {/* Características principales con iconos */}
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
         {property.features.slice(0, 6).map((feature) => (
           <div key={feature.id} className="text-center">
@@ -976,7 +992,6 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
         ))}
       </div>
 
-      {/* Descripción */}
       <div className="border-t pt-6" style={{ borderColor: templateConfig.colors.textLight + '20' }}>
         <h3 
           style={{ color: templateConfig.colors.text }}
@@ -994,7 +1009,7 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
     </div>
   );
 
-  // Amenidades
+  // Amenidades (MANTENIDA IGUAL)
   const AmenitiesSection: React.FC = () => (
     <div style={{ backgroundColor: templateConfig.colors.surface }} className="rounded-xl p-6 lg:p-8">
       <h3 
@@ -1022,7 +1037,111 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
     </div>
   );
 
-  // Información de contacto con sticky mejorado
+  // NUEVO: Componente Modal de Contacto
+  const ContactModal: React.FC = () => {
+    if (!isContactModalOpen) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-xl max-w-md w-full p-6 relative max-h-[90vh] overflow-y-auto">
+          <button
+            onClick={closeContactModal}
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            <XMarkIcon className="h-6 w-6" />
+          </button>
+          
+          <h2 className="text-2xl font-bold mb-4" style={{ color: templateConfig.colors.text }}>
+            Contactar por esta propiedad
+          </h2>
+          
+          {property && (
+            <div className="mb-4 p-3 rounded-lg" style={{ backgroundColor: `${templateConfig.colors.primary}10` }}>
+              <h3 className="font-semibold" style={{ color: templateConfig.colors.primary }}>
+                {property.title}
+              </h3>
+              <p className="text-sm text-gray-600">
+                {property.location.address}, {property.location.neighborhood}
+              </p>
+              <p className="text-sm text-gray-600">
+                Código: {apiProperty?.internal_code || property.id}
+              </p>
+            </div>
+          )}
+          
+          {contactSubmitted ? (
+            <div className="text-center py-8">
+              <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">¡Mensaje enviado!</h3>
+              <p className="text-gray-600">Nos pondremos en contacto contigo pronto.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleContactSubmit}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nombre completo
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={contactFormData.name}
+                  onChange={handleContactFormChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Tu nombre completo"
+                />
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Teléfono
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={contactFormData.phone}
+                  onChange={handleContactFormChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="+54 11 1234-5678"
+                />
+              </div>
+              
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Mensaje
+                </label>
+                <textarea
+                  name="message"
+                  value={contactFormData.message}
+                  onChange={handleContactFormChange}
+                  required
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Hola, estoy interesado en esta propiedad..."
+                />
+              </div>
+              
+              <button
+                type="submit"
+                disabled={isSubmittingContact}
+                style={{ backgroundColor: templateConfig.colors.primary }}
+                className="w-full py-3 text-white font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {isSubmittingContact ? 'Enviando...' : 'Enviar consulta'}
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // MODIFICADA: Información de contacto con sticky mejorado y nuevo botón
   const ContactSection: React.FC = () => (
     <div style={{ backgroundColor: templateConfig.colors.surface }} className="rounded-xl p-6 lg:p-8 sticky top-8">
       <h3 
@@ -1032,7 +1151,6 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
         Información de Contacto
       </h3>
       
-      {/* Agente */}
       <div className="flex items-center space-x-4 mb-6">
         <div className="relative w-16 h-16 rounded-full overflow-hidden">
           <Image
@@ -1058,9 +1176,19 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
         </div>
       </div>
 
-      {/* Botones de contacto */}
       <div className="grid grid-cols-1 gap-3">
-       
+        {/* NUEVO: Botón Contactar que abre el modal */}
+        <button
+          onClick={openContactModal}
+          style={{
+            backgroundColor: templateConfig.colors.primary,
+            color: 'white'
+          }}
+          className="flex items-center justify-center space-x-2 py-3 px-4 rounded-lg transition-colors duration-200 font-semibold hover:opacity-90"
+        >
+          <EnvelopeIcon className="h-5 w-5" />
+          <span>Contactar</span>
+        </button>
         
         <a
           href={`https://wa.me/${templateConfig.company.whatsapp}?text=${encodeURIComponent(`Hola, me interesa la propiedad: ${property.title}\nCódigo: ${apiProperty?.internal_code || ''}\nPrecio: ${formatPrice(showUSD ? 'USD' : 'ARS')}`)}`}
@@ -1077,21 +1205,8 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
           </svg>
           <span>WhatsApp</span>
         </a>
-
-        <button
-          style={{ 
-            backgroundColor: 'transparent',
-            color: templateConfig.colors.primary,
-            borderColor: templateConfig.colors.primary
-          }}
-          className="flex items-center justify-center space-x-2 py-3 px-4 rounded-lg border-2 transition-colors duration-200 font-semibold hover:bg-opacity-10"
-        >
-          <EnvelopeIcon className="h-5 w-5" />
-          <span>Escribir Email</span>
-        </button>
       </div>
 
-      {/* Información adicional */}
       <div className="mt-6 pt-6 border-t" style={{ borderColor: templateConfig.colors.textLight + '20' }}>
         <div className="text-center">
           <p style={{ color: templateConfig.colors.textLight }} className="text-sm mb-2">
@@ -1110,7 +1225,7 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
     </div>
   );
 
-  // Sección de propiedades relacionadas
+  // Sección de propiedades relacionadas (MANTENIDA IGUAL)
   const RelatedPropertiesSection: React.FC = () => (
     <div style={{ backgroundColor: templateConfig.colors.surface }} className="rounded-xl p-6 lg:p-8">
       <h3 
@@ -1135,7 +1250,6 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
                 className="object-cover group-hover:scale-110 transition-transform duration-300"
               />
               
-              {/* Badge de estado en propiedades relacionadas */}
               <div className="absolute top-3 left-3">
                 <span 
                   style={{ 
@@ -1170,7 +1284,6 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
                 US$ {relatedProperty.price.usd.toLocaleString()}
               </div>
               
-              {/* Precio alternativo más pequeño */}
               <div
                 style={{ color: templateConfig.colors.textLight }}
                 className="text-sm mb-3"
@@ -1216,71 +1329,70 @@ const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({ subdomain, prop
 
   return (
     <>
-    
-      <Navbar config={templateConfig} adaptiveColors={adaptiveColors} subdomain={subdomain}/>
       <div style={{ backgroundColor: templateConfig.colors.background }} className="min-h-screen">
-      
-      {/* Breadcrumb y navegación */}
-      <div style={{ backgroundColor: templateConfig.colors.surface }} className="py-4 px-6 border-b">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Link href="/properties">
-              <button 
-                style={{ 
-                  color: templateConfig.colors.primary,
-                  borderColor: templateConfig.colors.primary
-                }}
-                className="flex items-center space-x-2 border rounded-lg px-3 py-2 hover:bg-opacity-10 transition-colors"
-              >
-                <ArrowLeftIcon className="h-4 w-4" />
-                <span>Volver a Propiedades</span>
-              </button>
-            </Link>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <Link href="/" style={{ color: templateConfig.colors.textLight }}>Inicio</Link>
-            <span style={{ color: templateConfig.colors.textLight }}>/</span>
-            <Link href="/properties" style={{ color: templateConfig.colors.textLight }}>Propiedades</Link>
-            <span style={{ color: templateConfig.colors.textLight }}>/</span>
-            <span style={{ color: templateConfig.colors.text }}>Detalle</span>
+        {/* Breadcrumb y navegación */}
+        <div style={{ backgroundColor: templateConfig.colors.surface }} className="py-4 px-6 border-b">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Link href="/properties">
+                <button 
+                  style={{ 
+                    color: templateConfig.colors.primary,
+                    borderColor: templateConfig.colors.primary
+                  }}
+                  className="flex items-center space-x-2 border rounded-lg px-3 py-2 hover:bg-opacity-10 transition-colors"
+                >
+                  <ArrowLeftIcon className="h-4 w-4" />
+                  <span>Volver a Propiedades</span>
+                </button>
+              </Link>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Link href="/" style={{ color: templateConfig.colors.textLight }}>Inicio</Link>
+              <span style={{ color: templateConfig.colors.textLight }}>/</span>
+              <Link href="/properties" style={{ color: templateConfig.colors.textLight }}>Propiedades</Link>
+              <span style={{ color: templateConfig.colors.textLight }}>/</span>
+              <span style={{ color: templateConfig.colors.text }}>Detalle</span>
+            </div>
           </div>
         </div>
+
+        {/* Contenido principal */}
+        <main className="max-w-7xl mx-auto px-6 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Columna principal */}
+            <div className="lg:col-span-2 space-y-8">
+              <ImageGallery />
+              <PropertyInfo />
+              <AmenitiesSection />
+              <MapSection />
+            </div>
+            
+            {/* Sidebar sticky */}
+            <div className="lg:col-span-1">
+              <ContactSection />
+            </div>
+          </div>
+          
+          {/* Sección de propiedades relacionadas */}
+          <div className="mt-12">
+            <RelatedPropertiesSection />
+          </div>
+        </main>
+
+        {/* Modal de zoom */}
+        <ImageZoomModal
+          isOpen={isZoomModalOpen}
+          images={displayImages}
+          currentIndex={currentImageIndex}
+          onClose={() => setIsZoomModalOpen(false)}
+          onChangeImage={setCurrentImageIndex}
+        />
+
+        {/* NUEVO: Modal de contacto */}
+        <ContactModal />
       </div>
-
-      {/* Contenido principal */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Columna principal */}
-          <div className="lg:col-span-2 space-y-8">
-            <ImageGallery />
-            <PropertyInfo />
-            <AmenitiesSection />
-            <MapSection />
-          </div>
-          
-          {/* Sidebar sticky */}
-          <div className="lg:col-span-1">
-            <ContactSection />
-          </div>
-        </div>
-        
-        {/* Sección de propiedades relacionadas */}
-        <div className="mt-12">
-          <RelatedPropertiesSection />
-        </div>
-      </main>
-
-      {/* Modal de zoom */}
-      <ImageZoomModal
-        isOpen={isZoomModalOpen}
-        images={displayImages}
-        currentIndex={currentImageIndex}
-        onClose={() => setIsZoomModalOpen(false)}
-        onChangeImage={setCurrentImageIndex}
-      />
-      <Footer config={templateConfig} adaptiveColors={adaptiveColors}/>
-    </div>
     </>
   );
 };

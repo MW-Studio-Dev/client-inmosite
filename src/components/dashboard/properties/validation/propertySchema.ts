@@ -78,6 +78,12 @@ export const propertyValidationSchema = Yup.object({
   unit: Yup.string()
     .max(10, 'La unidad no puede exceder 10 caracteres'),
 
+  zip_code: Yup.string()
+    .max(20, 'El código postal no puede exceder 20 caracteres'),
+
+  currency: Yup.string()
+    .oneOf(['USD', 'ARS', 'EUR', ''], 'Moneda inválida'),
+
   // Características físicas
   bedrooms: Yup.string()
     .test('valid-number', 'Debe ser un número válido', function(value) {
