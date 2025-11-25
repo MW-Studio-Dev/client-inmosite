@@ -14,12 +14,7 @@ const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
 });
 
-// Inter como alternativa a Gotham (similar estilo geométrico)
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-});
+
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://inmosite.com';
 
@@ -100,7 +95,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/favicon-256x256.png" />
       </head>
       <body
-        className={`${poppins.variable} ${inter.variable} antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 font-sans`}
+        className={`${poppins.variable} antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 font-poppins`}
         suppressHydrationWarning
       >
         <GlobalLoaderProvider>

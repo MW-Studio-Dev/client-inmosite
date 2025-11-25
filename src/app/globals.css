@@ -3,112 +3,456 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&display=swap');
 
-/* Variables de colores globales */
+/* Variables de colores globales - Sistema de Diseño Sofisticado */
 :root {
-  /* Colores primarios */
-  --color-primary-50: #faf5ff;
-  --color-primary-100: #f3e8ff;
-  --color-primary-200: #e9d5ff;
-  --color-primary-300: #d8b4fe;
-  --color-primary-400: #c084fc;
-  --color-primary-500: #a855f7;
-  --color-primary-600: #9333ea;
-  --color-primary-700: #7c3aed;
-  --color-primary-800: #6b21a8;
-  --color-primary-900: #581c87;
+  /* === Paleta de Colores Principal (Rojo Inmobiliario) === */
+  --color-primary-50: #fef2f2;
+  --color-primary-100: #fee2e2;
+  --color-primary-200: #fecaca;
+  --color-primary-300: #fca5a5;
+  --color-primary-400: #f87171;
+  --color-primary-500: #ef4444;
+  --color-primary-600: #dc2626;
+  --color-primary-700: #b91c1c;
+  --color-primary-800: #991b1b;
+  --color-primary-900: #7f1d1d;
+  --color-primary-950: #450a0a;
 
-  /* Colores de fondo */
+  /* === Colores de Fondo (Base Cristalina) === */
   --color-background: #ffffff;
-  --color-background-secondary: #f8fafc;
-  --color-background-tertiary: #f1f5f9;
-  
-  /* Colores de superficie (cards, etc) */
+  --color-background-secondary: #fafbfc;
+  --color-background-tertiary: #f5f7fa;
+  --color-background-muted: #f8fafc;
+  --color-background-glass: rgba(255, 255, 255, 0.7);
+  --color-background-glass-strong: rgba(255, 255, 255, 0.9);
+
+  /* === Colores de Superficie (Efectos Neumórficos) === */
   --color-surface: #ffffff;
+  --color-surface-elevated: #ffffff;
+  --color-surface-overlay: rgba(255, 255, 255, 0.95);
   --color-surface-hover: #f8fafc;
-  --color-surface-border: #e2e8f0;
-  
-  /* Colores de texto */
-  --color-text-primary: #0f172a;
-  --color-text-secondary: #475569;
-  --color-text-tertiary: #64748b;
-  --color-text-muted: #94a3b8;
-  
-  /* Colores de acento */
-  --color-accent: #10b981;
-  --color-accent-hover: #059669;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
+  --color-surface-active: #f1f5f9;
+  --color-surface-border: #e5e7eb;
+  --color-surface-border-strong: #d1d5db;
+  --color-surface-glass: rgba(255, 255, 255, 0.25);
+  --color-surface-glass-border: rgba(255, 255, 255, 0.18);
+
+  /* === Paleta de Texto (Jerarquía Clara) === */
+  --color-text-primary: #111827;
+  --color-text-secondary: #374151;
+  --color-text-tertiary: #6b7280;
+  --color-text-quaternary: #9ca3af;
+  --color-text-muted: #d1d5db;
+  --color-text-inverse: #ffffff;
+  --color-text-on-primary: #ffffff;
+  --color-text-accent: var(--color-primary-600);
+
+  /* === Colores Semánticos Enriquecidos === */
   --color-success: #10b981;
-  
-  /* Sombras */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --color-success-light: #d1fae5;
+  --color-success-dark: #047857;
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  --color-warning-dark: #d97706;
+  --color-error: #ef4444;
+  --color-error-light: #fee2e2;
+  --color-error-dark: #dc2626;
+  --color-info: #3b82f6;
+  --color-info-light: #dbeafe;
+  --color-info-dark: #2563eb;
+
+  /* === Sistema de Sombras Multicapa === */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  
-  /* Border radius */
-  --radius-sm: 0.5rem;
-  --radius-md: 1rem;
-  --radius-lg: 1.5rem;
-  --radius-xl: 2rem;
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+
+  /* Sombras Especiales para Efectos Premium */
+  --shadow-glow-sm: 0 0 20px rgb(220 38 38 / 0.15);
+  --shadow-glow-md: 0 0 40px rgb(220 38 38 / 0.25);
+  --shadow-glow-lg: 0 0 60px rgb(220 38 38 / 0.35);
+  --shadow-card-hover: 0 20px 40px -10px rgb(0 0 0 / 0.15), 0 10px 20px -5px rgb(0 0 0 / 0.1);
+  --shadow-button-active: 0 2px 4px rgb(0 0 0 / 0.2);
+  --shadow-input-focus: 0 0 0 3px rgb(220 38 38 / 0.1);
+
+  /* === Sistema de Border Radius Moderno === */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+  --radius-full: 9999px;
+
+  /* === Gradientes Sofisticados === */
+  --gradient-primary: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #b91c1c 0%, #991b1b 50%, #7f1d1d 100%);
+  --gradient-subtle: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  --gradient-elegant: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  --gradient-hero: radial-gradient(ellipse at top right, #dc2626 0%, transparent 70%),
+                  radial-gradient(ellipse at bottom left, #b91c1c 0%, transparent 70%);
+
+  /* === Variables para Efectos de Transición === */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --transition-smooth: 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  /* === Variables de Espaciado Armonizado === */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+
+  /* === Variables de Tipografía Mejoradas === */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-5xl: 3rem;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
 }
 
-/* Variables para tema oscuro */
+/* Variables para tema oscuro - Sistema Oscuro Sofisticado */
 [data-theme="dark"] {
-  /* Colores de fondo oscuros */
-  --color-background: #0f172a;
-  --color-background-secondary: #1e293b;
-  --color-background-tertiary: #334155;
-  
-  /* Colores de superficie oscuros */
-  --color-surface: #1e293b;
-  --color-surface-hover: #334155;
-  --color-surface-border: #475569;
-  
-  /* Colores de texto oscuros */
-  --color-text-primary: #f8fafc;
-  --color-text-secondary: #cbd5e1;
-  --color-text-tertiary: #94a3b8;
-  --color-text-muted: #64748b;
-  
-  /* Sombras oscuras */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.2);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.3), 0 8px 10px -6px rgb(0 0 0 / 0.2);
+  /* === Paleta de Fondo Oscuro (Profundidad Cinemática) === */
+  --color-background: #0a0a0a;
+  --color-background-secondary: #111827;
+  --color-background-tertiary: #1f2937;
+  --color-background-muted: #111827;
+  --color-background-glass: rgba(17, 24, 39, 0.7);
+  --color-background-glass-strong: rgba(17, 24, 39, 0.9);
+
+  /* === Superficies Oscuras (Efecto Premium) === */
+  --color-surface: #111827;
+  --color-surface-elevated: #1f2937;
+  --color-surface-overlay: rgba(31, 41, 55, 0.95);
+  --color-surface-hover: #1f2937;
+  --color-surface-active: #374151;
+  --color-surface-border: #374151;
+  --color-surface-border-strong: #4b5563;
+  --color-surface-glass: rgba(255, 255, 255, 0.05);
+  --color-surface-glass-border: rgba(255, 255, 255, 0.1);
+
+  /* === Texto Oscuro (Contraste Perfecto) === */
+  --color-text-primary: #f9fafb;
+  --color-text-secondary: #e5e7eb;
+  --color-text-tertiary: #d1d5db;
+  --color-text-quaternary: #9ca3af;
+  --color-text-muted: #6b7280;
+  --color-text-inverse: #111827;
+  --color-text-on-primary: #ffffff;
+  --color-text-accent: #f87171;
+
+  /* === Colores Semánticos Adaptados === */
+  --color-success-light: #064e3b;
+  --color-warning-light: #92400e;
+  --color-error-light: #991b1b;
+  --color-info-light: #1e3a8a;
+
+  /* === Sombras Oscuras (Profundidad Dramática) === */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.6);
+
+  /* Sombras Especiales para Modo Oscuro */
+  --shadow-glow-sm: 0 0 30px rgb(220 38 38 / 0.3);
+  --shadow-glow-md: 0 0 50px rgb(220 38 38 / 0.4);
+  --shadow-glow-lg: 0 0 80px rgb(220 38 38 / 0.5);
+  --shadow-card-hover: 0 30px 60px -15px rgb(0 0 0 / 0.4), 0 15px 30px -8px rgb(0 0 0 / 0.3);
+  --shadow-button-active: inset 0 2px 4px rgb(0 0 0 / 0.3);
+  --shadow-input-focus: 0 0 0 3px rgb(220 38 38 / 0.2);
+
+  /* === Gradientes Adaptados para Oscuro === */
+  --gradient-subtle: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  --gradient-elegant: linear-gradient(145deg, #1f2937 0%, #111827 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  --gradient-hero: radial-gradient(ellipse at top right, #dc2626 0%, transparent 60%),
+                  radial-gradient(ellipse at bottom left, #b91c1c 0%, transparent 60%);
 }
 
-/* Clases de utilidad personalizadas */
+/* === Sistema de Componentes Sofisticados === */
 @layer components {
+  /* === Componentes Base Mejorados === */
   .bg-gradient-primary {
-    background: var(--gradient-primary, linear-gradient(135deg, var(--color-primary-600), var(--color-primary-700)));
+    background: var(--gradient-primary);
   }
-  
+
   .bg-gradient-primary-hover {
-    background: var(--gradient-primary-hover, linear-gradient(135deg, var(--color-primary-700), var(--color-primary-800)));
+    background: var(--gradient-primary-hover);
   }
-  
+
   .text-primary {
-    color: var(--color-primary-600);
+    color: var(--color-text-accent);
   }
-  
+
   .text-primary-hover {
     color: var(--color-primary-700);
   }
-  
+
   .border-primary {
     border-color: var(--color-primary-600);
   }
-  
+
+  /* === Superficies Premium === */
   .surface {
-    background-color: var(--color-surface);
+    background: var(--color-surface);
     border: 1px solid var(--color-surface-border);
     box-shadow: var(--shadow-sm);
+    transition: all var(--transition-normal) cubic-bezier(0.4, 0, 0.2, 1);
   }
-  
-  .surface-hover {
-    background-color: var(--color-surface-hover);
+
+  .surface-elevated {
+    background: var(--color-surface-elevated);
+    border: 1px solid var(--color-surface-border);
     box-shadow: var(--shadow-md);
+  }
+
+  .surface-glass {
+    background: var(--color-surface-glass);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--color-surface-glass-border);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .surface-hover {
+    background: var(--color-surface-hover);
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-2px);
+  }
+
+  .surface-interactive {
+    transition: all var(--transition-smooth);
+    cursor: pointer;
+  }
+
+  .surface-interactive:hover {
+    background: var(--color-surface-hover);
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-4px) scale(1.02);
+  }
+
+  /* === Tarjetas Sofisticadas === */
+  .card-premium {
+    background: var(--color-surface);
+    border: 1px solid var(--color-surface-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    transition: all var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-premium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+  }
+
+  .card-premium:hover::before {
+    opacity: 1;
+  }
+
+  .card-premium:hover {
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-6px);
+    border-color: var(--color-primary-200);
+  }
+
+  .card-glass {
+    background: var(--color-surface-glass);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--color-surface-glass-border);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-xl);
+    transition: all var(--transition-smooth);
+  }
+
+  .card-glass:hover {
+    background: var(--color-surface-glass-strong);
+    backdrop-filter: blur(30px) saturate(200%);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-2xl);
+  }
+
+  /* === Botones Premium === */
+  .btn-premium {
+    background: var(--gradient-primary);
+    color: var(--color-text-on-primary);
+    border: none;
+    border-radius: var(--radius-lg);
+    padding: var(--space-sm) var(--space-lg);
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    letter-spacing: var(--letter-spacing-wide);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-premium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left var(--transition-slow);
+  }
+
+  .btn-premium:hover::before {
+    left: 100%;
+  }
+
+  .btn-premium:hover {
+    background: var(--gradient-primary-hover);
+    box-shadow: var(--shadow-glow-sm);
+    transform: translateY(-2px);
+  }
+
+  .btn-premium:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-button-active);
+  }
+
+  /* === Inputs Premium === */
+  .input-premium {
+    background: var(--color-surface);
+    border: 2px solid var(--color-surface-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-sm) var(--space-md);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-base);
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .input-premium:focus {
+    outline: none;
+    border-color: var(--color-primary-500);
+    box-shadow: var(--shadow-input-focus);
+    background: var(--color-surface-elevated);
+  }
+
+  .input-premium::placeholder {
+    color: var(--color-text-muted);
+  }
+
+  /* === Efectos de Texto === */
+  .text-gradient-premium {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+  }
+
+  .text-shadow-elegant {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .text-outline-premium {
+    -webkit-text-stroke: 1px var(--color-primary-600);
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* === Utilidades de Animación === */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-glow-pulse {
+    animation: glowPulse 3s ease-in-out infinite alternate;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .animate-slide-down {
+    animation: slideDown 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .animate-slide-left {
+    animation: slideLeft 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .animate-slide-right {
+    animation: slideRight 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  /* === Efectos Especiales === */
+  .glow-effect {
+    box-shadow: var(--shadow-glow-sm);
+    transition: box-shadow var(--transition-normal);
+  }
+
+  .glow-effect:hover {
+    box-shadow: var(--shadow-glow-md);
+  }
+
+  .glass-reflection {
+    position: relative;
+  }
+
+  .glass-reflection::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    pointer-events: none;
+  }
+
+  .neumorphic {
+    background: var(--color-surface);
+    box-shadow:
+      20px 20px 60px rgba(0, 0, 0, 0.1),
+      -20px -20px 60px rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--color-surface-border);
+  }
+
+  .neumorphic-inset {
+    background: var(--color-surface);
+    box-shadow:
+      inset 20px 20px 60px rgba(0, 0, 0, 0.1),
+      inset -20px -20px 60px rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--color-surface-border);
   }
 }
 
@@ -265,7 +609,7 @@ body {
   font-style: normal;
 }
 
-/* Animaciones personalizadas */
+/* === Animaciones Personalizadas Premium === */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -288,12 +632,141 @@ body {
   }
 }
 
+/* Animaciones Avanzadas */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes glowPulse {
+  0% {
+    box-shadow: var(--shadow-glow-sm);
+  }
+  100% {
+    box-shadow: var(--shadow-glow-lg);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes borderGlow {
+  0%, 100% {
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 10px var(--color-primary-300);
+  }
+  50% {
+    border-color: var(--color-primary-600);
+    box-shadow: 0 0 20px var(--color-primary-400);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% {
+    animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    transform: translate3d(0, 0, 0);
+  }
+  40%, 43% {
+    animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+    transform: translate3d(0, -30px, 0);
+  }
+  70% {
+    animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+    transform: translate3d(0, -15px, 0);
+  }
+  90% {
+    transform: translate3d(0, -4px, 0);
+  }
+}
+
+/* Clases de animación unificadas */
 .animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out;
+  animation: fadeInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .animate-fade-in-scale {
-  animation: fadeInScale 0.4s ease-out;
+  animation: fadeInScale 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background-size: 1000px 100%;
+}
+
+.animate-border-glow {
+  animation: borderGlow 2s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.animate-bounce-subtle {
+  animation: bounce 2s infinite;
 }
 
 /* Ocultar scrollbar pero mantener funcionalidad */

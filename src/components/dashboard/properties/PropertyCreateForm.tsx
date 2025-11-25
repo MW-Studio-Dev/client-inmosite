@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Formik, Form, FormikHelpers } from 'formik';
+import { Formik, Form } from 'formik';
 import { useCreateProperty } from '@/hooks/useCreateProperty';
 import { CreatePropertyForm as FormData } from '@/types/property';
 import { propertyValidationSchema } from './validation/propertySchema';
@@ -203,12 +203,6 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
     }
   };
 
-  const removeAdditionalImage = (index: number, setFieldValue: (field: string, value: any) => void) => {
-    const newImages = additionalImages.filter((_, i) => i !== index);
-    setAdditionalImages(newImages);
-    setFieldValue('images', newImages);
-  };
-
   return (
     <>
     <Formik
@@ -248,20 +242,20 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
       validateOnChange={true}
       validateOnBlur={true}
     >
-      {({ values, setFieldValue, isSubmitting, errors, touched }) => (
+      {({ setFieldValue, isSubmitting }) => (
         <Form>
           <div className={`max-w-4xl mx-auto rounded-lg border ${
             isDark
               ? 'bg-slate-800 border-slate-700'
               : 'bg-white border-gray-200'
-          }`}>
+          } mx-2 sm:mx-4 lg:mx-auto`}>
             {/* Header */}
-            <div className={`px-6 py-4 border-b ${
+            <div className={`px-4 sm:px-6 py-4 border-b ${
               isDark ? 'border-slate-700' : 'border-gray-200'
             }`}>
               <div className="flex justify-between items-center">
                 <div>
-                  <h2 className={`text-xl font-semibold flex items-center gap-2 ${
+                  <h2 className={`text-lg sm:text-xl font-semibold flex items-center gap-2 ${
                     isDark ? 'text-white' : 'text-gray-900'
                   }`}>
                     <HiHome className={`h-5 w-5 ${
@@ -269,7 +263,7 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
                     }`} />
                     Nueva Propiedad
                   </h2>
-                  <p className={`text-sm mt-0.5 ${
+                  <p className={`text-xs sm:text-sm mt-0.5 ${
                     isDark ? 'text-gray-400' : 'text-gray-600'
                   }`}>Completa la información de la nueva propiedad</p>
                 </div>
@@ -284,14 +278,14 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
                     }`}
                   >
                     <HiX className="h-4 w-4" />
-                    Cancelar
+                    <span className="hidden sm:inline">Cancelar</span>
                   </button>
                 )}
               </div>
             </div>
 
             {/* Form content */}
-            <div className="px-6 py-5">
+            <div className="px-4 sm:px-6 py-5">
               {/* Error general */}
               {error && (
                 <div className={`mb-4 border rounded-md p-3 ${

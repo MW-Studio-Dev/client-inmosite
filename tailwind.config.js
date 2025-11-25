@@ -126,9 +126,9 @@ module.exports = {
       
       // === CONFIGURACIÓN DE FUENTES ===
       fontFamily: {
-        // Fuente principal del sistema - ahora con General Sans
+        // Fuente principal del sistema - ahora Poppins
         sans: [
-          'General Sans',
+          'Poppins',
           'Inter',
           'ui-sans-serif',
           'system-ui',
@@ -145,7 +145,16 @@ module.exports = {
           'Noto Color Emoji'
         ],
 
-        // General Sans como opción específica
+        // Poppins como opción específica
+        'poppins': [
+          'Poppins',
+          'Inter',
+          'ui-sans-serif',
+          'system-ui',
+          'sans-serif'
+        ],
+
+        // Fuentes alternativas
         'general-sans': [
           'General Sans',
           'Inter',
@@ -153,60 +162,51 @@ module.exports = {
           'system-ui',
           'sans-serif'
         ],
-        
-        // Fuentes específicas del proyecto
         'gotham': [
-          'Gotham', 
-          'Inter', 
-          'ui-sans-serif', 
-          'system-ui', 
-          'sans-serif'
-        ],
-        'poppins': [
-          'Poppins', 
-          'Inter', 
-          'ui-sans-serif', 
-          'system-ui', 
+          'Gotham',
+          'Inter',
+          'ui-sans-serif',
+          'system-ui',
           'sans-serif'
         ],
         'inter': [
-          'Inter', 
-          'ui-sans-serif', 
-          'system-ui', 
+          'Inter',
+          'ui-sans-serif',
+          'system-ui',
           'sans-serif'
         ],
         'montserrat': [
-          'Montserrat', 
-          'Inter', 
-          'ui-sans-serif', 
-          'system-ui', 
+          'Montserrat',
+          'Inter',
+          'ui-sans-serif',
+          'system-ui',
           'sans-serif'
         ],
-        
-        // Alias semánticos - actualizados para usar General Sans
+
+        // Alias semánticos - actualizados para usar Poppins
         'display': [
-          'General Sans',
+          'Poppins',
           'Inter',
           'ui-sans-serif',
           'system-ui',
           'sans-serif'
         ], // Para títulos grandes y headers
         'heading': [
-          'General Sans',
+          'Poppins',
           'Inter',
           'ui-sans-serif',
           'system-ui',
           'sans-serif'
         ], // Para encabezados
         'body': [
-          'General Sans',
+          'Poppins',
           'Inter',
           'ui-sans-serif',
           'system-ui',
           'sans-serif'
         ], // Para texto del cuerpo
         'elegant': [
-          'General Sans',
+          'Poppins',
           'Inter',
           'ui-sans-serif',
           'system-ui',
@@ -640,59 +640,59 @@ module.exports = {
           'font-weight': '800',
         },
         
-        // Utilidades combinadas (familia + peso + tamaño) - actualizadas a General Sans
+        // Utilidades combinadas (familia + peso + tamaño) - actualizadas a Poppins
         '.heading-xl': {
-          'font-family': theme('fontFamily.general-sans').join(', '),
+          'font-family': theme('fontFamily.poppins').join(', '),
           'font-weight': '700',
           'font-size': '3rem',
           'line-height': '1.1',
           'letter-spacing': '-0.02em',
         },
         '.heading-lg': {
-          'font-family': theme('fontFamily.general-sans').join(', '),
+          'font-family': theme('fontFamily.poppins').join(', '),
           'font-weight': '600',
           'font-size': '2.25rem',
           'line-height': '1.2',
           'letter-spacing': '-0.01em',
         },
         '.heading-md': {
-          'font-family': theme('fontFamily.general-sans').join(', '),
+          'font-family': theme('fontFamily.poppins').join(', '),
           'font-weight': '600',
           'font-size': '1.875rem',
           'line-height': '1.3',
         },
         '.heading-sm': {
-          'font-family': theme('fontFamily.general-sans').join(', '),
+          'font-family': theme('fontFamily.poppins').join(', '),
           'font-weight': '600',
           'font-size': '1.5rem',
           'line-height': '1.4',
         },
         '.body-xl': {
-          'font-family': theme('fontFamily.general-sans').join(', '),
+          'font-family': theme('fontFamily.poppins').join(', '),
           'font-weight': '400',
           'font-size': '1.25rem',
           'line-height': '1.6',
         },
         '.body-lg': {
-          'font-family': theme('fontFamily.general-sans').join(', '),
+          'font-family': theme('fontFamily.poppins').join(', '),
           'font-weight': '400',
           'font-size': '1.125rem',
           'line-height': '1.6',
         },
         '.body-md': {
-          'font-family': theme('fontFamily.general-sans').join(', '),
+          'font-family': theme('fontFamily.poppins').join(', '),
           'font-weight': '400',
           'font-size': '1rem',
           'line-height': '1.6',
         },
         '.body-sm': {
-          'font-family': theme('fontFamily.general-sans').join(', '),
+          'font-family': theme('fontFamily.poppins').join(', '),
           'font-weight': '400',
           'font-size': '0.875rem',
           'line-height': '1.5',
         },
         '.body-xs': {
-          'font-family': theme('fontFamily.general-sans').join(', '),
+          'font-family': theme('fontFamily.poppins').join(', '),
           'font-weight': '400',
           'font-size': '0.75rem',
           'line-height': '1.4',

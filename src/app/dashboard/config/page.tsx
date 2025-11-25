@@ -13,9 +13,10 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import MercadoLibreIntegration from '@/components/dashboard/integrations/MercadoLibreIntegration';
 import IntegrationsGrid from '@/components/dashboard/integrations/IntegrationsGrid';
+import CompanyInfoForm from '@/components/dashboard/settings/CompanyInfoForm';
 
 
-type Section = 'general' | 'integrations';
+type Section = 'general' | 'integrations' | 'company';
 
 // Componente de carga simple
 const LoadingSpinner = () => (
@@ -51,7 +52,7 @@ const ErrorBoundary = ({ children, fallback }: {
 export default function ConfiguracionPage() {
   const { theme } = useDashboardTheme();
   const isDark = theme === 'dark';
-  const { user, company, isLoading: authLoading } = useAuth();
+  const { user, company, isOwner, isLoading: authLoading } = useAuth();
   const [activeSection, setActiveSection] = useState<Section>('general');
   const [isMounted, setIsMounted] = useState(false);
 
@@ -109,6 +110,24 @@ export default function ConfiguracionPage() {
               >
                 General
               </button>
+
+              {isOwner && (
+                <button
+                  onClick={() => setActiveSection('company')}
+                  className={`pb-4 px-2 font-medium text-sm transition-all duration-200 border-b-2 ${
+                    activeSection === 'company'
+                      ? isDark
+                        ? 'border-red-500 text-red-400'
+                        : 'border-red-600 text-red-600'
+                      : isDark
+                        ? 'border-transparent text-gray-400 hover:text-gray-200'
+                        : 'border-transparent text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Empresa
+                </button>
+              )}
+
               <button
                 onClick={() => setActiveSection('integrations')}
                 className={`pb-4 px-2 font-medium text-sm transition-all duration-200 border-b-2 ${
@@ -129,82 +148,6 @@ export default function ConfiguracionPage() {
           {/* General Section */}
           {activeSection === 'general' && (
             <div className="space-y-6">
-              {/* Company Info Card */}
-              <div className={`rounded-xl border p-6 ${
-                isDark
-                  ? 'bg-gray-800 border-gray-700'
-                  : 'bg-white border-gray-200'
-              }`}>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`p-2 rounded-lg ${
-                    isDark
-                      ? 'bg-red-500/10 border border-red-500/20'
-                      : 'bg-red-50 border border-red-200'
-                  }`}>
-                    <HiOfficeBuilding className="h-6 w-6 text-red-500" />
-                  </div>
-                  <div>
-                    <h3 className={`text-lg font-bold ${
-                      isDark ? 'text-gray-100' : 'text-gray-900'
-                    }`}>
-                      Información del Negocio
-                    </h3>
-                    <p className={`text-sm ${
-                      isDark ? 'text-gray-400' : 'text-gray-600'
-                    }`}>
-                      Datos de tu inmobiliaria
-                    </p>
-                  </div>
-                </div>
-
-                <div className={`rounded-lg p-4 ${
-                  isDark
-                    ? 'bg-gray-900/50 border border-gray-700'
-                    : 'bg-gray-50 border border-gray-200'
-                }`}>
-                  <div className="space-y-3">
-                    <div>
-                      <label className={`text-xs font-medium ${
-                        isDark ? 'text-gray-400' : 'text-gray-600'
-                      }`}>
-                        Nombre de la Empresa
-                      </label>
-                      <p className={`text-sm font-semibold mt-1 ${
-                        isDark ? 'text-gray-200' : 'text-gray-900'
-                      }`}>
-                        {company?.name || 'No configurado'}
-                      </p>
-                    </div>
-                    <div>
-                      <label className={`text-xs font-medium ${
-                        isDark ? 'text-gray-400' : 'text-gray-600'
-                      }`}>
-                        Subdominio
-                      </label>
-                      <p className={`text-sm font-semibold mt-1 ${
-                        isDark ? 'text-gray-200' : 'text-gray-900'
-                      }`}>
-                        {company?.subdomain || 'No configurado'}
-                      </p>
-                    </div>
-                    {company?.email && (
-                      <div>
-                        <label className={`text-xs font-medium ${
-                          isDark ? 'text-gray-400' : 'text-gray-600'
-                        }`}>
-                          Email de Contacto
-                        </label>
-                        <p className={`text-sm font-semibold mt-1 ${
-                          isDark ? 'text-gray-200' : 'text-gray-900'
-                        }`}>
-                          {company?.email || 'No configurado'}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
               {/* Settings Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <button
@@ -331,6 +274,13 @@ export default function ConfiguracionPage() {
                   </p>
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* Company Info Section - Solo para owners */}
+          {activeSection === 'company' && (
+            <div className="space-y-6">
+              <CompanyInfoForm />
             </div>
           )}
 

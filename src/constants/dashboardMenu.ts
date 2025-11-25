@@ -36,11 +36,10 @@ export const dashboardMenuItems: MenuItem[] = [
     description: 'Gestionar inmuebles',
     subItems: [
       { name: 'Todas las Propiedades', href: '/dashboard/properties' },
-      { name: 'Disponibles para Venta', href: '/dashboard/properties/sale' },
-      { name: 'Disponibles para Alquiler', href: '/dashboard/properties/rent' },
-      { name: 'Alquiladas', href: '/dashboard/properties/rented' },
-      { name: 'Vendidas', href: '/dashboard/properties/sold' },
       { name: 'Crear Propiedad', href: '/dashboard/properties/new/' },
+      { name: 'En Alquiler', href: '/dashboard/properties/?operation_type=alquiler' },
+      { name: 'En Venta', href: '/dashboard/properties/?operation_type=venta' },
+
     ]
   },
   {

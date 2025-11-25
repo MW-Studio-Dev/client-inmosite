@@ -6,10 +6,12 @@ import axiosInstance from '@/lib/api';
 import { User, LoginCredentials, RegisterData, AuthState, LoginResponse, ApiErrorResponse } from '@/interfaces';
 import axios from 'axios';
 
-// Extender la interfaz AuthState para incluir isHydrated
+// Extender la interfaz AuthState para incluir isHydrated y nuevas funciones
 interface ExtendedAuthState extends AuthState {
   isHydrated: boolean;
   setHydrated: () => void;
+  verifyOTP: (email: string, otpCode: string) => Promise<ApiErrorResponse>;
+  completeOnboarding: (onboardingData: any) => Promise<any>;
 }
 
 export const useAuthStore = create<ExtendedAuthState>()(
@@ -101,29 +103,60 @@ export const useAuthStore = create<ExtendedAuthState>()(
       // Acción de registro
       register: async (data: RegisterData) => {
         set({ isLoading: true, error: null });
-        
+
         try {
-          await axiosInstance.post('/auth/register/', data);
-          
+          const response = await axiosInstance.post('/auth/register-basic/', data);
+          const responseData = response.data;
+
+          // Guardar email en localStorage para usarlo en verificación OTP
+          localStorage.setItem('verification_email', data.email);
+
           set({ isLoading: false, error: null });
-          
-          return { 
-            success: true, 
-            message: 'Registro exitoso. Revisa tu email para verificar tu cuenta.' 
+
+          return {
+            success: true,
+            message: responseData.message || 'Registro exitoso. Revisa tu email para verificar tu cuenta.',
+            data: responseData.data,
+            next_step: responseData.next_step
           };
 
         } catch (error) {
-          const errorMessage = axios.isAxiosError(error)
-            ? ((error.response?.data)?.message || error.message || 'Error al registrar la cuenta')
-            : (error instanceof Error ? error.message : 'Error al registrar la cuenta');
-          set({ 
-            isLoading: false, 
-            error: errorMessage 
+          let errorMessage = 'Error al registrar la cuenta';
+          let errorCode = 'UNKNOWN_ERROR';
+          let errors: Record<string, string[]> = {};
+
+          if (axios.isAxiosError(error) && error.response?.data) {
+            const errorData = error.response.data;
+
+            // Extraer mensaje principal
+            errorMessage = errorData.message || error.message || errorMessage;
+
+            // Extraer código de error
+            errorCode = errorData.error_code || errorCode;
+
+            // Extraer errores específicos de campos
+            if (errorData.errors) {
+              errors = errorData.errors;
+
+              // Si hay errores en non_field_errors, usar el primero como mensaje principal
+              if (errors.non_field_errors && errors.non_field_errors.length > 0) {
+                errorMessage = errors.non_field_errors[0];
+              }
+            }
+          } else if (error instanceof Error) {
+            errorMessage = error.message;
+          }
+
+          set({
+            isLoading: false,
+            error: errorMessage
           });
-          
-          return { 
-            success: false, 
-            message: errorMessage 
+
+          return {
+            success: false,
+            message: errorMessage,
+            error_code: errorCode,
+            errors: errors
           };
         }
       },
@@ -142,7 +175,7 @@ export const useAuthStore = create<ExtendedAuthState>()(
         });
       },
 
-      // Verificación de email
+      // Verificación de email (mantiene compatibilidad)
       verifyEmail: async (token: string) => {
         set({ isLoading: true, error: null });
 
@@ -158,6 +191,58 @@ export const useAuthStore = create<ExtendedAuthState>()(
 
         } catch (error) {
           let errorMessage = 'Error al verificar el email';
+          let errorCode = 'UNKNOWN_ERROR';
+          let errors: Record<string, string[]> = {};
+
+          if (axios.isAxiosError(error) && error.response?.data) {
+            const errorData = error.response.data;
+            errorMessage = errorData.message || error.message || errorMessage;
+            errorCode = errorData.error_code || errorCode;
+
+            if (errorData.errors) {
+              errors = errorData.errors;
+              if (errors.non_field_errors && errors.non_field_errors.length > 0) {
+                errorMessage = errors.non_field_errors[0];
+              }
+            }
+          } else if (error instanceof Error) {
+            errorMessage = error.message;
+          }
+
+          set({
+            isLoading: false,
+            error: errorMessage
+          });
+
+          return {
+            success: false,
+            message: errorMessage,
+            error_code: errorCode,
+            errors: errors
+          } as ApiErrorResponse;
+        }
+      },
+
+      // Verificación de código OTP (nuevo endpoint)
+      verifyOTP: async (email: string, otpCode: string) => {
+        set({ isLoading: true, error: null });
+
+        try {
+          const response = await axiosInstance.post('/auth/verify-otp/', {
+            email: email,
+            code: otpCode
+          });
+
+          set({ isLoading: false, error: null });
+
+          return {
+            success: true,
+            message: response.data?.message || 'Código OTP verificado exitosamente.',
+            data: response.data?.data
+          } as ApiErrorResponse;
+
+        } catch (error) {
+          let errorMessage = 'Error al verificar el código OTP';
           let errorCode = 'UNKNOWN_ERROR';
           let errors: Record<string, string[]> = {};
 
@@ -416,6 +501,73 @@ export const useAuthStore = create<ExtendedAuthState>()(
           }
 
           return { success: false, message: errorMessage };
+        }
+      },
+
+      // Completar onboarding
+      completeOnboarding: async (onboardingData: any) => {
+        set({ isLoading: true, error: null });
+
+        try {
+          const response = await axiosInstance.post('/auth/onboarding/complete/', onboardingData);
+
+          // Actualizar datos del usuario con la respuesta
+          if (response.data.data?.user) {
+            const updatedUser = response.data.data.user;
+            set({
+              user: updatedUser,
+              isLoading: false,
+              error: null
+            });
+          } else {
+            // Si no vienen datos de usuario, obtener el perfil actualizado
+            const profileResponse = await axiosInstance.get('/auth/profile/');
+            const updatedUser = profileResponse.data.data;
+
+            set({
+              user: updatedUser,
+              isLoading: false,
+              error: null
+            });
+          }
+
+          return {
+            success: true,
+            message: response.data?.message || 'Onboarding completado exitosamente',
+            data: response.data?.data
+          };
+
+        } catch (error) {
+          let errorMessage = 'Error al completar el onboarding';
+          let errorCode = 'UNKNOWN_ERROR';
+          let errors: Record<string, string[]> = {};
+
+          if (axios.isAxiosError(error) && error.response?.data) {
+            const errorData = error.response.data;
+            errorMessage = errorData.message || error.message || errorMessage;
+            errorCode = errorData.error_code || errorCode;
+
+            if (errorData.errors) {
+              errors = errorData.errors;
+              if (errors.non_field_errors && errors.non_field_errors.length > 0) {
+                errorMessage = errors.non_field_errors[0];
+              }
+            }
+          } else if (error instanceof Error) {
+            errorMessage = error.message;
+          }
+
+          set({
+            isLoading: false,
+            error: errorMessage
+          });
+
+          return {
+            success: false,
+            message: errorMessage,
+            error_code: errorCode,
+            errors: errors
+          };
         }
       }
     }),

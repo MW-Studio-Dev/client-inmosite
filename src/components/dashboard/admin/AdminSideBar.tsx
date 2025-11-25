@@ -65,27 +65,29 @@ export function AdminSidebar({
 
   // Función unificada para renderizar el contenido del sidebar
   const renderSidebarContent = () => (
-    <div 
+    <div
       ref={sidebarRef}
-      className={`flex grow flex-col overflow-y-auto shadow-sm transition-colors duration-300 border-r ${
-        isDark 
-          ? 'bg-gray-900 border-gray-700' 
+      className={`flex grow flex-col overflow-hidden transition-colors duration-300 border-r ${
+        isDark
+          ? 'bg-gray-900 border-gray-700'
           : 'bg-white border-gray-200'
       }`}
     >
       {/* Header con logo */}
-      <div className={`flex h-16 shrink-0 items-center justify-center px-6 transition-colors duration-300 border-b ${
-        isDark 
-          ? 'border-gray-700' 
-          : 'border-gray-200'
-      } ${isCollapsed ? 'px-2' : ''}`}>
-        {isCollapsed ? (
-          <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-            isDark ? 'bg-gray-800' : 'bg-gray-100'
-          }`}>
-            <span className={`font-bold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>I</span>
-          </div>
-        ) : (
+<div className={`flex h-16 shrink-0 items-center justify-center px-6 transition-colors duration-300 border-b ${
+      isDark
+        ? 'border-gray-700'
+        : 'border-gray-200'
+    } ${isCollapsed ? 'px-2' : ''}`}>
+      {isCollapsed ? (
+        <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+          isDark ? 'bg-gray-800' : 'bg-gray-100'
+        }`}>
+          <span className={`font-bold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>I</span>
+        </div>
+      ) : (
+        // 1. Envuelve el logo y el cartel en un nuevo div con Flexbox
+        <div className="flex items-center">
           <Image
             src={isDark ? "/logo.png" : "/logo_white.png"}
             alt="InmoSite"
@@ -93,21 +95,34 @@ export function AdminSidebar({
             height={90}
             priority
           />
-        )}
-      </div>
+          {/* 2. Añade el elemento del cartel aquí */}
+          <span className={`
+            mt-4
+            ml-4           
+            text-xs         
+            font-semibold   
+            px-2 py-1       
+            rounded-full    
+            ${isDark ? 'bg-red-400 text-gray-900' : 'bg-red-600 text-white'} // Color de fondo y texto que cambia con el modo oscuro
+          `}>
+            BETA
+          </span>
+        </div>
+      )}
+    </div>
 
-      {/* Navegación principal e inferior */}
-      <nav className="flex flex-1 flex-col">
-        <div className="flex-1 py-4">
-          <ul role="list" className="space-y-1 px-2">
+      {/* Navegación principal y inferior - Contenedor scrollable sin scrollbar visible */}
+      <nav className="flex flex-1 flex-col min-h-0">
+        <div className="flex-1 py-4 overflow-y-auto scrollbar-hide">
+          <ul role="list" className="space-y-1 px-2 pb-4">
             {menuItems.map((item) => (
               <SidebarItem key={item.href} item={item} pathname={pathname} isCollapsed={isCollapsed} isDark={isDark} router={router} />
             ))}
           </ul>
         </div>
-        <div className={`border-t py-3 ${
-          isDark 
-            ? 'border-gray-700' 
+        <div className={`shrink-0 border-t py-3 ${
+          isDark
+            ? 'border-gray-700'
             : 'border-gray-200'
         }`}>
           <ul role="list" className="space-y-1 px-2">
@@ -120,15 +135,15 @@ export function AdminSidebar({
 
       {/* Footer */}
       <div className={`flex shrink-0 items-center justify-center py-3 px-6 transition-colors duration-300 border-t ${
-        isDark 
-          ? 'border-gray-700 bg-gray-800' 
+        isDark
+          ? 'border-gray-700 bg-gray-800'
           : 'border-gray-200 bg-gray-50'
       }`}>
         <div className="flex items-center space-x-2">
           <div className="h-2 w-2 rounded-full bg-green-500"></div>
           {!isCollapsed && <p className={`text-xs font-medium ${
-            isDark 
-              ? 'text-gray-400' 
+            isDark
+              ? 'text-gray-400'
               : 'text-gray-600'
           }`}>© 2025 InmoSite</p>}
         </div>
@@ -143,19 +158,9 @@ export function AdminSidebar({
         <div className="relative z-50 lg:hidden">
           <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm" onClick={onClose} />
           <div className="fixed inset-0 flex">
-            <div className="relative mr-16 flex w-full max-w-xs flex-1">
-              <button
-                type="button"
-                className={`absolute -right-14 top-5 flex h-12 w-12 items-center justify-center rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                  isDark 
-                    ? 'bg-gray-800 text-white hover:bg-gray-700 focus:ring-gray-500' 
-                    : 'bg-gray-800 text-white hover:bg-gray-700 focus:ring-gray-500'
-                }`}
-                onClick={onClose}
-              >
-                <HiX className="h-6 w-6" />
-              </button>
+            <div className="relative flex w-full max-w-[85vw] sm:max-w-xs flex-1">
               <div
+                className="w-full h-full"
                 onError={(e) => {
                   console.error('Mobile sidebar render error:', e)
                   if (isMounted.current) {
@@ -165,6 +170,17 @@ export function AdminSidebar({
               >
                 {renderSidebarContent()}
               </div>
+              <button
+                type="button"
+                className={`absolute right-4 top-5 flex h-10 w-10 items-center justify-center rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200 z-10 ${
+                  isDark
+                    ? 'bg-gray-800 text-white hover:bg-gray-700 focus:ring-gray-500'
+                    : 'bg-white text-gray-800 hover:bg-gray-100 focus:ring-gray-300 border border-gray-300'
+                }`}
+                onClick={onClose}
+              >
+                <HiX className="h-5 w-5" />
+              </button>
             </div>
           </div>
         </div>
@@ -248,11 +264,11 @@ function SidebarItem({ item, pathname, isCollapsed, isDark, router }: {
   }, [item.icon, item.name])
 
   const itemClasses = `
-    group flex w-full items-center rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-all duration-200
+    group flex w-full items-center rounded-lg px-3 py-3 text-left text-sm font-medium transition-all duration-200
     ${isCollapsed ? 'justify-center px-2 py-3' : ''}
     ${isActive
-      ? isDark 
-        ? 'bg-gray-700 text-white shadow-sm' 
+      ? isDark
+        ? 'bg-gray-700 text-white shadow-sm'
         : 'bg-blue-50 text-blue-700 shadow-sm border-l-4 border-blue-700'
       : isDark
         ? 'text-gray-300 hover:bg-gray-800 hover:text-white'
@@ -300,31 +316,31 @@ function SidebarItem({ item, pathname, isCollapsed, isDark, router }: {
       </div>
 
       {hasSubItems && !isCollapsed && (
-        <ul className={`mt-1 ml-9 space-y-1 overflow-hidden transition-all duration-300 ${
+        <ul className={`mt-2 ml-4 sm:ml-9 space-y-1 overflow-hidden transition-all duration-300 ${
           isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
         }`}>
           {item.subItems?.map((subItem) => {
             const isSubActive = pathname.startsWith(subItem.href)
             return (
               <li key={subItem.href}>
-                <Link href={subItem.href} className={`flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${
-                  isSubActive 
-                    ? isDark 
-                      ? 'bg-gray-800 font-medium text-white' 
-                      : 'bg-blue-50 font-medium text-blue-700'
-                    : isDark 
-                      ? 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' 
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                <Link href={subItem.href} className={`flex w-full items-center rounded-lg px-3 py-2.5 text-xs sm:text-sm transition-all duration-200 mx-1 ${
+                  isSubActive
+                    ? isDark
+                      ? 'bg-gray-800 font-medium text-white shadow-sm'
+                      : 'bg-blue-50 font-medium text-blue-700 shadow-sm'
+                    : isDark
+                      ? 'text-gray-400 hover:bg-gray-800 hover:text-gray-200 rounded-lg'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg'
                 }`}>
                   <span className="flex-1">{subItem.name}</span>
                   {subItem.badge && (
-                    <span className={`ml-2 rounded-full px-2 py-0.5 text-xs font-medium ${
-                      isSubActive 
-                        ? isDark 
-                          ? 'bg-gray-700 text-white' 
+                    <span className={`ml-2 rounded-full px-1.5 py-0.5 text-xs font-medium shrink-0 ${
+                      isSubActive
+                        ? isDark
+                          ? 'bg-gray-700 text-white'
                           : 'bg-blue-100 text-blue-700'
-                        : isDark 
-                          ? 'bg-gray-700 text-gray-300' 
+                        : isDark
+                          ? 'bg-gray-700 text-gray-300'
                           : 'bg-gray-200 text-gray-700'
                     }`}>
                       {subItem.badge}

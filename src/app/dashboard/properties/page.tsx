@@ -106,137 +106,269 @@ export default function PropiedadesPage() {
 
   // Componente para la vista de tabla
   const PropertiesTable = () => (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Propiedad
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Tipo
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Operación
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Precio
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Estado
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Publicación
-              </th>
-              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Acciones
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {properties.map((property) => (
-              <tr key={property.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 h-10 w-10">
-                      {property.featured_image_url && property.featured_image_url.length > 0 ? (
-                        <img className="h-10 w-10 rounded object-cover" src={property.featured_image_url} alt={property.title} />
-                      ) : (
-                        <div className="h-10 w-10 rounded bg-gray-200 flex items-center justify-center">
-                          <HiHomeModern className="h-6 w-6 text-gray-400" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900 truncate max-w-xs">
-                        {property.title}
-                      </div>
-                      <div className="text-sm text-gray-500 truncate max-w-xs">
-                        {property.location_display}
-                      </div>
-                    </div>
+    <div className={`rounded-lg border overflow-hidden ${
+      isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+    }`}>
+      {/* Versión móvil - Tarjetas compactas */}
+      <div className="sm:hidden">
+        {properties.map((property) => (
+          <div key={property.id} className={`p-4 border-b last:border-b-0 ${
+            isDark ? 'border-gray-700' : 'border-gray-100'
+          }`}>
+            <div className="flex items-start gap-3">
+              {/* Imagen */}
+              <div className="flex-shrink-0 w-12 h-12">
+                {property.featured_image_url && property.featured_image_url.length > 0 ? (
+                  <img className="w-12 h-12 rounded object-cover" src={property.featured_image_url} alt={property.title} />
+                ) : (
+                  <div className={`w-12 h-12 rounded flex items-center justify-center ${
+                    isDark ? 'bg-gray-700' : 'bg-gray-200'
+                  }`}>
+                    <HiHomeModern className="h-6 w-6 text-gray-400" />
                   </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{property.property_type}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    property.operation_type === 'venta' 
-                      ? 'bg-blue-100 text-blue-800' 
+                )}
+              </div>
+
+              {/* Contenido principal */}
+              <div className="flex-1 min-w-0">
+                <h4 className={`text-sm font-medium truncate ${
+                  isDark ? 'text-gray-100' : 'text-gray-900'
+                }`}>
+                  {property.title}
+                </h4>
+                <p className={`text-xs truncate ${
+                  isDark ? 'text-gray-400' : 'text-gray-500'
+                }`}>
+                  {property.location_display}
+                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${
+                    property.operation_type === 'venta'
+                      ? 'bg-blue-100 text-blue-800'
                       : 'bg-green-100 text-green-800'
                   }`}>
                     {property.operation_type === 'venta' ? 'Venta' : 'Alquiler'}
                   </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">
-                    {property.operation_type === 'venta' 
-                      ? `$${property.price_usd?.toLocaleString()}` 
+                  <span className={`text-xs ${
+                    isDark ? 'text-gray-300' : 'text-gray-600'
+                  }`}>
+                    {property.operation_type === 'venta'
+                      ? `$${property.price_usd?.toLocaleString()}`
                       : `$${property.price_ars?.toLocaleString()}/mes`
                     }
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    property.status === 'disponible' 
-                      ? 'bg-green-100 text-green-800'
-                      : property.status === 'vendido'
-                      ? 'bg-red-100 text-red-800'
-                      : property.status === 'reservado'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {property.status === 'disponible' 
-                      ? 'Disponible'
-                      : property.status === 'vendido'
-                      ? 'Vendido'
-                      : property.status === 'reservado'
-                      ? 'Reservado'
-                      : 'No Disponible'
-                    }
                   </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    property.is_published 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {property.is_published ? 'Publicada' : 'No Publicada'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div className="flex justify-end space-x-2">
-                    <button
-                      onClick={() => handleView(property)}
-                      className="text-gray-400 hover:text-gray-600"
-                      title="Ver"
-                    >
-                      <HiEye className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => handleEdit(property)}
-                      className="text-gray-400 hover:text-gray-600"
-                      title="Editar"
-                    >
-                      <HiPencil className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteClick(property)}
-                      disabled={deletingId === property.id}
-                      className="text-gray-400 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                      title="Eliminar"
-                    >
-                      <HiTrash className={`h-5 w-5 ${deletingId === property.id ? 'animate-spin' : ''}`} />
-                    </button>
-                  </div>
-                </td>
+                </div>
+              </div>
+
+              {/* Acciones */}
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => handleView(property)}
+                  className={`p-1.5 rounded transition-colors ${
+                    isDark ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                  title="Ver"
+                >
+                  <HiEye className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => handleEdit(property)}
+                  className={`p-1.5 rounded transition-colors ${
+                    isDark ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                  title="Editar"
+                >
+                  <HiPencil className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => handleDeleteClick(property)}
+                  disabled={deletingId === property.id}
+                  className={`p-1.5 rounded transition-colors ${
+                    deletingId === property.id
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'text-gray-500 hover:text-red-600'
+                  }`}
+                  title="Eliminar"
+                >
+                  <HiTrash className={`h-4 w-4 ${deletingId === property.id ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Versión desktop - Tabla tradicional */}
+      <div className="hidden sm:block">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y">
+            <thead className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+              <tr>
+                <th scope="col" className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                  isDark ? 'text-gray-400' : 'text-gray-500'
+                }`}>
+                  Propiedad
+                </th>
+                <th scope="col" className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                  isDark ? 'text-gray-400' : 'text-gray-500'
+                }`}>
+                  Tipo
+                </th>
+                <th scope="col" className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                  isDark ? 'text-gray-400' : 'text-gray-500'
+                }`}>
+                  Operación
+                </th>
+                <th scope="col" className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                  isDark ? 'text-gray-400' : 'text-gray-500'
+                }`}>
+                  Precio
+                </th>
+                <th scope="col" className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                  isDark ? 'text-gray-400' : 'text-gray-500'
+                }`}>
+                  Estado
+                </th>
+                <th scope="col" className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                  isDark ? 'text-gray-400' : 'text-gray-500'
+                }`}>
+                  Publicación
+                </th>
+                <th scope="col" className={`px-6 py-3 text-right text-xs font-medium uppercase tracking-wider ${
+                  isDark ? 'text-gray-400' : 'text-gray-500'
+                }`}>
+                  Acciones
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className={`divide-y ${
+              isDark ? 'divide-gray-700' : 'divide-gray-200'
+            }`}>
+              {properties.map((property) => (
+                <tr key={property.id} className={`hover:${
+                  isDark ? 'bg-gray-900' : 'bg-gray-50'
+                }`}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 h-10 w-10">
+                        {property.featured_image_url && property.featured_image_url.length > 0 ? (
+                          <img className="h-10 w-10 rounded object-cover" src={property.featured_image_url} alt={property.title} />
+                        ) : (
+                          <div className={`h-10 w-10 rounded flex items-center justify-center ${
+                            isDark ? 'bg-gray-700' : 'bg-gray-200'
+                          }`}>
+                            <HiHomeModern className="h-6 w-6 text-gray-400" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="ml-4">
+                        <div className={`text-sm font-medium truncate max-w-xs ${
+                          isDark ? 'text-gray-100' : 'text-gray-900'
+                        }`}>
+                          {property.title}
+                        </div>
+                        <div className={`text-sm truncate max-w-xs ${
+                          isDark ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
+                          {property.location_display}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className={`text-sm ${
+                      isDark ? 'text-gray-100' : 'text-gray-900'
+                    }`}>{property.property_type}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      property.operation_type === 'venta'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-green-100 text-green-800'
+                    }`}>
+                      {property.operation_type === 'venta' ? 'Venta' : 'Alquiler'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className={`text-sm ${
+                      isDark ? 'text-gray-100' : 'text-gray-900'
+                    }`}>
+                      {property.operation_type === 'venta'
+                        ? `$${property.price_usd?.toLocaleString()}`
+                        : `$${property.price_ars?.toLocaleString()}/mes`
+                      }
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      property.status === 'disponible'
+                        ? 'bg-green-100 text-green-800'
+                        : property.status === 'vendido'
+                        ? 'bg-red-100 text-red-800'
+                        : property.status === 'reservado'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {property.status === 'disponible'
+                        ? 'Disponible'
+                        : property.status === 'vendido'
+                        ? 'Vendido'
+                        : property.status === 'reservado'
+                        ? 'Reservado'
+                        : 'No Disponible'
+                      }
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      property.is_published
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {property.is_published ? 'Publicada' : 'No Publicada'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        onClick={() => handleView(property)}
+                        className={`transition-colors ${
+                          isDark ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                        title="Ver"
+                      >
+                        <HiEye className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => handleEdit(property)}
+                        className={`transition-colors ${
+                          isDark ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                        title="Editar"
+                      >
+                        <HiPencil className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(property)}
+                        disabled={deletingId === property.id}
+                        className={`transition-colors ${
+                          deletingId === property.id
+                            ? 'opacity-50 cursor-not-allowed'
+                            : isDark
+                            ? 'text-gray-500 hover:text-red-400'
+                            : 'text-gray-500 hover:text-red-600'
+                        }`}
+                        title="Eliminar"
+                      >
+                        <HiTrash className={`h-5 w-5 ${deletingId === property.id ? 'animate-spin' : ''}`} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
@@ -295,8 +427,8 @@ export default function PropiedadesPage() {
               }`}>{totalProperties} propiedades en total</p>
             </div>
 
-            <div className="flex items-center gap-2">
-              {/* Botones para cambiar vista */}
+            <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+              {/* Botones para cambiar vista - Siempre visibles */}
               <div className={`border rounded-lg p-1 flex shadow-sm ${
                 isDark
                   ? 'bg-gray-800 border-gray-700'
@@ -334,46 +466,52 @@ export default function PropiedadesPage() {
                 </button>
               </div>
 
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
-                  showFilters
-                    ? isDark
-                      ? 'bg-gray-600 text-white shadow-md'
-                      : 'bg-gradient-to-r from-gray-800 to-gray-900 text-white shadow-md'
-                    : isDark
-                      ? 'bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700'
-                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
-                }`}
-              >
-                <HiFilter className="h-4 w-4" />
-                Filtros
-              </button>
-              <button
-                onClick={handleNavigateToIntegrations}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg relative ${
-                  isDark
-                    ? 'bg-yellow-600 hover:bg-yellow-500 text-white'
-                    : 'bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900'
-                }`}
-              >
-                <HiShoppingCart className="h-4 w-4" />
-                Mercado Libre
-                <span className="absolute -top-2 -right-2 px-2 py-0.5 text-xs font-bold rounded-full bg-red-500 text-white shadow-lg animate-pulse">
-                  NEW
-                </span>
-              </button>
-              <button
-                onClick={handleNavigateToNew}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg ${
-                  isDark
-                    ? 'bg-gray-600 hover:bg-gray-500 text-white'
-                    : 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white'
-                }`}
-              >
-                <HiPlus className="h-4 w-4" />
-                Nueva
-              </button>
+              {/* Botones responsive */}
+              <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-1 sm:gap-2 ${
+                    showFilters
+                      ? isDark
+                        ? 'bg-gray-600 text-white shadow-md'
+                        : 'bg-gradient-to-r from-gray-800 to-gray-900 text-white shadow-md'
+                      : isDark
+                        ? 'bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700'
+                        : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
+                  }`}
+                >
+                  <HiFilter className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Filtros</span>
+                </button>
+
+                <button
+                  onClick={handleNavigateToNew}
+                  className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-1 sm:gap-2 shadow-md hover:shadow-lg ${
+                    isDark
+                      ? 'bg-red-600 hover:bg-red-500 text-white'
+                      : 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white'
+                  }`}
+                >
+                  <HiPlus className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Nueva</span>
+                </button>
+
+                {/* Botón Mercado Libre - oculto en móvil */}
+                <button
+                  onClick={handleNavigateToIntegrations}
+                  className={`hidden sm:flex px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg relative ${
+                    isDark
+                      ? 'bg-yellow-600 hover:bg-yellow-500 text-white'
+                      : 'bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900'
+                  }`}
+                >
+                  <HiShoppingCart className="h-4 w-4" />
+                  Mercado Libre
+                  <span className="absolute -top-2 -right-2 px-2 py-0.5 text-xs font-bold rounded-full bg-red-500 text-white shadow-lg animate-pulse">
+                    NEW
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -384,7 +522,7 @@ export default function PropiedadesPage() {
                 ? 'bg-gray-800 border-gray-700'
                 : 'bg-white border-gray-200'
             }`}>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div>
                   <label className={`block text-xs font-medium mb-1 ${
                     isDark ? 'text-gray-300' : 'text-gray-700'
@@ -497,7 +635,7 @@ export default function PropiedadesPage() {
           {!loading && properties.length > 0 && (
             <>
               {viewMode === 'grid' ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                   {properties.map((property) => (
                     <PropertyCard
                       key={property.id}
@@ -510,7 +648,11 @@ export default function PropiedadesPage() {
                   ))}
                 </div>
               ) : (
-                <PropertiesTable />
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                  <div className="inline-block min-w-full align-middle">
+                    <PropertiesTable />
+                  </div>
+                </div>
               )}
             </>
           )}

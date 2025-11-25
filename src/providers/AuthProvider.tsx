@@ -19,11 +19,13 @@ interface AuthContextType {
   register: (data: any) => Promise<any>
   logout: () => void
   verifyEmail: (token: string) => Promise<any>
-  resendVerification: () => Promise<any>
+  verifyOTP: (email: string, otpCode: string) => Promise<any>
+  resendVerification: (email: string) => Promise<any>
   clearError: () => void
   updateUser: (data: any) => Promise<any>
   refreshToken: () => Promise<any>
   checkAuth: () => Promise<any>
+  completeOnboarding: (data: any) => Promise<any>
 
   // Utilidades computadas
   isOwner: boolean
@@ -150,11 +152,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     register: authStore.register,
     logout: authStore.logout,
     verifyEmail: authStore.verifyEmail,
+    verifyOTP: authStore.verifyOTP,
     resendVerification: authStore.resendVerification,
     clearError: authStore.clearError,
     updateUser: authStore.updateUser,
     refreshToken: authStore.refreshTokens,
     checkAuth: authStore.checkAuth,
+    completeOnboarding: authStore.completeOnboarding,
 
     // Utilidades computadas
     isOwner: authStore.user?.is_company_owner || false,
