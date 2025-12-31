@@ -14,7 +14,7 @@ import {
   HiShieldCheck
 } from 'react-icons/hi'
 
-interface SubscriptionPlan {
+export interface SubscriptionPlan {
   id: string
   slug: string
   name: string

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Poppins, Inter } from "next/font/google";
+import { Poppins } from "next/font/google";
+import Script from "next/script";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { GlobalLoaderProvider } from "@/context/GlobalLoaderContext";
 import { AuthProvider } from "@/providers/AuthProvider";
@@ -11,7 +12,7 @@ import "./globals.css";
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
 });
 
 
@@ -93,6 +94,11 @@ export default function RootLayout({
         <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />
         <link rel="icon" href="/favicon-48x48.png" sizes="48x48" type="image/png" />
         <link rel="apple-touch-icon" href="/favicon-256x256.png" />
+        {/* ✅ MercadoPago SDK v2 */}
+        <Script
+          src="https://sdk.mercadopago.com/js/v2"
+          strategy="beforeInteractive"
+        />
       </head>
       <body
         className={`${poppins.variable} antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 font-poppins`}

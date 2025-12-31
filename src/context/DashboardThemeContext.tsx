@@ -36,6 +36,8 @@ export function DashboardThemeProvider({ children }: { children: React.ReactNode
 
         // Apply or remove 'dark' class to html element
         const html = document.documentElement
+        html.setAttribute('data-theme', theme)
+
         if (theme === 'dark') {
           html.classList.add('dark')
         } else {

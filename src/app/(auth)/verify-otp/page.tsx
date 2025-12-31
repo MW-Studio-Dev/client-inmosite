@@ -14,6 +14,7 @@ import { useAuth } from '@/hooks';
 import Image from 'next/image';
 import Link from 'next/link';
 import { HouseLoader } from '@/components/auth/HouseLoader';
+import { Loader } from '@/components/common/Loader';
 
 const VerifyOTPPage = () => {
   const { verifyEmail, verifyOTP, isLoading, clearError } = useAuth();
@@ -128,7 +129,57 @@ const VerifyOTPPage = () => {
         // Limpiar email de localStorage después de verificación exitosa
         localStorage.removeItem('verification_email');
 
-        // Redirigir al login después de 3 segundos
+        // NUEVO: Verificar si hay un pago pendiente
+        const pendingPaymentData = localStorage.getItem('pending_payment_data');
+
+        if (pendingPaymentData) {
+          try {
+            const paymentData = JSON.parse(pendingPaymentData);
+
+            // Si requiere pago
+            if (paymentData.requires_payment || paymentData.checkout_url) {
+              setStatusMessage('¡Email verificado! Preparando pago...');
+
+              // Si ya tenemos el checkout_url, redirigir directamente
+              if (paymentData.checkout_url) {
+                setStatusMessage('¡Email verificado! Redirigiendo al pago...');
+
+                // Limpiar datos de pago del localStorage
+                localStorage.removeItem('pending_payment_data');
+
+                // Guardar deadline si existe
+                if (paymentData.payment_deadline) {
+                  localStorage.setItem('payment_deadline', paymentData.payment_deadline);
+                }
+
+                // Guardar el plan_slug para referencia
+                if (paymentData.plan_slug) {
+                  localStorage.setItem('pending_payment_plan', paymentData.plan_slug);
+                }
+
+                // Redirigir a MercadoPago después de 2 segundos
+                setTimeout(() => {
+                  window.location.href = paymentData.checkout_url;
+                }, 2000);
+                return; // Salir para no ejecutar la redirección al login
+              } else {
+                // No tenemos checkout_url, redirigir a waiting-payment para que el usuario
+                // pueda ver el estado y obtener el link de pago
+                localStorage.setItem('pending_payment_plan', paymentData.plan_slug);
+                localStorage.removeItem('pending_payment_data');
+
+                setTimeout(() => {
+                  router.push('/waiting-payment');
+                }, 2000);
+                return;
+              }
+            }
+          } catch (e) {
+            console.error('Error parsing pending payment data:', e);
+          }
+        }
+
+        // Si no hay pago pendiente, redirigir al login después de 3 segundos
         setTimeout(() => {
           router.push('/login?verified=true');
         }, 3000);
@@ -265,9 +316,11 @@ const VerifyOTPPage = () => {
                       <p className="text-gray-300">
                         {statusMessage}
                       </p>
-                      <p className="text-sm text-gray-400">
-                        Redirigiendo al login en 3 segundos...
-                      </p>
+                      {!statusMessage.includes('pago') && (
+                        <p className="text-sm text-gray-400">
+                          Redirigiendo...
+                        </p>
+                      )}
                     </div>
 
                     <div className="pt-4">
@@ -351,7 +404,7 @@ const VerifyOTPPage = () => {
                           <>
                             <HiKey className="w-5 h-5 animate-pulse" />
                             <span>Verificando...</span>
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            <Loader className="text-white" scale={0.5} />
                           </>
                         ) : (
                           <>

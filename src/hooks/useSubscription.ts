@@ -3,98 +3,57 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from './useAuth'
-
-interface SubscriptionPlan {
-  id: string
-  slug: string
-  name: string
-  plan_type: string
-  billing_cycle: string
-  price_usd: number
-  price_ars: number
-  price_display: string
-  description: string
-  features_list: string[]
-  is_popular: boolean
-  duration_days: number
-}
+import { subscriptionService } from '@/services/subscriptionService'
+import type { Plan } from '@/types/subscription'
 
 interface UseSubscriptionReturn {
-  plans: SubscriptionPlan[]
+  plans: Plan[]
   loading: boolean
   error: string | null
-  currentPlan: SubscriptionPlan | null
+  currentPlan: Plan | null
   trialDaysLeft: number
   isTrialExpiringSoon: boolean
   canUpgrade: boolean
   canDowngrade: boolean
   fetchPlans: () => Promise<void>
-  upgradePlan: (planSlug: string) => Promise<boolean>
-  cancelSubscription: () => Promise<boolean>
+  upgradePlan: (planSlug: string, paymentMethod?: string) => Promise<boolean>
+  cancelSubscription: (immediately?: boolean, reason?: string) => Promise<boolean>
   refreshSubscription: () => Promise<void>
 }
 
 export function useSubscription(): UseSubscriptionReturn {
-  const { company, checkAuth } = useAuth()
-  const [plans, setPlans] = useState<SubscriptionPlan[]>([])
+  const { user, checkAuth } = useAuth()
+  const [plans, setPlans] = useState<Plan[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Calcular días restantes del trial
-  const getTrialDaysLeft = (): number => {
-    if (!company?.trial_end_date) return 0
-    try {
-      const endDate = new Date(company.trial_end_date)
-      const today = new Date()
+  const subscription = user?.company?.subscription
 
-      // Verificar si la fecha es válida
-      if (isNaN(endDate.getTime())) return 0
-
-      const diffTime = endDate.getTime() - today.getTime()
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-      return Math.max(0, diffDays)
-    } catch (error) {
-      console.error('Error calculating trial days left:', error)
-      return 0
-    }
-  }
-
-  const trialDaysLeft = getTrialDaysLeft()
-  const isTrialExpiringSoon = trialDaysLeft <= 7 && company?.subscription_plan === 'trial'
+  const trialDaysLeft = subscription?.days_remaining || 0
+  const isTrialExpiringSoon = (subscription?.is_trial && trialDaysLeft <= 7) || false
 
   // Encontrar el plan actual
-  const currentPlan = plans.find(plan => plan.plan_type === company?.subscription_plan) || null
+  const currentPlan = subscription?.plan || plans.find(plan => plan.slug === user?.selected_plan_slug) || null
 
   // Determinar si puede actualizar o degradar
-  const planHierarchy = ['trial', 'basic', 'premium', 'enterprise']
-  const currentPlanIndex = planHierarchy.indexOf(company?.subscription_plan || '')
+  const planHierarchy = ['free', 'basic', 'premium', 'enterprise']
+  const currentPlanSlug = subscription?.plan?.slug || 'free'
+  const currentPlanIndex = planHierarchy.indexOf(currentPlanSlug)
+
   const canUpgrade = currentPlanIndex < planHierarchy.length - 1
   const canDowngrade = currentPlanIndex > 0
 
   // Cargar planes disponibles
   const fetchPlans = async (): Promise<void> => {
+    // Si ya tenemos planes cargados, no recargar a menos que sea forzado
+    if (plans.length > 0) return
+
     setLoading(true)
     setError(null)
-    
+
     try {
-      const response = await fetch('/api/subscriptions/plans/', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-          'Content-Type': 'application/json',
-        }
-      })
-      
-      const data = await response.json()
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Error al cargar planes')
-      }
-      
-      if (data.success) {
-        setPlans(data.data)
-      } else {
-        throw new Error(data.message || 'Error al procesar planes')
-      }
+      const data = await subscriptionService.getPlans()
+      setPlans(data)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error desconocido'
       setError(errorMessage)
@@ -105,35 +64,21 @@ export function useSubscription(): UseSubscriptionReturn {
   }
 
   // Actualizar plan
-  const upgradePlan = async (planSlug: string): Promise<boolean> => {
+  const upgradePlan = async (planSlug: string, paymentMethod: string = 'mercadopago'): Promise<boolean> => {
     setLoading(true)
     setError(null)
 
     try {
-      const response = await fetch('/api/subscriptions/upgrade/', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          plan_slug: planSlug
-        })
-      })
+      const result = await subscriptionService.upgradeWithProrate(planSlug, paymentMethod)
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Error al actualizar plan')
-      }
-
-      if (data.success) {
-        // Refrescar perfil para obtener la información actualizada
-        await checkAuth()
+      if (result.payment_url) {
+        window.location.href = result.payment_url
         return true
-      } else {
-        throw new Error(data.message || 'Error al procesar actualización')
       }
+
+      // Si no hay URL, asumimos éxito inmediato
+      await checkAuth()
+      return true
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error desconocido'
       setError(errorMessage)
@@ -145,31 +90,14 @@ export function useSubscription(): UseSubscriptionReturn {
   }
 
   // Cancelar suscripción
-  const cancelSubscription = async (): Promise<boolean> => {
+  const cancelSubscription = async (immediately: boolean = false, reason?: string): Promise<boolean> => {
     setLoading(true)
     setError(null)
 
     try {
-      const response = await fetch('/api/subscriptions/cancel/', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-          'Content-Type': 'application/json',
-        }
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Error al cancelar suscripción')
-      }
-
-      if (data.success) {
-        await checkAuth()
-        return true
-      } else {
-        throw new Error(data.message || 'Error al procesar cancelación')
-      }
+      await subscriptionService.cancelSubscription(immediately, reason)
+      await checkAuth()
+      return true
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error desconocido'
       setError(errorMessage)
@@ -190,10 +118,10 @@ export function useSubscription(): UseSubscriptionReturn {
 
   // Cargar planes al montar el componente
   useEffect(() => {
-    if (company) {
+    if (user) {
       fetchPlans()
     }
-  }, [company])
+  }, [user])
 
   return {
     plans,
@@ -271,7 +199,7 @@ export function usePlanFeatures() {
   const comparePlans = (planType1: string, planType2: string) => {
     const features1 = getPlanFeatures(planType1)
     const features2 = getPlanFeatures(planType2)
-    
+
     return {
       plan1: {
         type: planType1,

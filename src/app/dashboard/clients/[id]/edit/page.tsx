@@ -74,7 +74,7 @@ export default function EditClientPage() {
 
   const handleSubmit = async (formData: FormData) => {
     try {
-      const response = await axiosInstance.patch(`/clients/${clientId}/`, formData, {
+      const response = await axiosInstance.put(`/clients/${clientId}/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -146,25 +146,22 @@ export default function EditClientPage() {
   if (error || !client) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <div className={`max-w-md w-full p-6 rounded-lg border ${
-          document.documentElement.classList.contains('dark')
+        <div className={`max-w-md w-full p-6 rounded-lg border ${document.documentElement.classList.contains('dark')
             ? 'bg-slate-800 border-slate-700'
             : 'bg-white border-gray-200'
-        }`}>
+          }`}>
           <div className="text-center">
             <HiExclamationTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-            <h2 className={`text-lg font-semibold mb-2 ${
-              document.documentElement.classList.contains('dark')
+            <h2 className={`text-lg font-semibold mb-2 ${document.documentElement.classList.contains('dark')
                 ? 'text-white'
                 : 'text-gray-900'
-            }`}>
+              }`}>
               Error al cargar el cliente
             </h2>
-            <p className={`text-sm mb-6 ${
-              document.documentElement.classList.contains('dark')
+            <p className={`text-sm mb-6 ${document.documentElement.classList.contains('dark')
                 ? 'text-gray-400'
                 : 'text-gray-600'
-            }`}>
+              }`}>
               {error || 'No se pudo encontrar la información del cliente'}
             </p>
             <div className="flex gap-3 justify-center">
@@ -176,11 +173,10 @@ export default function EditClientPage() {
               </button>
               <button
                 onClick={handleCancel}
-                className={`px-4 py-2 rounded-md transition-colors text-sm ${
-                  document.documentElement.classList.contains('dark')
+                className={`px-4 py-2 rounded-md transition-colors text-sm ${document.documentElement.classList.contains('dark')
                     ? 'bg-slate-700 text-gray-300 hover:bg-slate-600'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 Volver
               </button>
@@ -197,11 +193,10 @@ export default function EditClientPage() {
       <div className="flex items-center gap-4">
         <button
           onClick={handleCancel}
-          className={`p-2 rounded-lg transition-colors ${
-            document.documentElement.classList.contains('dark')
+          className={`p-2 rounded-lg transition-colors ${document.documentElement.classList.contains('dark')
               ? 'hover:bg-slate-700 text-gray-400'
               : 'hover:bg-gray-100 text-gray-600'
-          }`}
+            }`}
           title="Volver a clientes"
         >
           <HiArrowLeft className="h-5 w-5" />

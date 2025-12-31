@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { Loader } from "@/components/common/Loader";
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
   HiCheckCircle,
@@ -107,12 +108,12 @@ const VerifyEmailPage = () => {
         className="fixed inset-0 z-0"
         style={{
           backgroundImage: `
-            radial-gradient(circle at 50% 0%, rgba(239, 68, 68, 0.1), transparent 50%),
-            radial-gradient(circle at 0% 50%, rgba(239, 68, 68, 0.05), transparent 50%),
-            radial-gradient(circle at 100% 50%, rgba(239, 68, 68, 0.05), transparent 50%),
-            linear-gradient(rgba(239, 68, 68, 0.02) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(239, 68, 68, 0.02) 1px, transparent 1px)
-          `,
+radial-gradient(circle at 50% 0%, rgba(239, 68, 68, 0.1), transparent 50%),
+  radial-gradient(circle at 0% 50%, rgba(239, 68, 68, 0.05), transparent 50%),
+  radial-gradient(circle at 100% 50%, rgba(239, 68, 68, 0.05), transparent 50%),
+  linear-gradient(rgba(239, 68, 68, 0.02) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(239, 68, 68, 0.02) 1px, transparent 1px)
+    `,
           backgroundSize: "auto, auto, auto, 60px 60px, 60px 60px"
         }}
       />
@@ -257,20 +258,18 @@ const VerifyEmailPage = () => {
 
                     {/* Resend Status Messages */}
                     {resendStatus && (
-                      <div className={`p-4 rounded-lg border ${
-                        resendStatus === 'success'
+                      <div className={`p-4 rounded-lg border ${resendStatus === 'success'
                           ? 'bg-green-950/30 border-green-800/30'
                           : 'bg-red-950/30 border-red-800/30'
-                      }`}>
+                        } `}>
                         <div className="flex items-center gap-3">
                           {resendStatus === 'success' ? (
                             <HiCheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
                           ) : (
                             <HiExclamationTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
                           )}
-                          <span className={`text-sm font-medium ${
-                            resendStatus === 'success' ? 'text-green-300' : 'text-red-300'
-                          }`}>
+                          <span className={`text-sm font-medium ${resendStatus === 'success' ? 'text-green-300' : 'text-red-300'
+                            } `}>
                             {resendMessage}
                           </span>
                         </div>
@@ -311,7 +310,7 @@ const VerifyEmailPage = () => {
                         <>
                           <HiEnvelope className="w-5 h-5 animate-pulse" />
                           <span>Enviando...</span>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <Loader className="text-white" scale={0.5} />
                         </>
                       ) : (
                         <>

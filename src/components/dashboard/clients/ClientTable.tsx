@@ -17,6 +17,8 @@ import {
   HiFolderOpen,
   HiLocationMarker,
   HiChatAlt2,
+  HiPlus,
+  HiUsers,
 } from 'react-icons/hi';
 import { useDashboardTheme } from '@/context/DashboardThemeContext';
 import { Client, ClientDocument } from '@/hooks/useClients';
@@ -52,10 +54,10 @@ const DocumentsModal: React.FC<{
 
   if (!isOpen) return null;
 
-  const handleDownload = (document: ClientDocument) => {
+  const handleDownload = (doc: ClientDocument) => {
     const link = document.createElement('a');
-    link.href = document.file_url;
-    link.download = document.file_name;
+    link.href = doc.file_url;
+    link.download = doc.file_name;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -71,24 +73,20 @@ const DocumentsModal: React.FC<{
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="fixed inset-0 bg-black opacity-50" onClick={onClose} />
-        <div className={`relative w-full max-w-4xl rounded-lg shadow-xl ${
-          isDark ? 'bg-slate-800' : 'bg-white'
-        }`}>
-          <div className={`flex items-center justify-between p-6 border-b ${
-            isDark ? 'border-slate-700' : 'border-gray-200'
+        <div className={`relative w-full max-w-4xl rounded-lg shadow-xl ${isDark ? 'bg-slate-800' : 'bg-white'
           }`}>
-            <h3 className={`text-lg font-semibold ${
-              isDark ? 'text-white' : 'text-gray-900'
+          <div className={`flex items-center justify-between p-6 border-b ${isDark ? 'border-slate-700' : 'border-gray-200'
             }`}>
+            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'
+              }`}>
               Documentos de {client.full_name}
             </h3>
             <button
               onClick={onClose}
-              className={`p-1 rounded-lg transition-colors ${
-                isDark
-                  ? 'hover:bg-slate-700 text-slate-400'
-                  : 'hover:bg-gray-100 text-gray-500'
-              }`}
+              className={`p-1 rounded-lg transition-colors ${isDark
+                ? 'hover:bg-slate-700 text-slate-400'
+                : 'hover:bg-gray-100 text-gray-500'
+                }`}
             >
               <HiX className="h-5 w-5" />
             </button>
@@ -97,38 +95,32 @@ const DocumentsModal: React.FC<{
           <div className="p-6">
             {client.documents.length === 0 ? (
               <div className="text-center py-8">
-                <HiFolderOpen className={`mx-auto h-12 w-12 ${
-                  isDark ? 'text-slate-600' : 'text-gray-400'
-                }`} />
-                <p className={`mt-2 text-sm ${
-                  isDark ? 'text-slate-400' : 'text-gray-600'
-                }`}>
+                <HiFolderOpen className={`mx-auto h-12 w-12 ${isDark ? 'text-slate-600' : 'text-gray-400'
+                  }`} />
+                <p className={`mt-2 text-sm ${isDark ? 'text-slate-400' : 'text-gray-600'
+                  }`}>
                   Este cliente no tiene documentos registrados
                 </p>
               </div>
             ) : (
               <div className="grid gap-4">
                 {client.documents.map((document) => (
-                  <div key={document.id} className={`p-4 rounded-lg border ${
-                    isDark
-                      ? 'border-slate-700 bg-slate-900/50'
-                      : 'border-gray-200 bg-gray-50'
-                  }`}>
+                  <div key={document.id} className={`p-4 rounded-lg border ${isDark
+                    ? 'border-slate-700 bg-slate-900/50'
+                    : 'border-gray-200 bg-gray-50'
+                    }`}>
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
-                        <h4 className={`font-medium ${
-                          isDark ? 'text-white' : 'text-gray-900'
-                        }`}>
+                        <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'
+                          }`}>
                           {document.description}
                         </h4>
-                        <p className={`text-sm ${
-                          isDark ? 'text-slate-400' : 'text-gray-600'
-                        }`}>
+                        <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-gray-600'
+                          }`}>
                           {document.document_type_display} • {document.file_size_formatted}
                         </p>
-                        <p className={`text-xs mt-1 ${
-                          isDark ? 'text-slate-500' : 'text-gray-500'
-                        }`}>
+                        <p className={`text-xs mt-1 ${isDark ? 'text-slate-500' : 'text-gray-500'
+                          }`}>
                           {new Date(document.created_at).toLocaleDateString('es-AR', {
                             day: '2-digit',
                             month: '2-digit',
@@ -141,11 +133,10 @@ const DocumentsModal: React.FC<{
                       <div className="flex items-center gap-2 ml-4">
                         <button
                           onClick={() => handleDownload(document)}
-                          className={`p-2 rounded-lg transition-colors ${
-                            isDark
-                              ? 'hover:bg-slate-700 text-slate-400'
-                              : 'hover:bg-gray-200 text-gray-600'
-                          }`}
+                          className={`p-2 rounded-lg transition-colors ${isDark
+                            ? 'hover:bg-slate-700 text-slate-400'
+                            : 'hover:bg-gray-200 text-gray-600'
+                            }`}
                           title="Descargar documento"
                         >
                           <HiDownload className="h-4 w-4" />
@@ -154,22 +145,20 @@ const DocumentsModal: React.FC<{
                           href={document.file_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={`p-2 rounded-lg transition-colors ${
-                            isDark
-                              ? 'hover:bg-slate-700 text-slate-400'
-                              : 'hover:bg-gray-200 text-gray-600'
-                          }`}
+                          className={`p-2 rounded-lg transition-colors ${isDark
+                            ? 'hover:bg-slate-700 text-slate-400'
+                            : 'hover:bg-gray-200 text-gray-600'
+                            }`}
                           title="Ver documento"
                         >
                           <HiEye className="h-4 w-4" />
                         </a>
                         <button
                           onClick={() => handleDelete(document.id)}
-                          className={`p-2 rounded-lg transition-colors ${
-                            isDark
-                              ? 'hover:bg-red-900/50 text-red-400'
-                              : 'hover:bg-red-100 text-red-600'
-                          }`}
+                          className={`p-2 rounded-lg transition-colors ${isDark
+                            ? 'hover:bg-red-900/50 text-red-400'
+                            : 'hover:bg-red-100 text-red-600'
+                            }`}
                           title="Eliminar documento"
                         >
                           <HiTrash className="h-4 w-4" />
@@ -187,7 +176,7 @@ const DocumentsModal: React.FC<{
   );
 };
 
-export function ClientTable({ clients, loading, pagination, onPageChange, onDocumentDelete }: ClientTableProps) {
+export function ClientTable({ clients, loading, pagination, onPageChange, onDocumentDelete, }: ClientTableProps) {
   const { theme } = useDashboardTheme();
   const isDark = theme === 'dark';
 
@@ -355,11 +344,10 @@ export function ClientTable({ clients, loading, pagination, onPageChange, onDocu
 
   if (loading) {
     return (
-      <div className={`rounded-lg border shadow-xl transition-colors duration-300 ${
-        isDark
-          ? 'border-slate-700/50 bg-slate-900'
-          : 'border-gray-200 bg-white'
-      }`}>
+      <div className={`rounded-lg border shadow-xl transition-colors duration-300 ${isDark
+        ? 'border-slate-700/50 bg-slate-900'
+        : 'border-gray-200 bg-white'
+        }`}>
         <div className="flex items-center justify-center py-12">
           <div className="flex items-center gap-3">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
@@ -373,69 +361,89 @@ export function ClientTable({ clients, loading, pagination, onPageChange, onDocu
   }
 
   return (
-    <div className={`rounded-lg border shadow-xl transition-colors duration-300 ${
-      isDark
-        ? 'border-slate-700/50 bg-slate-900'
-        : 'border-gray-200 bg-white'
-    }`}>
-      <div className="overflow-x-auto">
+    <div className={`rounded-lg border shadow-xl transition-colors duration-300 ${isDark
+      ? 'border-slate-700/50 bg-slate-900'
+      : 'border-gray-200 bg-white'
+      }`}>
+      <style jsx>{`
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: ${isDark ? '#475569 #1e293b' : '#cbd5e1 #f1f5f9'};
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar {
+          height: 12px;
+          width: 12px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: ${isDark ? '#1e293b' : '#f1f5f9'};
+          border-radius: 10px;
+          margin: 4px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: ${isDark ? '#475569' : '#cbd5e1'};
+          border-radius: 10px;
+          border: 2px solid ${isDark ? '#1e293b' : '#f1f5f9'};
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: ${isDark ? '#64748b' : '#94a3b8'};
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-corner {
+          background: ${isDark ? '#1e293b' : '#f1f5f9'};
+        }
+      `}</style>
+      {/* Vista de tabla para pantallas grandes */}
+      <div className="hidden md:block overflow-x-auto custom-scrollbar">
         <table className={`w-full transition-colors duration-300`}>
           <thead className={isDark ? 'bg-slate-800' : 'bg-gray-50'}>
             <tr>
-              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${
-                isDark ? 'text-slate-300' : 'text-gray-500'
-              }`}>
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${isDark ? 'text-slate-300' : 'text-gray-500'
+                }`}>
                 Cliente
               </th>
-              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${
-                isDark ? 'text-slate-300' : 'text-gray-500'
-              }`}>
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${isDark ? 'text-slate-300' : 'text-gray-500'
+                }`}>
                 Contacto
               </th>
-              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${
-                isDark ? 'text-slate-300' : 'text-gray-500'
-              }`}>
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${isDark ? 'text-slate-300' : 'text-gray-500'
+                }`}>
                 Ubicación
               </th>
-              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${
-                isDark ? 'text-slate-300' : 'text-gray-500'
-              }`}>
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${isDark ? 'text-slate-300' : 'text-gray-500'
+                }`}>
                 Estado
               </th>
-              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${
-                isDark ? 'text-slate-300' : 'text-gray-500'
-              }`}>
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${isDark ? 'text-slate-300' : 'text-gray-500'
+                }`}>
                 Actividad
               </th>
-              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${
-                isDark ? 'text-slate-300' : 'text-gray-500'
-              }`}>
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${isDark ? 'text-slate-300' : 'text-gray-500'
+                }`}>
                 Documentos
               </th>
-              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${
-                isDark ? 'text-slate-300' : 'text-gray-500'
-              }`}>
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${isDark ? 'text-slate-300' : 'text-gray-500'
+                }`}>
                 Registrado
               </th>
-              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${
-                isDark ? 'text-slate-300' : 'text-gray-500'
-              }`}>
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${isDark ? 'text-slate-300' : 'text-gray-500'
+                }`}>
                 Acciones
               </th>
             </tr>
           </thead>
-          <tbody className={`divide-y transition-colors duration-300 ${
-            isDark ? 'divide-slate-700/50' : 'divide-gray-200'
-          }`}>
+          <tbody className={`divide-y transition-colors duration-300 ${isDark ? 'divide-slate-700/50' : 'divide-gray-200'
+            }`}>
             {clients.map((client) => (
-              <tr key={client.id} className={`transition-colors duration-300 ${
-                isDark ? 'hover:bg-slate-800/50' : 'hover:bg-gray-50'
-              }`}>
+              <tr key={client.id} className={`transition-colors duration-300 ${isDark ? 'hover:bg-slate-800/50' : 'hover:bg-gray-50'
+                }`}>
                 <td className={`px-6 py-4 transition-colors duration-300`}>
                   <div>
-                    <div className={`text-sm font-medium transition-colors duration-300 ${
-                      isDark ? 'text-slate-100' : 'text-gray-900'
-                    }`}>
+                    <div className={`text-sm font-medium transition-colors duration-300 ${isDark ? 'text-slate-100' : 'text-gray-900'
+                      }`}>
                       {client.full_name || 'Sin nombre'}
                     </div>
                     <div className="mt-1">
@@ -465,11 +473,10 @@ export function ClientTable({ clients, loading, pagination, onPageChange, onDocu
                           href={`https://wa.me/${formatPhoneNumber(client.phone)}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={`p-1 rounded transition-colors ${
-                            isDark
+                          className={`p-1 rounded transition-colors ${isDark
                               ? 'hover:bg-green-900/30 text-green-400'
                               : 'hover:bg-green-100 text-green-600'
-                          }`}
+                            }`}
                           title="Enviar mensaje por WhatsApp"
                         >
                           <HiChatAlt2 className="h-4 w-4" />
@@ -499,15 +506,14 @@ export function ClientTable({ clients, loading, pagination, onPageChange, onDocu
                 <td className={`px-6 py-4 transition-colors duration-300`}>
                   <button
                     onClick={() => handleDocumentsClick(client)}
-                    className={`flex items-center gap-2 text-sm transition-colors ${
-                      client.documents_count > 0
+                    className={`flex items-center gap-2 text-sm transition-colors ${client.documents_count > 0
                         ? isDark
                           ? 'text-blue-400 hover:text-blue-300 hover:bg-slate-700/50 px-2 py-1 rounded'
                           : 'text-blue-600 hover:text-blue-700 hover:bg-gray-100 px-2 py-1 rounded'
                         : isDark
                           ? 'text-slate-400'
                           : 'text-gray-500'
-                    }`}
+                      }`}
                     disabled={client.documents_count === 0}
                   >
                     <HiDocumentText className="h-4 w-4" />
@@ -526,22 +532,20 @@ export function ClientTable({ clients, loading, pagination, onPageChange, onDocu
                   <div className="flex items-center justify-end gap-2">
                     <Link
                       href={`/dashboard/clients/${client.id}`}
-                      className={`p-1 rounded transition-colors ${
-                        isDark
+                      className={`p-1 rounded transition-colors ${isDark
                           ? 'hover:bg-slate-700 text-slate-400 hover:text-slate-200'
                           : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
-                      }`}
+                        }`}
                       title="Ver detalles"
                     >
                       <HiEye className="h-4 w-4" />
                     </Link>
                     <Link
                       href={`/dashboard/clients/${client.id}/edit`}
-                      className={`p-1 rounded transition-colors ${
-                        isDark
+                      className={`p-1 rounded transition-colors ${isDark
                           ? 'hover:bg-slate-700 text-slate-400 hover:text-slate-200'
                           : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
-                      }`}
+                        }`}
                       title="Editar cliente"
                     >
                       <HiPencil className="h-4 w-4" />
@@ -554,23 +558,175 @@ export function ClientTable({ clients, loading, pagination, onPageChange, onDocu
         </table>
       </div>
 
-      {clients.length === 0 && (
-        <div className="py-12 text-center">
-          <p className={`transition-colors duration-300 ${
-            isDark ? 'text-slate-400' : 'text-gray-500'
-          }`}>No hay clientes registrados</p>
+      {/* Vista de tarjetas para móviles */}
+      <div className="md:hidden divide-y transition-colors duration-300">
+        {clients.map((client) => (
+          <div key={client.id} className={`p-4 transition-colors duration-300 ${isDark ? 'hover:bg-slate-800/50 divide-slate-700/50' : 'hover:bg-gray-50 divide-gray-200'
+            }`}>
+            {/* Encabezado de la tarjeta */}
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex-1">
+                <h3 className={`text-base font-semibold mb-2 ${isDark ? 'text-slate-100' : 'text-gray-900'
+                  }`}>
+                  {client.full_name || 'Sin nombre'}
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border ${getClientTypeColor(client.client_type)}`}>
+                    {formatClientType(client.client_type)}
+                  </span>
+                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border ${getStatusColor(client.status)}`}>
+                    {formatStatus(client.status)}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1 ml-2">
+                <Link
+                  href={`/dashboard/clients/${client.id}`}
+                  className={`p-2 rounded-lg transition-colors ${isDark
+                      ? 'hover:bg-slate-700 text-slate-400 hover:text-slate-200'
+                      : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+                    }`}
+                  title="Ver detalles"
+                >
+                  <HiEye className="h-5 w-5" />
+                </Link>
+                <Link
+                  href={`/dashboard/clients/${client.id}/edit`}
+                  className={`p-2 rounded-lg transition-colors ${isDark
+                      ? 'hover:bg-slate-700 text-slate-400 hover:text-slate-200'
+                      : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+                    }`}
+                  title="Editar cliente"
+                >
+                  <HiPencil className="h-5 w-5" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Información de contacto */}
+            <div className="space-y-2 mb-3">
+              {client.email && (
+                <div className="flex items-center gap-2 text-sm">
+                  <HiMail className={`h-4 w-4 flex-shrink-0 ${isDark ? 'text-slate-400' : 'text-gray-400'}`} />
+                  <span className={`truncate ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>
+                    {client.email}
+                  </span>
+                </div>
+              )}
+              {client.phone && (
+                <div className="flex items-center gap-2 text-sm">
+                  <HiPhone className={`h-4 w-4 flex-shrink-0 ${isDark ? 'text-slate-400' : 'text-gray-400'}`} />
+                  <span className={isDark ? 'text-slate-300' : 'text-gray-700'}>
+                    {client.phone}
+                  </span>
+                  <a
+                    href={`https://wa.me/${formatPhoneNumber(client.phone)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`p-1 rounded transition-colors ${isDark
+                        ? 'hover:bg-green-900/30 text-green-400'
+                        : 'hover:bg-green-100 text-green-600'
+                      }`}
+                    title="Enviar mensaje por WhatsApp"
+                  >
+                    <HiChatAlt2 className="h-4 w-4" />
+                  </a>
+                </div>
+              )}
+              <div className="flex items-start gap-2 text-sm">
+                <HiLocationMarker className={`h-4 w-4 flex-shrink-0 mt-0.5 ${isDark ? 'text-slate-400' : 'text-gray-400'}`} />
+                <span className={isDark ? 'text-slate-300' : 'text-gray-700'}>
+                  {formatAddress(client.full_address)}
+                </span>
+              </div>
+            </div>
+
+            {/* Información adicional */}
+            <div className={`grid grid-cols-2 gap-3 pt-3 border-t ${isDark ? 'border-slate-700/50' : 'border-gray-200'}`}>
+              <div>
+                <p className={`text-xs font-medium mb-1 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                  Actividad
+                </p>
+                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border ${getActivityColor(client.current_activity)}`}>
+                  {formatActivity(client.current_activity)}
+                </span>
+              </div>
+              <div>
+                <p className={`text-xs font-medium mb-1 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                  Documentos
+                </p>
+                <button
+                  onClick={() => handleDocumentsClick(client)}
+                  className={`flex items-center gap-1.5 text-sm transition-colors ${client.documents_count > 0
+                      ? isDark
+                        ? 'text-blue-400 hover:text-blue-300'
+                        : 'text-blue-600 hover:text-blue-700'
+                      : isDark
+                        ? 'text-slate-400'
+                        : 'text-gray-500'
+                    }`}
+                  disabled={client.documents_count === 0}
+                >
+                  <HiDocumentText className="h-4 w-4" />
+                  <span>{client.documents_count}</span>
+                  {client.documents_count > 0 && (
+                    <span className="text-xs">Ver</span>
+                  )}
+                </button>
+              </div>
+              <div className="col-span-2">
+                <p className={`text-xs font-medium mb-1 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                  Registrado
+                </p>
+                <p className={`text-sm ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>
+                  {formatDate(client.created_at)}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Empty State */}
+      {!loading && clients.length === 0 && (
+        <div className={`rounded-lg border shadow-xl transition-colors duration-300 ${isDark
+          ? 'border-slate-700/50 bg-slate-900'
+          : 'border-gray-200 bg-white'
+          }`}>
+          <div className="flex flex-col items-center py-12">
+            <div className={`mb-4 flex h-24 w-24 items-center justify-center rounded-full transition-colors duration-300 ${isDark ? 'bg-slate-800' : 'bg-gray-100'
+              }`}>
+              <HiUsers className={`h-12 w-12 transition-colors duration-300 ${isDark ? 'text-slate-600' : 'text-gray-400'
+                }`} />
+            </div>
+            <h3 className={`mb-2 text-xl font-bold transition-colors duration-300 ${isDark ? 'text-slate-200' : 'text-gray-900'
+              }`}>
+              No se encontraron clientes
+            </h3>
+            <p className={`mb-6 max-w-md text-center transition-colors duration-300 ${isDark ? 'text-slate-400' : 'text-gray-600'
+              }`}>
+
+            </p>
+            <Link href="/dashboard/clients/new">
+              <button className={`px-4 py-2 rounded-lg border text-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 flex items-center gap-2 ${isDark
+                ? 'border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700'
+                : 'border-gray-300 bg-white text-gray-900 hover:bg-gray-50'
+                }`}>
+                <HiPlus className="h-4 w-4" />
+                Agregar Primer Cliente
+              </button>
+            </Link>
+          </div>
         </div>
       )}
 
       {/* Paginación */}
       {pagination && pagination.total_pages > 1 && (
-        <div className={`px-6 py-4 border-t transition-colors duration-300 ${
-          isDark ? 'border-slate-700/50 bg-slate-800' : 'border-gray-200 bg-gray-50'
-        }`}>
+        <div className={`px-6 py-4 border-t transition-colors duration-300 ${isDark ? 'border-slate-700/50 bg-slate-800' : 'border-gray-200 bg-gray-50'
+          }`}>
           <div className="flex items-center justify-between">
-            <div className={`text-sm transition-colors duration-300 ${
-              isDark ? 'text-slate-400' : 'text-gray-700'
-            }`}>
+            <div className={`text-sm transition-colors duration-300 ${isDark ? 'text-slate-400' : 'text-gray-700'
+              }`}>
               Mostrando {pagination.start_index + 1} a {Math.min(pagination.end_index + 1, pagination.total_count)} de{' '}
               {pagination.total_count} clientes
             </div>
@@ -578,15 +734,14 @@ export function ClientTable({ clients, loading, pagination, onPageChange, onDocu
               <button
                 onClick={() => onPageChange?.(pagination.current_page - 1)}
                 disabled={!pagination.has_previous}
-                className={`p-2 rounded-lg border transition-colors ${
-                  !pagination.has_previous
-                    ? isDark
-                      ? 'border-slate-700 bg-slate-900 text-slate-700 cursor-not-allowed'
-                      : 'border-gray-200 bg-white text-gray-300 cursor-not-allowed'
-                    : isDark
-                      ? 'border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700'
-                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                }`}
+                className={`p-2 rounded-lg border transition-colors ${!pagination.has_previous
+                  ? isDark
+                    ? 'border-slate-700 bg-slate-900 text-slate-700 cursor-not-allowed'
+                    : 'border-gray-200 bg-white text-gray-300 cursor-not-allowed'
+                  : isDark
+                    ? 'border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700'
+                    : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
               >
                 <HiChevronLeft className="h-4 w-4" />
               </button>
@@ -608,15 +763,14 @@ export function ClientTable({ clients, loading, pagination, onPageChange, onDocu
                     <button
                       key={pageNum}
                       onClick={() => onPageChange?.(pageNum)}
-                      className={`px-3 py-1 rounded-lg text-sm transition-colors ${
-                        pagination.current_page === pageNum
-                          ? isDark
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-blue-600 text-white'
-                          : isDark
-                            ? 'border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700'
-                            : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                      }`}
+                      className={`px-3 py-1 rounded-lg text-sm transition-colors ${pagination.current_page === pageNum
+                        ? isDark
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-blue-600 text-white'
+                        : isDark
+                          ? 'border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700'
+                          : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                        }`}
                     >
                       {pageNum}
                     </button>
@@ -627,15 +781,14 @@ export function ClientTable({ clients, loading, pagination, onPageChange, onDocu
               <button
                 onClick={() => onPageChange?.(pagination.current_page + 1)}
                 disabled={!pagination.has_next}
-                className={`p-2 rounded-lg border transition-colors ${
-                  !pagination.has_next
-                    ? isDark
-                      ? 'border-slate-700 bg-slate-900 text-slate-700 cursor-not-allowed'
-                      : 'border-gray-200 bg-white text-gray-300 cursor-not-allowed'
-                    : isDark
-                      ? 'border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700'
-                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                }`}
+                className={`p-2 rounded-lg border transition-colors ${!pagination.has_next
+                  ? isDark
+                    ? 'border-slate-700 bg-slate-900 text-slate-700 cursor-not-allowed'
+                    : 'border-gray-200 bg-white text-gray-300 cursor-not-allowed'
+                  : isDark
+                    ? 'border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700'
+                    : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
               >
                 <HiChevronRight className="h-4 w-4" />
               </button>

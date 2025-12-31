@@ -16,11 +16,11 @@ import Link from 'next/link';
 
 const LoginForm = () => {
   const { login, isLoading, error, clearError } = useAuth();
-  
+
   // Hook para obtener parámetros de URL
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
-  
+
   // Estados para el formulario
   const [showPassword, setShowPassword] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'success' | 'error' | 'warning' | null>(null);
@@ -94,7 +94,13 @@ const LoginForm = () => {
           });
         }
 
-        setSubmitStatus('error');
+        // Detectar si es un error de cuenta pendiente de pago
+        if (message.includes('pago') || message.includes('payment') || message.includes('pending_payment')) {
+          setSubmitStatus('warning');
+        } else {
+          setSubmitStatus('error');
+        }
+
         setStatusMessage(message);
         setErrorCode(code || null);
         setFieldErrors(normalizedErrors);
@@ -183,13 +189,12 @@ const LoginForm = () => {
 
             {/* Status Messages - Igual que RegisterForm */}
             {(submitStatus || error) && (
-              <div className={`p-4 rounded-lg border ${
-                submitStatus === 'success'
+              <div className={`p-4 rounded-lg border ${submitStatus === 'success'
                   ? 'bg-green-950/30 border-green-800/30'
                   : submitStatus === 'warning'
-                  ? 'bg-yellow-950/30 border-yellow-800/30'
-                  : 'bg-red-950/30 border-red-800/30'
-              }`}>
+                    ? 'bg-yellow-950/30 border-yellow-800/30'
+                    : 'bg-red-950/30 border-red-800/30'
+                }`}>
                 <div className="flex items-start gap-3">
                   {submitStatus === 'success' ? (
                     <HiCheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
@@ -199,15 +204,29 @@ const LoginForm = () => {
                     <HiXCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
                   )}
                   <div className="flex-1">
-                    <p className={`text-sm font-medium ${
-                      submitStatus === 'success'
+                    <p className={`text-sm font-medium ${submitStatus === 'success'
                         ? 'text-green-300'
                         : submitStatus === 'warning'
-                        ? 'text-yellow-300'
-                        : 'text-red-300'
-                    }`}>
+                          ? 'text-yellow-300'
+                          : 'text-red-300'
+                      }`}>
                       {statusMessage || error}
                     </p>
+
+                    {/* Link especial para pago pendiente */}
+                    {submitStatus === 'warning' && statusMessage.includes('pago') && (
+                      <div className="mt-4 space-y-2">
+                        <Link
+                          href="/waiting-payment"
+                          className="block w-full text-center py-2 px-4 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition-colors text-sm"
+                        >
+                          Completar Pago Ahora
+                        </Link>
+                        <p className="text-xs text-yellow-400/70 text-center">
+                          Debes completar el pago para activar tu cuenta
+                        </p>
+                      </div>
+                    )}
 
                     {/* Mostrar errores adicionales si existen */}
                     {Object.keys(fieldErrors).length > 0 && (
@@ -251,9 +270,8 @@ const LoginForm = () => {
                   placeholder="Email"
                   value={loginData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`w-full px-3 py-2 bg-gray-800/50 border rounded-lg text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-transparent backdrop-blur-sm ${
-                    fieldErrors.email ? 'border-red-500' : 'border-gray-600/50'
-                  }`}
+                  className={`w-full px-3 py-2 bg-gray-800/50 border rounded-lg text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-transparent backdrop-blur-sm ${fieldErrors.email ? 'border-red-500' : 'border-gray-600/50'
+                    }`}
                 />
                 {fieldErrors.email && (
                   <p className="mt-1 text-xs text-red-400">
@@ -272,9 +290,8 @@ const LoginForm = () => {
                     placeholder="Contraseña"
                     value={loginData.password}
                     onChange={(e) => handleInputChange('password', e.target.value)}
-                    className={`w-full px-3 py-2 pr-10 bg-gray-800/50 border rounded-lg text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-transparent backdrop-blur-sm ${
-                      fieldErrors.password ? 'border-red-500' : 'border-gray-600/50'
-                    }`}
+                    className={`w-full px-3 py-2 pr-10 bg-gray-800/50 border rounded-lg text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-transparent backdrop-blur-sm ${fieldErrors.password ? 'border-red-500' : 'border-gray-600/50'
+                      }`}
                   />
                   <button
                     type="button"
@@ -329,7 +346,7 @@ const LoginForm = () => {
             <div className="text-center">
               <p className="text-sm text-gray-400">
                 ¿No tienes cuenta?{' '}
-                <Link href="/register" className="text-red-400 hover:text-red-300 font-medium transition-colors">
+                <Link href="/select-plan" className="text-red-400 hover:text-red-300 font-medium transition-colors">
                   Crear cuenta
                 </Link>
               </p>
