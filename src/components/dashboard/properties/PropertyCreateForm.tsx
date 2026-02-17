@@ -15,7 +15,8 @@ import {
   SelectInput,
   TextAreaInput,
   CheckboxInput,
-  FeatureSelector
+  FeatureSelector,
+  AddressAutocomplete
 } from './form-fields';
 import {
   HiHome,
@@ -151,6 +152,7 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
   const [featuredImage, setFeaturedImage] = useState<File | null>(null);
   const [additionalImages, setAdditionalImages] = useState<File[]>([]);
   const [featuredPreview, setFeaturedPreview] = useState<string | null>(null);
+  const [additionalPreviews, setAdditionalPreviews] = useState<string[]>([]);
   const [expandedSections, setExpandedSections] = useState({
     basic: true, // Iniciar con la sección básica expandida
     prices: false,
@@ -200,7 +202,22 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
       const newImages = [...additionalImages, ...files];
       setAdditionalImages(newImages);
       setFieldValue('images', newImages);
+
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setAdditionalPreviews(prev => [...prev, reader.result as string]);
+        };
+        reader.readAsDataURL(file);
+      });
     }
+  };
+
+  const removeAdditionalImage = (index: number, setFieldValue: (field: string, value: any) => void) => {
+    const newImages = additionalImages.filter((_, i) => i !== index);
+    setAdditionalImages(newImages);
+    setAdditionalPreviews(prev => prev.filter((_, i) => i !== index));
+    setFieldValue('images', newImages);
   };
 
   return (
@@ -242,7 +259,7 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
       validateOnChange={true}
       validateOnBlur={true}
     >
-      {({ setFieldValue, isSubmitting }) => (
+      {({ setFieldValue, isSubmitting, values }) => (
         <Form>
           <div className={`max-w-4xl mx-auto rounded-lg border ${
             isDark
@@ -408,27 +425,39 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
                 </button>
 
                 {expandedSections.prices && (
-                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <NumberInput
-                      label="Precio en USD"
-                      name="price_usd"
-                      placeholder="150000"
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <SelectInput
+                      label="Moneda"
+                      name="currency"
+                      options={CURRENCIES}
+                      required
+                      placeholder="Seleccionar moneda"
                     />
-                    <NumberInput
-                      label="Precio en ARS"
-                      name="price_ars"
-                      placeholder="120000000"
-                    />
+                    {values.currency === 'USD' && (
+                      <NumberInput
+                        label="Precio en USD"
+                        name="price_usd"
+                        placeholder="150000"
+                      />
+                    )}
+                    {values.currency === 'ARS' && (
+                      <NumberInput
+                        label="Precio en ARS"
+                        name="price_ars"
+                        placeholder="120000000"
+                      />
+                    )}
+                    {values.currency === 'EUR' && (
+                      <NumberInput
+                        label="Precio en EUR"
+                        name="price_usd"
+                        placeholder="150000"
+                      />
+                    )}
                     <NumberInput
                       label="Expensas (ARS)"
                       name="expenses"
                       placeholder="50000"
-                    />
-                    <SelectInput
-                      label="Moneda de referencia"
-                      name="currency"
-                      options={CURRENCIES}
-                      placeholder="Seleccionar moneda"
                     />
                   </div>
                 )}
@@ -460,49 +489,51 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
 
                 {expandedSections.location && (
                   <div className="mt-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <TextInput
-                        label="Provincia"
-                        name="province"
-                        required
-                        placeholder="Buenos Aires"
-                      />
-                      <TextInput
-                        label="Ciudad"
-                        name="city"
-                        required
-                        placeholder="CABA"
-                      />
-                      <TextInput
-                        label="Barrio"
-                        name="neighborhood"
-                        required
-                        placeholder="Palermo"
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-                      <TextInput
-                        label="Dirección"
-                        name="address"
-                        required
-                        placeholder="Av. Santa Fe 3456"
-                      />
-                      <NumberInput
-                        label="Piso"
-                        name="floor"
-                        placeholder="3"
-                      />
-                      <TextInput
-                        label="Unidad/Depto"
-                        name="unit"
-                        placeholder="A"
-                      />
-                      <TextInput
-                        label="Código Postal"
-                        name="zip_code"
-                        placeholder="C1000ABC"
-                      />
-                    </div>
+                    <AddressAutocomplete setFieldValue={setFieldValue}>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <TextInput
+                          label="Provincia"
+                          name="province"
+                          required
+                          placeholder="Buenos Aires"
+                        />
+                        <TextInput
+                          label="Ciudad"
+                          name="city"
+                          required
+                          placeholder="CABA"
+                        />
+                        <TextInput
+                          label="Barrio"
+                          name="neighborhood"
+                          required
+                          placeholder="Palermo"
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+                        <TextInput
+                          label="Dirección"
+                          name="address"
+                          required
+                          placeholder="Av. Santa Fe 3456"
+                        />
+                        <NumberInput
+                          label="Piso"
+                          name="floor"
+                          placeholder="3"
+                        />
+                        <TextInput
+                          label="Unidad/Depto"
+                          name="unit"
+                          placeholder="A"
+                        />
+                        <TextInput
+                          label="Código Postal"
+                          name="zip_code"
+                          placeholder="C1000ABC"
+                        />
+                      </div>
+                    </AddressAutocomplete>
                   </div>
                 )}
               </div>
@@ -615,75 +646,93 @@ export const CreatePropertyForm: React.FC<CreatePropertyFormProps> = ({
                       <h4 className={`text-sm font-medium mb-2 ${
                         isDark ? 'text-white' : 'text-gray-900'
                       }`}>Imagen destacada</h4>
-                      {!featuredPreview ? (
-                        <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-md cursor-pointer hover:border-red-500 transition-colors ${
+                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                        {featuredPreview && (
+                          <div className={`relative group aspect-square rounded-md overflow-hidden border-2 ${
+                            isDark ? 'border-slate-600' : 'border-gray-300'
+                          }`}>
+                            <img
+                              src={featuredPreview}
+                              alt="Imagen destacada"
+                              className="w-full h-full object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeFeaturedImage(setFieldValue)}
+                              className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white p-1 rounded-md transition-opacity opacity-0 group-hover:opacity-100"
+                            >
+                              <HiTrash className="h-3 w-3" />
+                            </button>
+                          </div>
+                        )}
+                        {!featuredPreview && (
+                          <label className={`flex flex-col items-center justify-center aspect-square border-2 border-dashed rounded-md cursor-pointer hover:border-red-500 transition-colors ${
+                            isDark
+                              ? 'border-slate-600 bg-slate-900 hover:bg-slate-800'
+                              : 'border-gray-300 bg-gray-50 hover:bg-gray-100'
+                          }`}>
+                            <HiUpload className={`h-6 w-6 ${
+                              isDark ? 'text-gray-500' : 'text-gray-400'
+                            }`} />
+                            <input
+                              type="file"
+                              className="hidden"
+                              accept="image/*"
+                              onChange={(e) => handleFeaturedImageChange(e, setFieldValue)}
+                            />
+                          </label>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Imágenes adicionales */}
+                    <div>
+                      <h4 className={`text-sm font-medium mb-2 ${
+                        isDark ? 'text-white' : 'text-gray-900'
+                      }`}>Imágenes adicionales</h4>
+
+                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                        {/* Previews de imágenes cargadas */}
+                        {additionalPreviews.map((preview, index) => (
+                          <div
+                            key={index}
+                            className={`relative group aspect-square rounded-md overflow-hidden border-2 ${
+                              isDark ? 'border-slate-600' : 'border-gray-300'
+                            }`}
+                          >
+                            <img
+                              src={preview}
+                              alt={`Imagen ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeAdditionalImage(index, setFieldValue)}
+                              className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white p-1 rounded-md transition-opacity opacity-0 group-hover:opacity-100"
+                            >
+                              <HiTrash className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+
+                        {/* Botón para agregar más */}
+                        <label className={`flex flex-col items-center justify-center aspect-square border-2 border-dashed rounded-md cursor-pointer hover:border-red-500 transition-colors ${
                           isDark
                             ? 'border-slate-600 bg-slate-900 hover:bg-slate-800'
                             : 'border-gray-300 bg-gray-50 hover:bg-gray-100'
                         }`}>
-                          <div className="flex flex-col items-center justify-center">
-                            <HiUpload className={`h-8 w-8 mb-2 ${
-                              isDark ? 'text-gray-500' : 'text-gray-400'
-                            }`} />
-                            <p className={`text-sm ${
-                              isDark ? 'text-gray-400' : 'text-gray-600'
-                            }`}>Click para subir imagen principal</p>
-                          </div>
+                          <HiPlus className={`h-6 w-6 ${
+                            isDark ? 'text-gray-500' : 'text-gray-400'
+                          }`} />
                           <input
                             type="file"
                             className="hidden"
                             accept="image/*"
-                            onChange={(e) => handleFeaturedImageChange(e, setFieldValue)}
+                            multiple
+                            onChange={(e) => handleAdditionalImagesChange(e, setFieldValue)}
                           />
                         </label>
-                      ) : (
-                        <div className={`relative w-full h-32 border-2 rounded-md overflow-hidden ${
-                          isDark ? 'border-slate-600' : 'border-gray-300'
-                        }`}>
-                          <img
-                            src={featuredPreview}
-                            alt="Preview"
-                            className="w-full h-full object-cover"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeFeaturedImage(setFieldValue)}
-                            className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-md transition-colors"
-                          >
-                            <HiTrash className="h-4 w-4" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Imágenes adicionales simplificadas */}
-                    <div>
-                      <label className={`flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-md cursor-pointer hover:border-red-500 transition-colors ${
-                        isDark
-                          ? 'border-slate-600 bg-slate-900 hover:bg-slate-800'
-                          : 'border-gray-300 bg-gray-50 hover:bg-gray-100'
-                      }`}>
-                        <div className="flex flex-col items-center justify-center">
-                          <HiPlus className={`h-6 w-6 mb-1 ${
-                            isDark ? 'text-gray-500' : 'text-gray-400'
-                          }`} />
-                          <p className={`text-sm ${
-                            isDark ? 'text-gray-400' : 'text-gray-600'
-                          }`}>Agregar imágenes adicionales</p>
-                        </div>
-                        <input
-                          type="file"
-                          className="hidden"
-                          accept="image/*"
-                          multiple
-                          onChange={(e) => handleAdditionalImagesChange(e, setFieldValue)}
-                        />
-                      </label>
-                      {additionalImages.length > 0 && (
-                        <p className={`text-sm mt-2 ${
-                          isDark ? 'text-gray-400' : 'text-gray-600'
-                        }`}>{additionalImages.length} imágenes agregadas</p>
-                      )}
+                      </div>
                     </div>
                   </div>
                 )}

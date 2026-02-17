@@ -16,24 +16,33 @@ export const propertyValidationSchema = Yup.object({
     .max(50, 'El código interno no puede exceder 50 caracteres'),
 
   // Precios - Al menos uno debe estar presente
+  // Precios - Validación condicional según moneda
   price_usd: Yup.string()
-    .test('at-least-one-price', 'Debe especificar al menos un precio (USD o ARS)', function(value) {
-      const { price_ars } = this.parent;
-      return !!(value || price_ars);
-    })
-    .test('valid-number', 'Debe ser un número válido', function(value) {
-      if (!value) return true;
-      return !isNaN(Number(value)) && Number(value) > 0;
+    .when('currency', {
+      is: (val: string) => val === 'USD' || val === 'EUR',
+      then: (schema) => schema
+        .required('El precio es obligatorio')
+        .test('valid-number', 'Debe ser un número válido mayor a 0', (value) => {
+          if (!value) return false;
+          return !isNaN(Number(value)) && Number(value) > 0;
+        }),
+      otherwise: (schema) => schema.nullable().notRequired()
     }),
 
   price_ars: Yup.string()
-    .test('valid-number', 'Debe ser un número válido', function(value) {
-      if (!value) return true;
-      return !isNaN(Number(value)) && Number(value) > 0;
+    .when('currency', {
+      is: 'ARS',
+      then: (schema) => schema
+        .required('El precio es obligatorio')
+        .test('valid-number', 'Debe ser un número válido mayor a 0', (value) => {
+          if (!value) return false;
+          return !isNaN(Number(value)) && Number(value) > 0;
+        }),
+      otherwise: (schema) => schema.nullable().notRequired()
     }),
 
   expenses: Yup.string()
-    .test('valid-number', 'Debe ser un número válido', function(value) {
+    .test('valid-number', 'Debe ser un número válido', function (value) {
       if (!value) return true;
       return !isNaN(Number(value)) && Number(value) >= 0;
     }),
@@ -79,64 +88,66 @@ export const propertyValidationSchema = Yup.object({
     .max(10, 'La unidad no puede exceder 10 caracteres'),
 
   zip_code: Yup.string()
-    .max(20, 'El código postal no puede exceder 20 caracteres'),
+    .max(20, 'El código postal no puede exceder 20 caracteres')
+    .required('El código postal es obligatorio'),
 
   currency: Yup.string()
-    .oneOf(['USD', 'ARS', 'EUR', ''], 'Moneda inválida'),
+    .oneOf(['USD', 'ARS', 'EUR'], 'Moneda inválida')
+    .required('La moneda es obligatoria'),
 
   // Características físicas
   bedrooms: Yup.string()
-    .test('valid-number', 'Debe ser un número válido', function(value) {
+    .test('valid-number', 'Debe ser un número válido', function (value) {
       if (!value) return true;
       return !isNaN(Number(value)) && Number(value) >= 0;
     }),
 
   bathrooms: Yup.string()
-    .test('valid-number', 'Debe ser un número válido', function(value) {
+    .test('valid-number', 'Debe ser un número válido', function (value) {
       if (!value) return true;
       return !isNaN(Number(value)) && Number(value) >= 0;
     }),
 
   half_bathrooms: Yup.string()
-    .test('valid-number', 'Debe ser un número válido', function(value) {
+    .test('valid-number', 'Debe ser un número válido', function (value) {
       if (!value) return true;
       return !isNaN(Number(value)) && Number(value) >= 0;
     }),
 
   rooms: Yup.string()
-    .test('valid-number', 'Debe ser un número válido', function(value) {
+    .test('valid-number', 'Debe ser un número válido', function (value) {
       if (!value) return true;
       return !isNaN(Number(value)) && Number(value) >= 0;
     })
     .required('El número de ambientes es obligatorio'),
 
   surface_total: Yup.string()
-    .test('valid-number', 'Debe ser un número válido', function(value) {
+    .test('valid-number', 'Debe ser un número válido', function (value) {
       if (!value) return true;
       return !isNaN(Number(value)) && Number(value) > 0;
     })
     .required('La superficie total es obligatoria'),
 
   surface_covered: Yup.string()
-    .test('valid-number', 'Debe ser un número válido', function(value) {
+    .test('valid-number', 'Debe ser un número válido', function (value) {
       if (!value) return true;
       return !isNaN(Number(value)) && Number(value) >= 0;
     }),
 
   surface_semicovered: Yup.string()
-    .test('valid-number', 'Debe ser un número válido', function(value) {
+    .test('valid-number', 'Debe ser un número válido', function (value) {
       if (!value) return true;
       return !isNaN(Number(value)) && Number(value) >= 0;
     }),
 
   surface_uncovered: Yup.string()
-    .test('valid-number', 'Debe ser un número válido', function(value) {
+    .test('valid-number', 'Debe ser un número válido', function (value) {
       if (!value) return true;
       return !isNaN(Number(value)) && Number(value) >= 0;
     }),
 
   age_years: Yup.string()
-    .test('valid-number', 'Debe ser un número válido', function(value) {
+    .test('valid-number', 'Debe ser un número válido', function (value) {
       if (!value) return true;
       return !isNaN(Number(value)) && Number(value) >= 0;
     }),
@@ -145,13 +156,13 @@ export const propertyValidationSchema = Yup.object({
     .oneOf(['norte', 'sur', 'este', 'oeste', 'noreste', 'noroeste', 'sureste', 'suroeste', ''], 'Orientación inválida'),
 
   garage_spaces: Yup.string()
-    .test('valid-number', 'Debe ser un número válido', function(value) {
+    .test('valid-number', 'Debe ser un número válido', function (value) {
       if (!value) return true;
       return !isNaN(Number(value)) && Number(value) >= 0;
     }),
 
   storage_spaces: Yup.string()
-    .test('valid-number', 'Debe ser un número válido', function(value) {
+    .test('valid-number', 'Debe ser un número válido', function (value) {
       if (!value) return true;
       return !isNaN(Number(value)) && Number(value) >= 0;
     }),

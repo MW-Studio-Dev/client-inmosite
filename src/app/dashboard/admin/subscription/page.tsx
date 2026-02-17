@@ -3,9 +3,10 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/hooks/useAuth'
-import { 
-  HiCheck, 
-  HiStar, 
+import { subscriptionService } from '@/services/subscriptionService'
+import {
+  HiCheck,
+  HiStar,
   HiCreditCard,
   HiClock,
   HiExclamationCircle,
@@ -126,10 +127,45 @@ export default function SubscriptionPage() {
   }
 
   const handleConfirmUpgrade = async () => {
-    // Aquí iría la lógica para actualizar el plan
-    console.log('Upgrading to plan:', selectedPlan)
-    setShowConfirmModal(false)
-    // Mostrar mensaje de éxito o redirigir a procesamiento de pago
+    if (!selectedPlan) return;
+
+    try {
+      setShowConfirmModal(false);
+      setLoading(true);
+      setError(null);
+
+      // Verificar si el usuario ya tiene una suscripción activa
+      const currentSubscription = company?.subscription_id;
+
+      if (!currentSubscription || company?.subscription_plan === 'trial' || company?.subscription_plan === 'free') {
+        // Usuario sin suscripción o en trial/free -> Crear nueva suscripción con preapproval
+        const result = await subscriptionService.startSubscription(selectedPlan, 'credit_card');
+
+        if (result.success && result.init_point) {
+          // Redirigir a MercadoPago para autorizar la suscripción
+          window.location.href = result.init_point;
+        } else {
+          setError('No se pudo iniciar la suscripción. Intenta nuevamente.');
+        }
+      } else {
+        // Usuario con suscripción activa -> Upgrade con preapproval
+        const result = await subscriptionService.upgradeWithPreapproval(
+          currentSubscription,
+          selectedPlan
+        );
+
+        if (result.success && result.init_point) {
+          // Redirigir a MercadoPago para autorizar el upgrade
+          window.location.href = result.init_point;
+        } else {
+          setError('No se pudo procesar el upgrade. Intenta nuevamente.');
+        }
+      }
+    } catch (error: any) {
+      console.error('Error upgrading plan:', error);
+      setError(error.response?.data?.message || 'Error al procesar la solicitud');
+      setLoading(false);
+    }
   }
 
   if (loading) {

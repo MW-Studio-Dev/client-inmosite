@@ -53,6 +53,13 @@ const nextConfig = {
         port: '8000', // Puerto de tu Django server
         pathname: '/**',
       },
+        {
+        protocol: 'https',
+        hostname: 'usc1.contabostorage.com',
+        port: '', 
+        pathname: '/**',
+      },
+     
     ],
     // Configuraciones opcionales adicionales
     formats: ['image/webp', 'image/avif'], // Formatos optimizados

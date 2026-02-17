@@ -11,7 +11,7 @@ export interface Property {
   location_display: string;
   main_features: string;
   featured_image_url: string | null;
-  
+
   images_count: number;
   bathrooms: number;
   bedrooms: number;
@@ -19,7 +19,7 @@ export interface Property {
   surface_total: string;
   is_featured: boolean;
   is_published: boolean;
-  is_development:boolean;
+  is_development: boolean;
   views_count: number;
   created_at: string;
   updated_at: string;
@@ -45,17 +45,17 @@ export interface CreatePropertyForm {
   title: string;
   description: string;
   internal_code: string;
-  
+
   // Precios
   price_usd: number | '';
   price_ars: number | '';
   expenses: number | '';
-  
+
   // Tipo y estado
   operation_type: 'venta' | 'alquiler' | '';
   property_type: string;
   status: 'disponible' | 'vendido' | 'reservado' | 'no_disponible' | '';
-  
+
   // Ubicación
   province: string;
   city: string;
@@ -65,7 +65,7 @@ export interface CreatePropertyForm {
   unit: string;
   zip_code: string;
   currency: string;
-  
+
   // Características físicas
   bedrooms: number | '';
   bathrooms: number | '';
@@ -79,15 +79,15 @@ export interface CreatePropertyForm {
   orientation: string;
   garage_spaces: number | '';
   storage_spaces: number | '';
-  
+
   // Configuración
   is_featured: boolean;
   is_published: boolean;
-  
+
   // SEO
   meta_title: string;
   meta_description: string;
-  
+
   // Características adicionales
   features: string[];
   featured_image: File | null;
@@ -168,6 +168,7 @@ export interface PropertyDetail {
   address: string;
   floor: string;
   unit: string;
+  zip_code: string;
   location_display: string;
   bedrooms: number;
   bathrooms: number;

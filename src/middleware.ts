@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { rootDomain } from '@/lib/utils';
-import axios from 'axios';
 
 // Cache en memoria para verificaciones rápidas de subdominios
 const subdomainCache = new Map<string, {
@@ -16,19 +15,9 @@ const subdomainCache = new Map<string, {
 // Duración del cache en memoria (5 minutos)
 const CACHE_DURATION = 5 * 60 * 1000;
 
-// Instancia de axios con headers de seguridad
-const publicAxios = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
-  timeout: 5000, // ✅ AUMENTADO: Más tiempo para producción
-  headers: {
-    'Content-Type': 'application/json',
-    'X-Domain-Check-Key': process.env.DOMAIN_CHECK_SECRET_KEY || 'B@guira2025!+',
-  },
-});
-
 // Lista de subdominios reservados del sistema
 const RESERVED_SUBDOMAINS = [
-  'www', 'api', 'admin', 'app', 'dashboard', 'docs', 'blog', 
+  'www', 'api', 'admin', 'app', 'dashboard', 'docs', 'blog',
   'mail', 'ftp', 'cdn', 'static', 'assets', 'img', 'images',
   'support', 'help', 'status', 'staging', 'dev', 'test',
   'preview', 'demo', 'sandbox', 'beta', 'alpha'
@@ -49,10 +38,10 @@ const SUBDOMAIN_ROUTES_CONFIG = {
     'app': {
       redirectTo: '/dashboard'
     }
-  } as Record<string, { 
-    allowedPaths?: string[]; 
-    rewriteToApiRoutes?: boolean; 
-    redirectTo?: string 
+  } as Record<string, {
+    allowedPaths?: string[];
+    rewriteToApiRoutes?: boolean;
+    redirectTo?: string
   }>
 };
 
@@ -88,7 +77,7 @@ function extractSubdomain(request: NextRequest): string | null {
     hostname.endsWith(`.${rootDomainFormatted}`);
 
   const extractedSubdomain = isSubdomain ? hostname.replace(`.${rootDomainFormatted}`, '') : null;
-  
+
   if (extractedSubdomain) {
     console.log(`🌐 Production subdomain: ${extractedSubdomain}`);
   }
@@ -124,21 +113,43 @@ async function verifySubdomainExists(subdomain: string): Promise<{
 
   try {
     console.log(`🔍 Verificando: ${subdomain}`);
-    
-    const endpoint = `/companies/public/domains/validate/?domain=${subdomain}`;
-    const response = await publicAxios.get(endpoint);
-    
+
+    // Configurar timeout para fetch
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    const endpoint = `${process.env.NEXT_PUBLIC_API_URL}/companies/public/domains/validate/?domain=${subdomain}`;
+
+    // Usar fetch en lugar de axios para compatibilidad con Edge Runtime
+    const response = await fetch(endpoint, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Domain-Check-Key': process.env.DOMAIN_CHECK_SECRET_KEY || 'B@guira2025!+',
+      },
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
     console.log(`✅ API Response:`, response.status);
 
-    if (response.status === 200 && response.data?.success && response.data?.data?.valid) {
-      const apiData = response.data.data;
-      
+    let apiData = null;
+    try {
+      apiData = await response.json();
+    } catch (e) {
+      console.warn('Error parsing JSON response', e);
+    }
+
+    if (response.ok && apiData?.success && apiData?.data?.valid) {
+      const data = apiData.data;
+
       const result = {
         exists: true,
-        isPublished: apiData.is_verified !== false,
+        isPublished: data.is_verified !== false,
         companyData: {
-          name: apiData.company_name || subdomain,
-          id: apiData.company_id || ''
+          name: data.company_name || subdomain,
+          id: data.company_id || ''
         }
       };
 
@@ -149,9 +160,12 @@ async function verifySubdomainExists(subdomain: string): Promise<{
 
       console.log(`✅ Subdomain verificado: ${subdomain}`);
       return result;
-    } else {
+    }
+
+    // Si la respuesta es 404 o explícitamente inválida
+    if (response.status === 404 || apiData?.data?.valid === false) {
       console.log(`❌ Subdomain no válido: ${subdomain}`);
-      
+
       const result = {
         exists: false,
         isPublished: false
@@ -164,30 +178,16 @@ async function verifySubdomainExists(subdomain: string): Promise<{
 
       return result;
     }
+
+    // Si llegamos aquí con un error 500 o similar, lanzamos error para caer en el catch (modo permisivo)
+    throw new Error(`API Error: ${response.status}`);
+
   } catch (error: any) {
-    console.error(`⚠️ Error verificando ${subdomain}:`, error.message);
-
-    // ✅ CAMBIO CLAVE: En caso de error de API, PERMITIR el subdominio si es válido
-    // Esto hace que los subdominios funcionen incluso si Django está caído o hay problemas de red
-    
-    if (error.response?.status === 404 || error.response?.data?.data?.valid === false) {
-      // Solo rechazar si la API explícitamente dice que no existe
-      const result = {
-        exists: false,
-        isPublished: false
-      };
-
-      subdomainCache.set(subdomain, {
-        ...result,
-        timestamp: Date.now()
-      });
-
-      return result;
-    }
+    console.error(`⚠️ Error verificando ${subdomain}:`, error.message || error);
 
     // Para errores de red, timeout, o errores 500, PERMITIR acceso
     console.warn(`⚠️ Permitiendo ${subdomain} debido a error de API (modo permisivo)`);
-    
+
     const result = {
       exists: true, // ✅ PERMITIR
       isPublished: true, // ✅ PERMITIR
@@ -208,29 +208,29 @@ async function verifySubdomainExists(subdomain: string): Promise<{
 }
 
 function handleSpecialSubdomains(
-  subdomain: string, 
-  pathname: string, 
+  subdomain: string,
+  pathname: string,
   request: NextRequest
 ): NextResponse | null {
   const specialConfig = SUBDOMAIN_ROUTES_CONFIG.specialSubdomains[subdomain];
-  
+
   if (!specialConfig) return null;
 
   if (subdomain === 'api') {
     const allowedPaths = specialConfig.allowedPaths || [];
     const isAllowedPath = allowedPaths.some(path => pathname.startsWith(path));
-    
+
     if (!isAllowedPath) {
       return NextResponse.json(
-        { 
+        {
           success: false,
-          error: 'Not Found', 
-          message: 'API endpoint not found' 
+          error: 'Not Found',
+          message: 'API endpoint not found'
         },
         { status: 404 }
       );
     }
-    
+
     if (specialConfig.rewriteToApiRoutes) {
       return NextResponse.rewrite(new URL(`/api${pathname}`, request.url));
     }
@@ -246,7 +246,7 @@ function handleSpecialSubdomains(
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
+
   // Filtrar URLs que no deberían ser procesadas
   const shouldSkipProcessing = [
     '/.well-known/',
@@ -290,17 +290,17 @@ export async function middleware(request: NextRequest) {
     if (specialResponse) {
       return specialResponse;
     }
-    
+
     const mainDomainUrl = request.url.replace(`${subdomain}.`, '');
     return NextResponse.redirect(new URL('/', mainDomainUrl));
   }
 
   // Recursos estáticos - paso directo
-  if (pathname.startsWith('/_next') || 
-      pathname.startsWith('/favicon') || 
-      pathname.startsWith('/robots') ||
-      pathname.startsWith('/sitemap') ||
-      pathname.startsWith('/api/_internal')) {
+  if (pathname.startsWith('/_next') ||
+    pathname.startsWith('/favicon') ||
+    pathname.startsWith('/robots') ||
+    pathname.startsWith('/sitemap') ||
+    pathname.startsWith('/api/_internal')) {
     return NextResponse.next();
   }
 
@@ -308,7 +308,7 @@ export async function middleware(request: NextRequest) {
   const isSystemRoute = SUBDOMAIN_ROUTES_CONFIG.systemRoutes.some(
     route => pathname.startsWith(route)
   );
-  
+
   if (isSystemRoute) {
     console.log(`🚫 Ruta de sistema bloqueada: ${pathname}`);
     return NextResponse.rewrite(new URL('/website-not-found', request.url));

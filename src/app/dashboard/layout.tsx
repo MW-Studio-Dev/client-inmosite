@@ -46,9 +46,8 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 font-poppins ${
-      isDark ? 'bg-gray-950' : 'bg-gray-50'
-    }`}>
+    <div className={`min-h-screen transition-colors duration-300 font-poppins font-light ${isDark ? 'bg-gray-950' : 'bg-gray-50'
+      }`}>
       {/* Sidebar */}
       <AdminSidebar
         isOpen={sidebarOpen}
@@ -64,20 +63,19 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       {/* Main content */}
       <div className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-72'}`}>
         {/* Top navigation bar */}
-        <div className={`sticky top-0 z-40 transition-colors duration-300 ${
-          isDark
-            ? 'bg-gray-900 border-b border-gray-700'
-            : 'bg-white border-b border-gray-200'
-        } ${searchExpanded ? 'h-24' : 'h-16'}`}>
+        <div className={`fixed top-0 right-0 z-40 transition-all duration-300 ${isDark
+          ? 'bg-gray-900'
+          : 'bg-white border-b border-gray-200'
+          } ${searchExpanded ? 'h-24' : 'h-16'} ${sidebarCollapsed ? 'left-0 lg:left-20' : 'left-0 lg:left-72'
+          }`}>
           <div className="flex h-16 items-center gap-x-4 shadow-sm px-4 sm:gap-x-6 sm:px-6 lg:px-8">
             {/* Botón hamburguesa para abrir sidebar en móvil */}
             <button
               type="button"
-              className={`p-2 rounded-lg lg:hidden transition-all duration-200 ${
-                isDark
-                  ? 'text-gray-300 hover:bg-gray-800'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
+              className={`p-2 rounded-lg lg:hidden transition-all duration-200 ${isDark
+                ? 'text-gray-300 hover:bg-gray-800'
+                : 'text-gray-700 hover:bg-gray-100'
+                }`}
               onClick={() => setSidebarOpen(true)}
             >
               <span className="sr-only">Abrir sidebar</span>
@@ -85,20 +83,18 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
             </button>
 
             {/* Separator */}
-            <div className={`h-6 w-px lg:hidden ${
-              isDark ? 'bg-gray-700' : 'bg-gray-200'
-            }`} aria-hidden="true" />
+            <div className={`h-6 w-px lg:hidden ${isDark ? 'bg-gray-700' : 'bg-gray-200'
+              }`} aria-hidden="true" />
 
-            <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+            <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6 lg:pl-8">
               <div className="flex flex-1 items-center gap-3">
                 {/* Botón para colapsar sidebar en desktop */}
                 <button
                   type="button"
-                  className={`hidden lg:block p-2 rounded-lg transition-all duration-200 ${
-                    isDark
-                      ? 'text-gray-300 hover:bg-gray-800'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                  className={`hidden lg:block p-2 rounded-lg transition-all duration-200 mt-1 ${isDark
+                    ? 'text-gray-300 hover:bg-gray-800'
+                    : 'text-gray-700 hover:bg-gray-100'
+                    }`}
                   onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
                 >
                   <span className="sr-only">
@@ -111,55 +107,48 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                 <div className="flex-1 lg:max-w-2xl">
                   <div className="relative">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                      <HiSearch className={`h-5 w-5 ${
-                        isDark ? 'text-gray-500' : 'text-gray-400'
-                      }`} />
+                      <HiSearch className={`h-5 w-5 ${isDark ? 'text-gray-500' : 'text-gray-400'
+                        }`} />
                     </div>
                     <input
                       type="search"
                       placeholder="Buscar propiedades, clientes..."
                       onFocus={() => setSearchExpanded(true)}
                       onBlur={() => setTimeout(() => setSearchExpanded(false), 200)}
-                      className={`block w-full rounded-lg border py-2 pl-10 pr-3 text-sm transition-all duration-200 lg:py-2 ${
-                        isDark
-                          ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder:text-gray-500 focus:border-gray-600 focus:ring-2 focus:ring-gray-700'
-                          : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-gray-500 focus:ring-2 focus:ring-gray-200'
-                      } ${searchExpanded ? 'lg:py-3' : ''}`}
+                      className={`block w-full rounded-lg border py-2 pl-10 pr-3 text-sm transition-all duration-200 lg:py-2 ${isDark
+                        ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder:text-gray-500 focus:border-gray-600 focus:ring-2 focus:ring-gray-700'
+                        : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-gray-500 focus:ring-2 focus:ring-gray-200'
+                        } ${searchExpanded ? 'lg:py-3' : ''}`}
                     />
                   </div>
                   {/* Expandible search suggestions for mobile */}
                   {searchExpanded && (
-                    <div className={`absolute left-0 right-0 top-16 mt-2 mx-4 lg:hidden rounded-lg shadow-lg border transition-all duration-300 ${
-                      isDark
-                        ? 'bg-gray-800 border-gray-700'
-                        : 'bg-white border-gray-200'
-                    }`}>
+                    <div className={`absolute left-0 right-0 top-16 mt-2 mx-4 lg:hidden rounded-lg shadow-lg border transition-all duration-300 ${isDark
+                      ? 'bg-gray-800 border-gray-700'
+                      : 'bg-white border-gray-200'
+                      }`}>
                       <div className="p-3">
-                        <p className={`text-xs font-medium mb-2 ${
-                          isDark ? 'text-gray-400' : 'text-gray-600'
-                        }`}>
+                        <p className={`text-xs font-medium mb-2 ${isDark ? 'text-gray-400' : 'text-gray-600'
+                          }`}>
                           Sugerencias de búsqueda
                         </p>
                         <div className="space-y-2">
-                          <button className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                            isDark
-                              ? 'text-gray-300 hover:bg-gray-700'
-                              : 'text-gray-700 hover:bg-gray-100'
-                          }`}>
+                          <button className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${isDark
+                            ? 'text-gray-300 hover:bg-gray-700'
+                            : 'text-gray-700 hover:bg-gray-100'
+                            }`}>
                             🏠 Buscar propiedades
                           </button>
-                          <button className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                            isDark
-                              ? 'text-gray-300 hover:bg-gray-700'
-                              : 'text-gray-700 hover:bg-gray-100'
-                          }`}>
+                          <button className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${isDark
+                            ? 'text-gray-300 hover:bg-gray-700'
+                            : 'text-gray-700 hover:bg-gray-100'
+                            }`}>
                             👥 Buscar clientes
                           </button>
-                          <button className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                            isDark
-                              ? 'text-gray-300 hover:bg-gray-700'
-                              : 'text-gray-700 hover:bg-gray-100'
-                          }`}>
+                          <button className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${isDark
+                            ? 'text-gray-300 hover:bg-gray-700'
+                            : 'text-gray-700 hover:bg-gray-100'
+                            }`}>
                             📊 Ver estadísticas
                           </button>
                         </div>
@@ -176,11 +165,10 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
               <button
                 type="button"
                 onClick={toggleTheme}
-                className={`p-2 rounded-lg transition-all duration-200 ${
-                  isDark
-                    ? 'text-yellow-400 hover:bg-gray-800'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
+                className={`p-2 rounded-lg transition-all duration-200 ${isDark
+                  ? 'text-yellow-400 hover:bg-gray-800'
+                  : 'text-gray-600 hover:bg-gray-100'
+                  }`}
                 title={isDark ? 'Modo claro' : 'Modo oscuro'}
               >
                 <span className="sr-only">Cambiar tema</span>
@@ -193,55 +181,47 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
               {/* Notificaciones */}
               <NotificationBadge
-                className={`relative p-2 rounded-lg transition-all duration-200 ${
-                  isDark
-                    ? 'text-gray-300 hover:bg-gray-800'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
+                className={`relative p-2 rounded-lg transition-all duration-200 ${isDark
+                  ? 'text-gray-300 hover:bg-gray-800'
+                  : 'text-gray-600 hover:bg-gray-100'
+                  }`}
               />
 
               {/* Separator */}
-              <div className={`hidden lg:block h-6 w-px ${
-                isDark ? 'bg-gray-700' : 'bg-gray-200'
-              }`} aria-hidden="true" />
+              <div className={`hidden lg:block h-6 w-px ${isDark ? 'bg-gray-700' : 'bg-gray-200'
+                }`} aria-hidden="true" />
 
               {/* Información del usuario */}
-              <div className={`flex items-center gap-x-3 rounded-lg px-3 py-2 border transition-colors duration-200 ${
-                isDark
-                  ? 'bg-gray-800 border-gray-700'
-                  : 'bg-gray-50 border-gray-200'
-              }`}>
-                <HiUserCircle className={`h-8 w-8 ${
-                  isDark ? 'text-gray-400' : 'text-gray-600'
-                }`} />
+              <div className={`flex items-center gap-x-3 rounded-lg px-3 py-2 border transition-colors duration-200 ${isDark
+                ? 'bg-gray-800 border-gray-700'
+                : 'bg-gray-50 border-gray-200'
+                }`}>
+                <HiUserCircle className={`h-8 w-8 ${isDark ? 'text-gray-400' : 'text-gray-600'
+                  }`} />
                 <span className="hidden lg:flex lg:flex-col">
-                  <span className={`text-sm font-semibold ${
-                    isDark ? 'text-gray-200' : 'text-gray-900'
-                  }`}>
+                  <span className={`text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-900'
+                    }`}>
                     {user?.full_name}
                   </span>
-                  <span className={`text-xs ${
-                    isDark ? 'text-gray-400' : 'text-gray-500'
-                  }`}>
+                  <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'
+                    }`}>
                     {company?.name || 'Inmobiliaria'}
                   </span>
                 </span>
               </div>
 
               {/* Separator */}
-              <div className={`hidden lg:block h-6 w-px ${
-                isDark ? 'bg-gray-700' : 'bg-gray-200'
-              }`} aria-hidden="true" />
+              <div className={`hidden lg:block h-6 w-px ${isDark ? 'bg-gray-700' : 'bg-gray-200'
+                }`} aria-hidden="true" />
 
               {/* Botón cerrar sesión */}
               <button
                 type="button"
                 onClick={handleLogout}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 font-medium text-sm ${
-                  isDark
-                    ? 'bg-gray-700 hover:bg-gray-600 text-white'
-                    : 'bg-gray-900 hover:bg-gray-800 text-white'
-                }`}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 font-medium text-sm ${isDark
+                  ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                  : 'bg-gray-900 hover:bg-gray-800 text-white'
+                  }`}
                 title="Cerrar sesión"
               >
                 <HiLogout className="h-5 w-5" />
@@ -250,6 +230,9 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </div>
+
+        {/* Spacer for fixed header */}
+        <div className="h-16" />
 
         {/* Page content */}
         <main className="py-10">

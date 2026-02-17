@@ -15,9 +15,6 @@ export function DashboardGuard({ children }: DashboardGuardProps) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loading />
-        <span className="ml-3 text-gray-600 dark:text-gray-400">
-          Verificando autenticación...
-        </span>
       </div>
     )
   }

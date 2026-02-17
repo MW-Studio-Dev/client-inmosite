@@ -605,18 +605,22 @@ export default function PropertyDetailPage() {
                 Características Adicionales
               </h3>
               <div className="flex flex-wrap gap-2">
-                {property.features.map((feature, index) => (
-                  <span
-                    key={index}
-                    className={`px-2.5 py-1 text-xs font-medium rounded-md border ${
-                      isDark
-                        ? 'bg-blue-900/20 text-blue-400 border-blue-800'
-                        : 'bg-blue-50 text-blue-700 border-blue-200'
-                    }`}
-                  >
-                    {feature}
-                  </span>
-                ))}
+                {property.features.map((feature: any, index: number) => {
+                  const label = typeof feature === 'string' ? feature : (feature?.feature || feature?.name || feature?.value || '');
+                  if (!label) return null;
+                  return (
+                    <span
+                      key={index}
+                      className={`px-2.5 py-1 text-xs font-medium rounded-md border ${
+                        isDark
+                          ? 'bg-blue-900/20 text-blue-400 border-blue-800'
+                          : 'bg-blue-50 text-blue-700 border-blue-200'
+                      }`}
+                    >
+                      {label}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           )}

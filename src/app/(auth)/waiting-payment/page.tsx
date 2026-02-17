@@ -21,8 +21,18 @@ const WaitingPaymentPage = () => {
 
   useEffect(() => {
     // Verificar si el pago fue exitoso
-    if (collection_status === 'approved' || status === 'approved') {
+    if (collection_status === 'approved' || status === 'approved' || status === 'authorized') {
       setPaymentStatus('success');
+
+      // Si es una suscripción autorizada, redirigir a la página de éxito después de 2 segundos
+      if (status === 'authorized') {
+        setTimeout(() => {
+          const queryParams = new URLSearchParams();
+          if (preference_id) queryParams.set('preapproval_id', preference_id);
+          if (status) queryParams.set('status', status);
+          router.push(`/dashboard/subscription/success?${queryParams.toString()}`);
+        }, 2000);
+      }
     } else if (collection_status === 'rejected' || status === 'rejected' || collection_status === 'cancelled') {
       setPaymentStatus('failed');
     }
@@ -52,7 +62,7 @@ const WaitingPaymentPage = () => {
 
       return () => clearInterval(interval);
     }
-  }, [collection_status, status, paymentStatus]);
+  }, [collection_status, status, paymentStatus, preference_id, router]);
 
   const handleRetry = () => {
     // Redirigir al usuario a seleccionar plan nuevamente
@@ -163,10 +173,12 @@ const WaitingPaymentPage = () => {
                     <HiCheckCircle className="w-16 h-16 text-green-500 mx-auto" />
                   </div>
                   <h1 className="text-2xl font-semibold text-white mb-3">
-                    ¡Pago Exitoso!
+                    {status === 'authorized' ? '¡Suscripción Autorizada!' : '¡Pago Exitoso!'}
                   </h1>
                   <p className="text-gray-400 text-sm mb-6">
-                    Tu pago ha sido confirmado. Tu cuenta está siendo activada.
+                    {status === 'authorized'
+                      ? 'Tu suscripción ha sido autorizada. Serás redirigido en unos momentos...'
+                      : 'Tu pago ha sido confirmado. Tu cuenta está siendo activada.'}
                   </p>
 
                   {payment_id && (
@@ -176,12 +188,26 @@ const WaitingPaymentPage = () => {
                     </div>
                   )}
 
-                  <button
-                    onClick={handleGoToLogin}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg text-sm transition-colors"
-                  >
-                    Ir a iniciar sesión
-                  </button>
+                  {preference_id && status === 'authorized' && (
+                    <div className="bg-green-950/30 border border-green-800/30 rounded-lg p-4 mb-6">
+                      <p className="text-green-300 text-xs mb-1">ID de Suscripción:</p>
+                      <p className="text-green-100 text-sm font-mono">{preference_id}</p>
+                    </div>
+                  )}
+
+                  {status === 'authorized' ? (
+                    <div className="flex items-center justify-center gap-2 text-green-400">
+                      <Loader className="w-5 h-5" />
+                      <span className="text-sm">Redirigiendo...</span>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleGoToLogin}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg text-sm transition-colors"
+                    >
+                      Ir a iniciar sesión
+                    </button>
+                  )}
                 </div>
               )}
 

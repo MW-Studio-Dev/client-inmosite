@@ -5,11 +5,14 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import ClientForm from '@/components/dashboard/clients/ClientForm';
 import { useToast } from '@/components/common/Toast';
-import  { axiosInstanceMultipart } from '@/lib/api';
+import { axiosInstanceMultipart } from '@/lib/api';
+import { useDashboardTheme } from '@/context/DashboardThemeContext';
 
 export default function NuevoClientePage() {
   const router = useRouter();
   const { showSuccess } = useToast();
+  const { theme } = useDashboardTheme();
+  const isDark = theme === 'dark';
 
   const handleSuccess = () => {
     // Mostrar mensaje de éxito
@@ -56,7 +59,7 @@ export default function NuevoClientePage() {
   return (
     <div className="space-y-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
           Nuevo Cliente
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">

@@ -417,18 +417,12 @@ export function ClientTable({ clients, loading, pagination, onPageChange, onDocu
                 }`}>
                 Estado
               </th>
-              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${isDark ? 'text-slate-300' : 'text-gray-500'
-                }`}>
-                Actividad
-              </th>
+
               <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${isDark ? 'text-slate-300' : 'text-gray-500'
                 }`}>
                 Documentos
               </th>
-              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${isDark ? 'text-slate-300' : 'text-gray-500'
-                }`}>
-                Registrado
-              </th>
+
               <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${isDark ? 'text-slate-300' : 'text-gray-500'
                 }`}>
                 Acciones
@@ -446,9 +440,12 @@ export function ClientTable({ clients, loading, pagination, onPageChange, onDocu
                       }`}>
                       {client.full_name || 'Sin nombre'}
                     </div>
-                    <div className="mt-1">
+                    <div className="mt-1 flex flex-wrap gap-2">
                       <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border ${getClientTypeColor(client.client_type)}`}>
                         {formatClientType(client.client_type)}
+                      </span>
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border ${getActivityColor(client.current_activity)}`}>
+                        {formatActivity(client.current_activity)}
                       </span>
                     </div>
                   </div>
@@ -474,8 +471,8 @@ export function ClientTable({ clients, loading, pagination, onPageChange, onDocu
                           target="_blank"
                           rel="noopener noreferrer"
                           className={`p-1 rounded transition-colors ${isDark
-                              ? 'hover:bg-green-900/30 text-green-400'
-                              : 'hover:bg-green-100 text-green-600'
+                            ? 'hover:bg-green-900/30 text-green-400'
+                            : 'hover:bg-green-100 text-green-600'
                             }`}
                           title="Enviar mensaje por WhatsApp"
                         >
@@ -494,25 +491,26 @@ export function ClientTable({ clients, loading, pagination, onPageChange, onDocu
                   </div>
                 </td>
                 <td className={`px-6 py-4 transition-colors duration-300`}>
-                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border ${getStatusColor(client.status)}`}>
-                    {formatStatus(client.status)}
-                  </span>
+                  <div className="flex flex-col gap-1">
+                    <span className={`inline-flex w-fit items-center rounded-full px-2.5 py-0.5 text-xs font-medium border ${getStatusColor(client.status)}`}>
+                      {formatStatus(client.status)}
+                    </span>
+                    <span className={`text-xs ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                      Reg: {formatDate(client.created_at)}
+                    </span>
+                  </div>
                 </td>
-                <td className={`px-6 py-4 transition-colors duration-300`}>
-                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border ${getActivityColor(client.current_activity)}`}>
-                    {formatActivity(client.current_activity)}
-                  </span>
-                </td>
+
                 <td className={`px-6 py-4 transition-colors duration-300`}>
                   <button
                     onClick={() => handleDocumentsClick(client)}
                     className={`flex items-center gap-2 text-sm transition-colors ${client.documents_count > 0
-                        ? isDark
-                          ? 'text-blue-400 hover:text-blue-300 hover:bg-slate-700/50 px-2 py-1 rounded'
-                          : 'text-blue-600 hover:text-blue-700 hover:bg-gray-100 px-2 py-1 rounded'
-                        : isDark
-                          ? 'text-slate-400'
-                          : 'text-gray-500'
+                      ? isDark
+                        ? 'text-blue-400 hover:text-blue-300 hover:bg-slate-700/50 px-2 py-1 rounded'
+                        : 'text-blue-600 hover:text-blue-700 hover:bg-gray-100 px-2 py-1 rounded'
+                      : isDark
+                        ? 'text-slate-400'
+                        : 'text-gray-500'
                       }`}
                     disabled={client.documents_count === 0}
                   >
@@ -523,18 +521,14 @@ export function ClientTable({ clients, loading, pagination, onPageChange, onDocu
                     )}
                   </button>
                 </td>
-                <td className={`px-6 py-4 text-sm transition-colors duration-300`}>
-                  <div className={isDark ? 'text-slate-300' : 'text-gray-700'}>
-                    {formatDate(client.created_at)}
-                  </div>
-                </td>
+
                 <td className={`px-6 py-4 text-right text-sm font-medium transition-colors duration-300`}>
                   <div className="flex items-center justify-end gap-2">
                     <Link
                       href={`/dashboard/clients/${client.id}`}
                       className={`p-1 rounded transition-colors ${isDark
-                          ? 'hover:bg-slate-700 text-slate-400 hover:text-slate-200'
-                          : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+                        ? 'hover:bg-slate-700 text-slate-400 hover:text-slate-200'
+                        : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
                         }`}
                       title="Ver detalles"
                     >
@@ -543,8 +537,8 @@ export function ClientTable({ clients, loading, pagination, onPageChange, onDocu
                     <Link
                       href={`/dashboard/clients/${client.id}/edit`}
                       className={`p-1 rounded transition-colors ${isDark
-                          ? 'hover:bg-slate-700 text-slate-400 hover:text-slate-200'
-                          : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+                        ? 'hover:bg-slate-700 text-slate-400 hover:text-slate-200'
+                        : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
                         }`}
                       title="Editar cliente"
                     >
@@ -583,8 +577,8 @@ export function ClientTable({ clients, loading, pagination, onPageChange, onDocu
                 <Link
                   href={`/dashboard/clients/${client.id}`}
                   className={`p-2 rounded-lg transition-colors ${isDark
-                      ? 'hover:bg-slate-700 text-slate-400 hover:text-slate-200'
-                      : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+                    ? 'hover:bg-slate-700 text-slate-400 hover:text-slate-200'
+                    : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
                     }`}
                   title="Ver detalles"
                 >
@@ -593,8 +587,8 @@ export function ClientTable({ clients, loading, pagination, onPageChange, onDocu
                 <Link
                   href={`/dashboard/clients/${client.id}/edit`}
                   className={`p-2 rounded-lg transition-colors ${isDark
-                      ? 'hover:bg-slate-700 text-slate-400 hover:text-slate-200'
-                      : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+                    ? 'hover:bg-slate-700 text-slate-400 hover:text-slate-200'
+                    : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
                     }`}
                   title="Editar cliente"
                 >
@@ -624,8 +618,8 @@ export function ClientTable({ clients, loading, pagination, onPageChange, onDocu
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`p-1 rounded transition-colors ${isDark
-                        ? 'hover:bg-green-900/30 text-green-400'
-                        : 'hover:bg-green-100 text-green-600'
+                      ? 'hover:bg-green-900/30 text-green-400'
+                      : 'hover:bg-green-100 text-green-600'
                       }`}
                     title="Enviar mensaje por WhatsApp"
                   >
@@ -658,12 +652,12 @@ export function ClientTable({ clients, loading, pagination, onPageChange, onDocu
                 <button
                   onClick={() => handleDocumentsClick(client)}
                   className={`flex items-center gap-1.5 text-sm transition-colors ${client.documents_count > 0
-                      ? isDark
-                        ? 'text-blue-400 hover:text-blue-300'
-                        : 'text-blue-600 hover:text-blue-700'
-                      : isDark
-                        ? 'text-slate-400'
-                        : 'text-gray-500'
+                    ? isDark
+                      ? 'text-blue-400 hover:text-blue-300'
+                      : 'text-blue-600 hover:text-blue-700'
+                    : isDark
+                      ? 'text-slate-400'
+                      : 'text-gray-500'
                     }`}
                   disabled={client.documents_count === 0}
                 >

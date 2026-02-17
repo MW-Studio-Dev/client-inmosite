@@ -9,6 +9,7 @@ import { useToast } from '@/components/common/Toast';
 import axiosInstance from '@/lib/api';
 // import { useClientOptions } from '@/hooks/useClientOptions'; // Comentado temporalmente
 import DocumentManager from './DocumentManager';
+import { AddressAutocomplete } from '../properties/form-fields/AddressAutocomplete';
 import { IconType } from 'react-icons';
 import {
   HiPhone,
@@ -22,9 +23,11 @@ import {
   HiOutlineOfficeBuilding,
   HiOutlineIdentification,
   HiOutlineCog,
-  HiDocumentText
+  HiDocumentText,
+  HiOutlinePhone
 } from 'react-icons/hi';
-import  { HiExclamationTriangle } from 'react-icons/hi2';
+import { HiExclamationTriangle } from 'react-icons/hi2';
+import { sileo } from 'sileo';
 // Tipos de datos para el formulario (más flexibles para soportar nuevos tipos dinámicamente)
 type ClientType = string;
 type ClientStatus = string;
@@ -89,28 +92,25 @@ const TextInput: React.FC<TextInputProps> = ({ label, name, required = false, pl
 
   return (
     <div>
-      <label htmlFor={name} className={`block text-sm font-medium mb-1 ${
-        isDark ? 'text-gray-200' : 'text-gray-700'
-      }`}>
+      <label htmlFor={name} className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'
+        }`}>
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <div className="relative">
         {IconComponent && (
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <IconComponent className={`h-5 w-5 ${
-              isDark ? 'text-gray-400' : 'text-gray-400'
-            }`} />
+            <IconComponent className={`h-5 w-5 ${isDark ? 'text-gray-400' : 'text-gray-400'
+              }`} />
           </div>
         )}
         <input
           type="text"
           id={name}
           name={name}
-          className={`block w-full rounded-md border ${
-            isDark
-              ? 'bg-slate-800 border-slate-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500'
-              : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500'
-          } ${IconComponent ? 'pl-10' : 'pl-3'} pr-3 py-2 focus:outline-none focus:ring-1 sm:text-sm`}
+          className={`block w-full rounded-md border ${isDark
+            ? 'bg-slate-800 border-slate-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500'
+            : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500'
+            } ${IconComponent ? 'pl-10' : 'pl-3'} pr-3 py-2 focus:outline-none focus:ring-1 sm:text-sm`}
           placeholder={placeholder}
           {...props}
         />
@@ -143,27 +143,24 @@ const SelectInput: React.FC<SelectInputProps> = ({ label, name, required = false
 
   return (
     <div>
-      <label htmlFor={name} className={`block text-sm font-medium mb-1 ${
-        isDark ? 'text-gray-200' : 'text-gray-700'
-      }`}>
+      <label htmlFor={name} className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'
+        }`}>
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <div className="relative">
         {IconComponent && (
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <IconComponent className={`h-5 w-5 ${
-              isDark ? 'text-gray-400' : 'text-gray-400'
-            }`} />
+            <IconComponent className={`h-5 w-5 ${isDark ? 'text-gray-400' : 'text-gray-400'
+              }`} />
           </div>
         )}
         <select
           id={name}
           name={name}
-          className={`block w-full rounded-md border ${
-            isDark
-              ? 'bg-slate-800 border-slate-600 text-white focus:border-red-500 focus:ring-red-500'
-              : 'bg-white border-gray-300 text-gray-900 focus:border-red-500 focus:ring-red-500'
-          } ${IconComponent ? 'pl-10' : 'pl-3'} pr-10 py-2 focus:outline-none focus:ring-1 sm:text-sm`}
+          className={`block w-full rounded-md border ${isDark
+            ? 'bg-slate-800 border-slate-600 text-white focus:border-red-500 focus:ring-red-500'
+            : 'bg-white border-gray-300 text-gray-900 focus:border-red-500 focus:ring-red-500'
+            } ${IconComponent ? 'pl-10' : 'pl-3'} pr-10 py-2 focus:outline-none focus:ring-1 sm:text-sm`}
           {...props}
         >
           {placeholder && (
@@ -205,20 +202,18 @@ const TextAreaInput: React.FC<TextAreaInputProps> = ({ label, name, required = f
 
   return (
     <div>
-      <label htmlFor={name} className={`block text-sm font-medium mb-1 ${
-        isDark ? 'text-gray-200' : 'text-gray-700'
-      }`}>
+      <label htmlFor={name} className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'
+        }`}>
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <textarea
         id={name}
         name={name}
         rows={rows}
-        className={`block w-full rounded-md border ${
-          isDark
-            ? 'bg-slate-800 border-slate-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500'
-            : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500'
-        } px-3 py-2 focus:outline-none focus:ring-1 sm:text-sm`}
+        className={`block w-full rounded-md border ${isDark
+          ? 'bg-slate-800 border-slate-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500'
+          : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500'
+          } px-3 py-2 focus:outline-none focus:ring-1 sm:text-sm`}
         placeholder={placeholder}
         {...props}
       />
@@ -266,7 +261,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
   const [newDocuments, setNewDocuments] = useState<DocumentFile[]>([]);
 
   // Estado para gestión de errores
-  const [formErrors, setFormErrors] = useState<Array<{field: string, message: string, section?: string}>>([]);
+  const [formErrors, setFormErrors] = useState<Array<{ field: string, message: string, section?: string }>>([]);
   const [showErrorSummary, setShowErrorSummary] = useState(false);
 
   // Datos iniciales del formulario
@@ -304,6 +299,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
     { value: 'ALQUILANDO', label: 'Alquilando' },
     { value: 'VENDIENDO', label: 'Vendiendo' },
     { value: 'BUSCANDO_ALQUILER', label: 'Buscando Alquiler' },
+    { value: 'BUSCANDO_COMPRAR', label: 'Buscando Comprar' },
     { value: 'BUSCANDO_INVERTIR', label: 'Buscando Invertir' },
     { value: 'OTRA', label: 'Otra' },
   ];
@@ -311,7 +307,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
 
   // Función para procesar y mostrar errores
   const processFormErrors = (backendErrors: any, formikActions: any) => {
-    const errorList: Array<{field: string, message: string, section?: string}> = [];
+    const errorList: Array<{ field: string, message: string, section?: string }> = [];
     const formattedErrors: Record<string, string> = {};
 
     // Mapeo de campos a secciones para mejor visualización
@@ -365,7 +361,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
     return errorList;
   };
 
-  
+
   // Manejar envío del formulario
   const handleSubmit = async (values: ClientFormData, actions: FormikHelpers<ClientFormData>) => {
     try {
@@ -428,7 +424,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
         }
       }
 
-          console.log('Enviando formulario:', {
+      console.log('Enviando formulario:', {
         isEditing,
         hasDocuments: newDocuments.length > 0,
         documentsCount: newDocuments.length,
@@ -508,6 +504,26 @@ const ClientForm: React.FC<ClientFormProps> = ({
           }
         });
 
+        // Manejo específico para error CLIENT_ALREADY_EXISTS
+        if (backendErrors.error_code === 'CLIENT_ALREADY_EXISTS' && backendErrors.message) {
+          const message = backendErrors.message.toLowerCase();
+
+          // Mostrar notificación grande con Sileo
+          sileo.error({
+            title: "Error: Cliente Duplicado",
+            description: backendErrors.message,
+            duration: 8000,
+          });
+
+          if (message.includes('cuit') || message.includes('cuil')) {
+            formattedErrors['cuit_cuil'] = backendErrors.message;
+            hasFieldErrors = true;
+          } else if (message.includes('email') || message.includes('correo')) {
+            formattedErrors['email'] = backendErrors.message;
+            hasFieldErrors = true;
+          }
+        }
+
         // Si hay errores de documentos, mostrar mensaje específico
         if (backendErrors.documents_data) {
           showError('Error en los documentos: ' + JSON.stringify(backendErrors.documents_data));
@@ -534,7 +550,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
     }
   };
 
-  
+
   return (
     <Formik
       initialValues={initialFormData}
@@ -542,114 +558,178 @@ const ClientForm: React.FC<ClientFormProps> = ({
       onSubmit={handleSubmit}
       enableReinitialize={true} // Habilitar reinicialización cuando cambian las opciones
     >
-      {({ isSubmitting }) => (
+      {({ isSubmitting, setFieldValue }) => (
         <Form>
-          <div className={`max-w-6xl mx-auto rounded-lg border ${
-            isDark
-              ? 'bg-slate-800 border-slate-700'
-              : 'bg-white border-gray-200'
-          }`}>
-           
-            
+          <div className={`max-w-6xl mx-auto rounded-lg border ${isDark
+            ? 'bg-slate-800 border-slate-700'
+            : 'bg-white border-gray-200'
+            }`}>
 
-           
-            
+
+
+
+
 
             {/* Form content - Todo en una sola página */}
             <div className="px-6 py-5 space-y-8">
-  
+
               {/* Información Básica */}
               <div>
-                <h3 className={`text-lg font-medium mb-4 flex items-center gap-2 ${
-                  isDark ? 'text-white' : 'text-gray-900'
-                }`}>
-                  <HiOutlineUser className="h-5 w-5 text-red-600" />
-                  Información Básica
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 space-y-6 md:space-y-0">
-                  <Field name="client_type">
-                    {({ field, form, meta }: any) => (
-                      <SelectInput
-                        label="Tipo de Cliente"
-                        name="client_type"
-                        value={field.value}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        options={clientTypes}
-                        required
-                        icon={HiOutlineOfficeBuilding}
-                        form={form}
-                      />
-                    )}
-                  </Field>
-
-                  <Field name="status">
-                    {({ field, form, meta }: any) => (
-                      <SelectInput
-                        label="Estado"
-                        name="status"
-                        value={field.value}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        options={clientStatuses}
-                        required
-                        icon={HiOutlineCog}
-                        form={form}
-                      />
-                    )}
-                  </Field>
-
-                  <div className="md:col-span-2">
-                    <Field name="current_activity">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                  <div className="md:col-span-3">
+                    <Field name="client_type">
                       {({ field, form, meta }: any) => (
                         <SelectInput
-                          label="Actividad Actual"
-                          name="current_activity"
+                          label="Tipo de Cliente"
+                          name="client_type"
                           value={field.value}
                           onChange={field.onChange}
                           onBlur={field.onBlur}
-                          options={clientActivities}
+                          options={clientTypes}
                           required
-                          icon={HiOutlineHome}
+                          icon={HiOutlineOfficeBuilding}
                           form={form}
                         />
                       )}
                     </Field>
                   </div>
 
-                  <Field name="first_name">
-                    {({ field, form, meta }: any) => (
-                      <TextInput
-                        label="Nombre"
-                        name="first_name"
-                        value={field.value}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        required
-                        placeholder="Juan"
-                        icon={HiOutlineUser}
-                        form={form}
-                      />
-                    )}
-                  </Field>
+                  <div className="md:col-span-3">
+                    <Field name="status">
+                      {({ field, form, meta }: any) => (
+                        <SelectInput
+                          label="Estado"
+                          name="status"
+                          value={field.value}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          options={clientStatuses}
+                          required
+                          icon={HiOutlineCog}
+                          form={form}
+                        />
+                      )}
+                    </Field>
+                  </div>
 
-                  <Field name="last_name">
-                    {({ field, form, meta }: any) => (
-                      <TextInput
-                        label="Apellido"
-                        name="last_name"
-                        value={field.value}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        required
-                        placeholder="Pérez"
-                        icon={HiOutlineUser}
-                        form={form}
-                      />
-                    )}
-                  </Field>
+                  <div className="md:col-span-6">
+                    <Field name="current_activity">
+                      {({ field, form, meta }: any) => {
+                        // Lógica para filtrar opciones según el tipo de cliente
+                        const clientType = form.values.client_type;
+                        let filteredActivities = clientActivities;
 
-                  <div className="md:col-span-2">
+                        if (clientType === 'PROPIETARIO') {
+                          filteredActivities = clientActivities.filter(opt =>
+                            ['ALQUILANDO', 'VENDIENDO'].includes(opt.value)
+                          );
+                        } else if (clientType === 'INQUILINO') {
+                          filteredActivities = clientActivities.filter(opt =>
+                            ['BUSCANDO_ALQUILER', 'BUSCANDO_COMPRAR'].includes(opt.value)
+                          );
+                        } else if (['GARANTE', 'INVERSOR'].includes(clientType)) {
+                          // Para Garante e Inversor, por defecto "OTRA" (o permitir solo OTRA si es estricto)
+                          filteredActivities = clientActivities.filter(opt =>
+                            opt.value === 'OTRA' || opt.value === 'BUSCANDO_INVERTIR' // Dejamos invertir para inversor por si acaso
+                          );
+                          // Según requerimiento: "para garante o inversor poner por defecto otro"
+                          // Si es estricto "unicamente", filtramos solo OTRA.
+                          // Voy a ser estricto con el requerimiento de "por defecto otro" pero flexibles en opciones?
+                          // Requerimiento: "tenga como opcion unicamente..." para propietario.
+                          // "si es inquilino ponerlo en..." -> suena a setear valor.
+                          // "para garante o inversor poner por defecto otro".
+
+                          // Interpretación final:
+                          // Propietario: Limitado a Alquilando/Vendiendo.
+                          // Inquilino: Limitado a Buscando Alquiler.
+                          // Garante/Inversor: Default a Otra. (No dice limitar, pero suele ser mejor para UX).
+                          // Voy a limitar para evitar incongruencias, agregando Buscando Invertir para Inversor como opción lógica.
+
+                          if (clientType === 'GARANTE') {
+                            filteredActivities = clientActivities.filter(opt => opt.value === 'OTRA');
+                          } else if (clientType === 'INVERSOR') {
+                            filteredActivities = clientActivities.filter(opt => ['OTRA', 'BUSCANDO_INVERTIR'].includes(opt.value));
+                          } else {
+                            filteredActivities = clientActivities.filter(opt => opt.value === 'OTRA');
+                          }
+                        }
+
+                        // Effect para actualizar el valor si la opción actual no es válida
+                        React.useEffect(() => {
+                          // Solo si estamos editando el campo (touched) o si cambió el tipo de cliente
+                          // Pero cuidado con loops infinitos.
+                          // Mejor: si el valor actual NO está en las opciones filtradas, setear un default válido.
+
+                          const currentVal = field.value;
+                          const isValid = filteredActivities.some(opt => opt.value === currentVal);
+
+                          if (!isValid && filteredActivities.length > 0) {
+                            // Setear default
+                            let defaultValue = filteredActivities[0].value;
+                            if (clientType === 'GARANTE' || clientType === 'INVERSOR') {
+                              defaultValue = 'OTRA'; // Forzar OTRA como default
+                            }
+                            // Usamos setTimeout para evitar warning de "update during render"
+                            setTimeout(() => {
+                              form.setFieldValue('current_activity', defaultValue);
+                            }, 0);
+                          }
+                        }, [clientType, field.value, form.setFieldValue]); // Dependencias del efecto
+
+                        return (
+                          <SelectInput
+                            label="Actividad Actual"
+                            name="current_activity"
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            options={filteredActivities}
+                            required
+                            icon={HiOutlineHome}
+                            form={form}
+                          />
+                        );
+                      }}
+                    </Field>
+                  </div>
+
+                  <div className="md:col-span-4">
+                    <Field name="first_name">
+                      {({ field, form, meta }: any) => (
+                        <TextInput
+                          label="Nombre"
+                          name="first_name"
+                          value={field.value}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          required
+                          placeholder="Juan"
+                          icon={HiOutlineUser}
+                          form={form}
+                        />
+                      )}
+                    </Field>
+                  </div>
+
+                  <div className="md:col-span-4">
+                    <Field name="last_name">
+                      {({ field, form, meta }: any) => (
+                        <TextInput
+                          label="Apellido"
+                          name="last_name"
+                          value={field.value}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          required
+                          placeholder="Pérez"
+                          icon={HiOutlineUser}
+                          form={form}
+                        />
+                      )}
+                    </Field>
+                  </div>
+
+                  <div className="md:col-span-4">
                     <Field name="cuit_cuil">
                       {({ field, form, meta }: any) => (
                         <TextInput
@@ -670,170 +750,168 @@ const ClientForm: React.FC<ClientFormProps> = ({
 
               {/* Contacto */}
               <div>
-                <h3 className={`text-lg font-medium mb-4 flex items-center gap-2 ${
-                  isDark ? 'text-white' : 'text-gray-900'
-                }`}>
-                  <HiPhone className="h-5 w-5 text-red-600" />
-                  Información de Contacto
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Field name="phone">
-                    {({ field, form, meta }: any) => (
-                      <TextInput
-                        label="Teléfono"
-                        name="phone"
-                        value={field.value}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="+54 11 1234-5678"
-                        icon={HiPhone}
-                        form={form}
-                      />
-                    )}
-                  </Field>
-
-                  <Field name="email">
-                    {({ field, form, meta }: any) => {
-                      const hasEmailError = form.errors.email && form.touched.email;
-                      const isDuplicateEmail = form.errors.email && form.errors.email.includes('Ya existe un cliente');
-
-                      return (
-                        <div>
-                          <label htmlFor="email" className={`block text-sm font-medium mb-1 ${
-                            isDark ? 'text-gray-200' : 'text-gray-700'
-                          }`}>
-                            Email
-                          </label>
-                          <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                              <HiMail className={`h-5 w-5 ${
-                                isDuplicateEmail
-                                  ? 'text-red-600'
-                                  : isDark ? 'text-gray-400' : 'text-gray-400'
-                              }`} />
-                            </div>
-                            <input
-                              type="email"
-                              id="email"
-                              name="email"
-                              value={field.value}
-                              onChange={field.onChange}
-                              onBlur={field.onBlur}
-                              className={`block w-full rounded-md border ${
-                                hasEmailError
-                                  ? 'border-red-500 ring-red-500 ring-1'
-                                  : isDark
-                                    ? 'bg-slate-800 border-slate-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500'
-                                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500'
-                              } pl-10 pr-3 py-2 focus:outline-none focus:ring-1 sm:text-sm`}
-                              placeholder="cliente@example.com"
-                            />
-                            {isDuplicateEmail && (
-                              <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                                <HiExclamationTriangle className="h-5 w-5 text-red-600" title="Email duplicado" />
-                              </div>
-                            )}
-                          </div>
-                          {/* Error message mejorado para email duplicado */}
-                          <div className="min-h-[20px] mt-1">
-                            {hasEmailError && (
-                              <span className={`text-xs ${isDuplicateEmail ? 'text-red-600 font-medium' : 'text-red-500'}`}>
-                                {form.errors.email}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    }}
-                  </Field>
-                </div>
-              </div>
-
-              {/* Dirección */}
-              <div>
-                <h3 className={`text-lg font-medium mb-4 flex items-center gap-2 ${
-                  isDark ? 'text-white' : 'text-gray-900'
-                }`}>
-                  <HiLocationMarker className="h-5 w-5 text-red-600" />
-                  Dirección
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 space-y-6 md:space-y-0">
-                  <div className="md:col-span-2">
-                    <Field name="address">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                  <div className="md:col-span-6">
+                    <Field name="phone">
                       {({ field, form, meta }: any) => (
                         <TextInput
-                          label="Dirección"
-                          name="address"
+                          label="Teléfono"
+                          name="phone"
                           value={field.value}
                           onChange={field.onChange}
                           onBlur={field.onBlur}
-                          placeholder="Av. Corrientes 1234"
-                          icon={HiLocationMarker}
+                          placeholder="+54 11 1234-5678"
+                          icon={HiOutlinePhone}
                           form={form}
                         />
                       )}
                     </Field>
                   </div>
 
-                  <Field name="city">
-                    {({ field, form, meta }: any) => (
-                      <TextInput
-                        label="Ciudad"
-                        name="city"
-                        value={field.value}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="Buenos Aires"
-                        icon={HiOutlineLocationMarker}
-                        form={form}
-                      />
-                    )}
-                  </Field>
+                  <div className="md:col-span-6">
+                    <Field name="email">
+                      {({ field, form, meta }: any) => {
+                        const hasEmailError = form.errors.email && form.touched.email;
+                        const isDuplicateEmail = form.errors.email && form.errors.email.includes('Ya existe un cliente');
 
-                  <Field name="province">
-                    {({ field, form, meta }: any) => (
-                      <TextInput
-                        label="Provincia"
-                        name="province"
-                        value={field.value}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="Buenos Aires"
-                        icon={HiOutlineLocationMarker}
-                        form={form}
-                      />
-                    )}
-                  </Field>
-
-                  <Field name="postal_code">
-                    {({ field, form, meta }: any) => (
-                      <TextInput
-                        label="Código Postal"
-                        name="postal_code"
-                        value={field.value}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="C1043"
-                        icon={HiOutlineLocationMarker}
-                        form={form}
-                      />
-                    )}
-                  </Field>
+                        return (
+                          <div>
+                            <label htmlFor="email" className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : 'text-gray-700'
+                              }`}>
+                              Email
+                            </label>
+                            <div className="relative">
+                              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <HiMail className={`h-5 w-5 ${isDuplicateEmail
+                                  ? 'text-red-600'
+                                  : isDark ? 'text-gray-400' : 'text-gray-400'
+                                  }`} />
+                              </div>
+                              <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                value={field.value}
+                                onChange={field.onChange}
+                                onBlur={field.onBlur}
+                                className={`block w-full rounded-md border ${hasEmailError
+                                  ? 'border-red-500 ring-red-500 ring-1'
+                                  : isDark
+                                    ? 'bg-slate-800 border-slate-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500'
+                                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-red-500'
+                                  } pl-10 pr-3 py-2 focus:outline-none focus:ring-1 sm:text-sm`}
+                                placeholder="cliente@example.com"
+                              />
+                              {isDuplicateEmail && (
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                  <HiExclamationTriangle className="h-5 w-5 text-red-600" title="Email duplicado" />
+                                </div>
+                              )}
+                            </div>
+                            {/* Error message mejorado para email duplicado */}
+                            <div className="min-h-[20px] mt-1">
+                              {hasEmailError && (
+                                <span className={`text-xs ${isDuplicateEmail ? 'text-red-600 font-medium' : 'text-red-500'}`}>
+                                  {form.errors.email}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      }}
+                    </Field>
+                  </div>
                 </div>
+              </div>
+
+              {/* Dirección */}
+              <div>
+                <AddressAutocomplete
+                  setFieldValue={setFieldValue}
+                  fieldMap={{
+                    zip_code: 'postal_code',
+                    // Client form doesn't have neighborhood, so we don't map it (or map to null/undefined if strict)
+                    neighborhood: undefined
+                  }}
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                    <div className="md:col-span-5">
+                      <Field name="address">
+                        {({ field, form, meta }: any) => (
+                          <TextInput
+                            label="Dirección"
+                            name="address"
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            placeholder="Av. Corrientes 1234"
+                            icon={HiLocationMarker}
+                            form={form}
+                          />
+                        )}
+                      </Field>
+                    </div>
+
+                    <div className="md:col-span-3">
+                      <Field name="city">
+                        {({ field, form, meta }: any) => (
+                          <TextInput
+                            label="Ciudad"
+                            name="city"
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            placeholder="Buenos Aires"
+                            icon={HiOutlineLocationMarker}
+                            form={form}
+                          />
+                        )}
+                      </Field>
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <Field name="province">
+                        {({ field, form, meta }: any) => (
+                          <TextInput
+                            label="Provincia"
+                            name="province"
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            placeholder="Buenos Aires"
+                            icon={HiOutlineLocationMarker}
+                            form={form}
+                          />
+                        )}
+                      </Field>
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <Field name="postal_code">
+                        {({ field, form, meta }: any) => (
+                          <TextInput
+                            label="CP"
+                            name="postal_code"
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            placeholder="C1414"
+                            icon={HiOutlineLocationMarker}
+                            form={form}
+                          />
+                        )}
+                      </Field>
+                    </div>
+                  </div>
+                </AddressAutocomplete>
               </div>
 
               {/* Notas */}
               <div>
-                <h3 className={`text-lg font-medium mb-4 flex items-center gap-2 ${
-                  isDark ? 'text-white' : 'text-gray-900'
-                }`}>
-                  <HiDocumentText className="h-5 w-5 text-red-600" />
-                  Notas Adicionales
-                </h3>
                 <Field name="notes">
                   {({ field, form, meta }: any) => (
                     <TextAreaInput
-                      label="Notas"
+                      label="Notas Adicionales"
                       name="notes"
                       value={field.value}
                       onChange={field.onChange}
@@ -860,20 +938,18 @@ const ClientForm: React.FC<ClientFormProps> = ({
               </div>
 
               {/* Submit buttons */}
-              <div className={`flex justify-between items-center pt-6 border-t ${
-                isDark ? 'border-slate-700' : 'border-gray-200'
-              }`}>
+              <div className={`flex flex-col-reverse md:flex-row justify-between items-center pt-6 gap-4 md:gap-0 border-t ${isDark ? 'border-slate-700' : 'border-gray-200'
+                }`}>
                 <button
                   type="button"
                   disabled={isSubmitting}
                   onClick={() => onCancel ? onCancel() : router.push('/dashboard/clients')}
-                  className={`px-6 py-3 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
-                    isSubmitting
-                      ? 'bg-gray-300 cursor-not-allowed text-gray-500'
-                      : isDark
-                        ? 'bg-slate-700 hover:bg-slate-600 text-gray-300'
-                        : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-                  }`}
+                  className={`w-full md:w-auto px-6 py-3 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2 ${isSubmitting
+                    ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+                    : isDark
+                      ? 'bg-slate-700 hover:bg-slate-600 text-gray-300'
+                      : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                    }`}
                 >
                   <HiX className="h-5 w-5" />
                   Cancelar
@@ -882,30 +958,31 @@ const ClientForm: React.FC<ClientFormProps> = ({
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`px-8 py-3 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
-                    isSubmitting
-                      ? 'bg-gray-400 cursor-not-allowed text-white'
-                      : 'bg-red-600 hover:bg-red-700 text-white'
-                  }`}
+                  className={`w-full md:w-auto px-8 py-3 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2 ${isSubmitting
+                    ? 'bg-gray-400 cursor-not-allowed text-white'
+                    : 'bg-red-600 hover:bg-red-700 text-white'
+                    }`}
                 >
                   {isSubmitting ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                      {isEditing ? 'Actualizando...' : 'Creando...'}
+                      <span className="hidden md:inline">{isEditing ? 'Actualizando...' : 'Creando...'}</span>
+                      <span className="md:hidden">Procesando...</span>
                     </>
                   ) : (
                     <>
                       <HiCheckCircle className="h-5 w-5" />
-                      {isEditing ? 'Actualizar Cliente' : 'Crear Cliente'}
+                      <span className="hidden md:inline">{isEditing ? 'Actualizar Cliente' : 'Crear Cliente'}</span>
+                      <span className="md:hidden">{isEditing ? 'Actualizar' : 'Crear'}</span>
                     </>
                   )}
                 </button>
               </div>
             </div>
-          </div>
-        </Form>
+          </div >
+        </Form >
       )}
-    </Formik>
+    </Formik >
   );
 };
 

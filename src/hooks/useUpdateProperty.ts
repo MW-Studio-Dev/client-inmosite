@@ -149,6 +149,7 @@ export const useUpdateProperty = (): UseUpdatePropertyReturn => {
         features: formData.features.filter(f => f.trim() !== ''),
         featured_image: formData.featured_image || null,
         images: formData.images || [],
+        zip_code: formData.zip_code || '',
       };
 
       // Agregar campos opcionales solo si tienen valor
@@ -166,26 +167,31 @@ export const useUpdateProperty = (): UseUpdatePropertyReturn => {
       const formDataToSend = new FormData();
 
       // Agregar todos los campos del payload como strings o números
+      // Agregar todos los campos del payload como strings o números
       Object.entries(payload).forEach(([key, value]) => {
         if (key === 'featured_image' || key === 'images') {
           // Estas las agregaremos después
           return;
         }
 
-        if (value !== null && value !== undefined && value !== '') {
-          if (Array.isArray(value)) {
-            // Para arrays como features, agregar cada item con el mismo nombre (formato Django)
-            value.forEach((item) => {
-              formDataToSend.append(key, String(item));
-            });
-          } else if (typeof value === 'boolean') {
-            formDataToSend.append(key, value ? 'true' : 'false');
-          } else {
-            formDataToSend.append(key, String(value));
-          }
+        // Skip null or undefined
+        if (value === null || value === undefined) {
+          return;
+        }
+
+        if (Array.isArray(value)) {
+          // Para arrays como features, agregar cada item con el mismo nombre (formato Django)
+          value.forEach((item) => {
+            formDataToSend.append(key, String(item));
+          });
         } else if (typeof value === 'boolean') {
-          // Agregar booleanos incluso si son false
           formDataToSend.append(key, value ? 'true' : 'false');
+        } else {
+          // Ensure value is string
+          const stringValue = String(value);
+          if (stringValue.trim() !== '') {
+            formDataToSend.append(key, stringValue);
+          }
         }
       });
 

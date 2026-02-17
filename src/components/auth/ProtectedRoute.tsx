@@ -15,22 +15,22 @@ interface ProtectedRouteProps {
   loadingComponent?: ReactNode;
 }
 
-export const ProtectedRoute = ({ 
-  children, 
+export const ProtectedRoute = ({
+  children,
   requireAuth = true,
   requireEmailVerification = false,
   requireOnboarding = false,
   redirectTo = '/login',
   loadingComponent
 }: ProtectedRouteProps) => {
-  const { 
-    isAuthenticated, 
-    isEmailVerified, 
+  const {
+    isAuthenticated,
+    isEmailVerified,
     needsOnboarding,
     isInitializing,
     isReady,
   } = useAuth();
-  
+
   const router = useRouter();
   const [shouldRender, setShouldRender] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
@@ -88,14 +88,14 @@ export const ProtectedRoute = ({
       setShouldRender(true);
     }
   }, [
-    isAuthenticated, 
-    isEmailVerified, 
+    isAuthenticated,
+    isEmailVerified,
     needsOnboarding,
     isInitializing,
     isReady,
-    router, 
-    requireAuth, 
-    requireEmailVerification, 
+    router,
+    requireAuth,
+    requireEmailVerification,
     requireOnboarding,
     redirectTo
   ]);
@@ -112,7 +112,6 @@ export const ProtectedRoute = ({
 const DefaultLoadingScreen = () => (
   <div className="min-h-screen bg-background flex flex-col items-center justify-center">
     <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mb-4"></div>
-    <p className="text-text-secondary font-light">Verificando autenticación...</p>
   </div>
 );
 

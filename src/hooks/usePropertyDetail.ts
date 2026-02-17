@@ -1,6 +1,7 @@
 // hooks/usePropertyDetail.ts
 import { useState, useEffect, useCallback } from 'react';
 import { PropertyDetail, PropertyDetailResponse, UsePropertyDetailReturn } from '@/types/property';
+import { normalizeFeatures } from '@/utils/normalizeFeatures';
 
 export const usePropertyDetail = (subdomain: string, propertyId: string): UsePropertyDetailReturn => {
   const [property, setProperty] = useState<PropertyDetail | null>(null);
@@ -32,7 +33,8 @@ export const usePropertyDetail = (subdomain: string, propertyId: string): UsePro
         throw new Error(data.message || 'Error al obtener la propiedad');
       }
 
-      setProperty(data.data);
+      const normalized = { ...data.data, features: normalizeFeatures(data.data.features) };
+      setProperty(normalized);
 
     } catch (err: any) {
       if (err.name !== 'AbortError') {

@@ -1,8 +1,9 @@
-// hooks/usePropertyDetail.ts
+// hooks/useDetailProperty.ts
 import { useState, useEffect, useCallback } from 'react';
 import axiosInstance from '@/lib/api';
 import { PropertyDetail, PropertyDetailResponse, UsePropertyDetailReturn } from '@/types/property';
 import axios from 'axios';
+import { normalizeFeatures } from '@/utils/normalizeFeatures';
 
 // Tipar la respuesta de error para evitar 'any'
 interface ErrorResponse {
@@ -28,8 +29,9 @@ export const usePropertyDetail = (propertyId: string): UsePropertyDetailReturn =
       console.log('useDetailProperty - Response:', response.data);
 
       if (response.data.success) {
-        setProperty(response.data.data);
-        console.log('useDetailProperty - Property set:', response.data.data);
+        const normalized = { ...response.data.data, features: normalizeFeatures(response.data.data.features) };
+        setProperty(normalized);
+        console.log('useDetailProperty - Property set:', normalized);
       } else {
         const errorMsg = response.data.message || 'Error al obtener la propiedad';
         console.error('useDetailProperty - API returned success=false:', errorMsg);

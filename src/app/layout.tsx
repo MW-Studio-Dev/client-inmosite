@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
-import Script from "next/script";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { GlobalLoaderProvider } from "@/context/GlobalLoaderContext";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { AuthMonitor } from "@/components/auth/AuthMonitor";
 import { GlobalLoaderWithHook } from "@/components/common/Loading";
+import { Toaster } from "sileo";
 import "./globals.css";
 
 // Poppins para textos generales
@@ -94,11 +94,8 @@ export default function RootLayout({
         <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />
         <link rel="icon" href="/favicon-48x48.png" sizes="48x48" type="image/png" />
         <link rel="apple-touch-icon" href="/favicon-256x256.png" />
-        {/* ✅ MercadoPago SDK v2 */}
-        <Script
-          src="https://sdk.mercadopago.com/js/v2"
-          strategy="beforeInteractive"
-        />
+        {/* MercadoPago SDK v2 */}
+        <script src="https://sdk.mercadopago.com/js/v2"></script>
       </head>
       <body
         className={`${poppins.variable} antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 font-poppins`}
@@ -112,6 +109,7 @@ export default function RootLayout({
             </ThemeProvider>
           </AuthProvider>
           <GlobalLoaderWithHook />
+          <Toaster position="bottom-right" />
         </GlobalLoaderProvider>
       </body>
     </html>

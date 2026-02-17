@@ -109,7 +109,7 @@ export const useAuthStore = create<ExtendedAuthState>()(
           const responseData = response.data;
 
           // Guardar email en localStorage para usarlo en verificación OTP
-          localStorage.setItem('verification_email', data.email);
+          localStorage.setItem('verification_email', data.user_email);
 
           set({ isLoading: false, error: null });
 
@@ -166,7 +166,7 @@ export const useAuthStore = create<ExtendedAuthState>()(
         // Limpiar localStorage
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
-        
+
         set({
           user: null,
           tokens: null,
@@ -347,7 +347,7 @@ export const useAuthStore = create<ExtendedAuthState>()(
         set({ isLoading: true });
 
         try {
-          console.log('🔍 Verificando autenticación...');
+          // console.log('🔍 Verificando autenticación...');
 
           // Verificar si el token es válido obteniendo el perfil del usuario
           const response = await axiosInstance.get('/auth/profile/');
@@ -373,27 +373,27 @@ export const useAuthStore = create<ExtendedAuthState>()(
           return;
 
         } catch (error) {
-          console.error('❌ Verificación de autenticación fallida:', error);
+          // console.error('❌ Verificación de autenticación fallida:', error);
 
           // Analizar el tipo de error
-          if (axios.isAxiosError(error)) {
-            const status = error.response?.status;
+          // if (axios.isAxiosError(error)) {
+          //   const status = error.response?.status;
 
-            if (status === 401) {
-              console.log('🔄 Token expirado. Intentando renovar...');
+          //   // if (status === 401) {
+          //   //   // console.log('🔄 Token expirado. Intentando renovar...');
 
-              // El interceptor ya debería haber intentado renovar el token
-              // Si llegamos aquí, significa que el refresh también falló
-              // o no hay refresh token disponible
-              if (!refreshToken) {
-                console.log('❌ No hay refresh token. Cerrando sesión.');
-              } else {
-                console.log('❌ Refresh token también inválido o expirado. Cerrando sesión.');
-              }
-            } else {
-              console.log('❌ Error de autenticación inesperado:', status);
-            }
-          }
+          //   //   // El interceptor ya debería haber intentado renovar el token
+          //   //   // Si llegamos aquí, significa que el refresh también falló
+          //   //   // o no hay refresh token disponible
+          //   //   // if (!refreshToken) {
+          //   //   //   // console.log('❌ No hay refresh token. Cerrando sesión.');
+          //   //   // } else {
+          //   //   //   console.log('❌ Refresh token también inválido o expirado. Cerrando sesión.');
+          //   //   // }
+          //   // } else {
+          //   //   console.log('❌ Error de autenticación inesperado:', status);
+          //   // }
+          // }
 
           // Token inválido, limpiar estado
           localStorage.removeItem('access_token');
@@ -426,14 +426,14 @@ export const useAuthStore = create<ExtendedAuthState>()(
         const refreshToken = localStorage.getItem('refresh_token');
 
         if (!refreshToken) {
-          console.error('❌ No hay refresh token disponible');
+          // console.error('❌ No hay refresh token disponible');
           // Limpiar estado
           get().logout();
           return { success: false, message: 'No hay token de refresco disponible' };
         }
 
         try {
-          console.log('🔄 Renovando tokens desde authStore...');
+          // console.log('🔄 Renovando tokens desde authStore...');
           const response = await axiosInstance.post('/auth/refresh/', { refresh: refreshToken });
 
           // Extraer datos según el formato de tu API
@@ -462,11 +462,11 @@ export const useAuthStore = create<ExtendedAuthState>()(
             error: null
           }));
 
-          console.log('✅ Tokens renovados exitosamente desde authStore');
+          // console.log('✅ Tokens renovados exitosamente desde authStore');
           return { success: true };
 
         } catch (error) {
-          console.error('❌ Error al refrescar token desde authStore:', error);
+          // console.error('❌ Error al refrescar token desde authStore:', error);
 
           // Analizar el error
           let errorMessage = 'Error al refrescar el token';

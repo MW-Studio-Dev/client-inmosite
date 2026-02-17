@@ -95,7 +95,11 @@ const transformApiPropertyToInternal = (apiProperty: PropertyDetailType): Intern
         email: 'info@inmobiliaria.com'
       }
     },
-    amenities: apiProperty.features || [],
+    amenities: (apiProperty.features || []).map((f: any) => {
+      if (typeof f === 'string') return f;
+      if (typeof f === 'object' && f !== null) return f.feature || f.name || f.value || '';
+      return '';
+    }).filter((f: string) => f.length > 0),
     nearbyPlaces: [
       { name: 'Transporte Público', distance: '500m', type: 'transport' },
       { name: 'Centros Comerciales', distance: '1km', type: 'shopping' },
