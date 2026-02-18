@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaYoutube } from "react-icons/fa";
+import { FaInstagram, FaLinkedin } from "react-icons/fa";
 import Image from 'next/image';
 
 const Footer: React.FC = () => {
@@ -15,20 +15,20 @@ const Footer: React.FC = () => {
       <div className="py-12 relative">
         {/* Subtle background gradient */}
         <div className="absolute inset-0 bg-gradient-to-b from-red-950/20 to-transparent" />
-        
+
         <div className="max-w-6xl mx-auto px-6 relative z-10">
           <div className="text-center mb-8">
             {/* Logo */}
             <div className="relative w-24 h-12 sm:w-32 sm:h-16 md:w-40 md:h-20 lg:w-48 lg:h-24 mx-auto mb-4">
-              <Image 
-                src='/logo.png' 
-                alt="Logo" 
+              <Image
+                src='/logo.png'
+                alt="Logo"
                 fill
                 className="object-contain drop-shadow-lg"
                 priority
               />
             </div>
-            
+
             {/* Description */}
             <p className="text-gray-400 max-w-md mx-auto mb-8 font-light">
               La plataforma líder para inmobiliarias modernas.
@@ -37,11 +37,8 @@ const Footer: React.FC = () => {
             {/* Social Media */}
             <div className="flex justify-center gap-4 mb-8">
               {[
-                { icon: FaFacebook, href: "#", label: "Facebook" },
-                { icon: FaTwitter, href: "#", label: "Twitter" },
                 { icon: FaInstagram, href: "#", label: "Instagram" },
                 { icon: FaLinkedin, href: "#", label: "LinkedIn" },
-                { icon: FaYoutube, href: "#", label: "YouTube" }
               ].map(({ icon: Icon, href, label }) => (
                 <a
                   key={label}

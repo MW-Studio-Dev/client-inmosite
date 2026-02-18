@@ -4,9 +4,8 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { marketingService } from '@/services/marketingService';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { toast } from 'sileo';
+import { sileo } from 'sileo';
 
 function WhitelistForm() {
     const searchParams = useSearchParams();
@@ -54,10 +53,10 @@ function WhitelistForm() {
 
             await marketingService.joinWhitelist(email, name, metadata);
             setSubmitted(true);
-            toast.success("¡Gracias por registrarte!");
+            sileo.success({ title: "¡Registro exitoso!", description: "¡Gracias por registrarte!" });
         } catch (error) {
             console.error(error);
-            toast.error("Ocurrió un error al registrarte. Por favor intenta nuevamente.");
+            sileo.error({ title: "Error", description: "Ocurrió un error al registrarte. Por favor intenta nuevamente." });
         } finally {
             setLoading(false);
         }
@@ -92,8 +91,9 @@ function WhitelistForm() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
                         <label htmlFor="name" className="text-sm font-medium">Nombre (Opcional)</label>
-                        <Input
+                        <input
                             id="name"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                             placeholder="Tu nombre"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
@@ -101,9 +101,10 @@ function WhitelistForm() {
                     </div>
                     <div className="space-y-2">
                         <label htmlFor="email" className="text-sm font-medium">Email</label>
-                        <Input
+                        <input
                             id="email"
                             type="email"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                             placeholder="tu@email.com"
                             required
                             value={email}
