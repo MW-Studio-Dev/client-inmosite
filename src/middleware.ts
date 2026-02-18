@@ -265,6 +265,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Block auth routes when auth is disabled
+  const authEnabled = process.env.NEXT_PUBLIC_AUTH_ENABLED !== 'false';
+  if (!authEnabled && (pathname === '/login' || pathname === '/register' || pathname.startsWith('/register'))) {
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+
   const subdomain = extractSubdomain(request);
 
   if (subdomain) {

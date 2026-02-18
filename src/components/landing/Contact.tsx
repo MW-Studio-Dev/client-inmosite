@@ -2,10 +2,8 @@
 
 import React, { useState } from 'react';
 import { Button } from "@heroui/react";
-import { HiArrowRight, HiCheck, HiPaperAirplane,
-  HiEnvelope, HiPhone, HiClock
- } from "react-icons/hi2";
-import { FaWhatsapp } from "react-icons/fa";
+import { HiCheck, HiPaperAirplane, HiEnvelope, HiPhone, HiClock } from "react-icons/hi2";
+import { contactService } from '@/services/contactService';
 
 interface ContactForm {
   name: string;
@@ -48,19 +46,19 @@ const Contact: React.FC<ContactProps> = ({ companyData }) => {
 
   const generateWhatsAppMessage = () => {
     const { name, email, company, message } = formData;
-    
+
     let whatsappMessage = `🏢 *Nueva Consulta desde MW Studio Digital*\n\n`;
     whatsappMessage += `👤 *Nombre:* ${name}\n`;
     whatsappMessage += `📧 *Email:* ${email}\n`;
-    
+
     if (company.trim()) {
       whatsappMessage += `🏠 *Inmobiliaria:* ${company}\n`;
     }
-    
+
     whatsappMessage += `\n💬 *Mensaje:*\n${message}\n\n`;
     whatsappMessage += `⏰ *Enviado desde la web el:* ${new Date().toLocaleString('es-AR')}\n\n`;
     whatsappMessage += `¡Gracias por contactarnos! 🚀`;
-    
+
     return encodeURIComponent(whatsappMessage);
   };
 
@@ -81,27 +79,17 @@ const Contact: React.FC<ContactProps> = ({ companyData }) => {
     setSubmitStatus(null);
 
     try {
-      // Simular un pequeño delay para mejor UX
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Generar mensaje de WhatsApp
-      const whatsappMessage = generateWhatsAppMessage();
-      const whatsappNumber = "5491134672565"; // Formato internacional
-      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
-      
-      // Abrir WhatsApp en nueva ventana
-      window.open(whatsappUrl, '_blank');
-      
-      // Limpiar formulario
-      setFormData({
-        name: '',
-        email: '',
-        company: '',
-        message: ''
+      await contactService.sendMessage({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        company: formData.company.trim() || undefined,
+        message: formData.message.trim(),
       });
-      
+
+      setFormData({ name: '', email: '', company: '', message: '' });
       setSubmitStatus('success');
-    
+    } catch {
+      setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
     }
@@ -145,7 +133,7 @@ const Contact: React.FC<ContactProps> = ({ companyData }) => {
                 <span className="text-red-400 font-normal">24 horas</span>.
               </p>
             </div>
-            
+
             <div className="space-y-4">
               {contactInfo.map((contact, index) => (
                 <div key={index} className="flex items-center gap-4 group">
@@ -158,9 +146,9 @@ const Contact: React.FC<ContactProps> = ({ companyData }) => {
                 </div>
               ))}
             </div>
-            
-           
-            
+
+
+
             {/* Additional contact features */}
             <div className="mt-12 p-6 bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 rounded-2xl">
               <h3 className="text-lg font-medium text-gray-100 mb-4">¿Por qué elegirnos?</h3>
@@ -189,10 +177,10 @@ const Contact: React.FC<ContactProps> = ({ companyData }) => {
               <div className="mb-6 p-4 bg-green-500/20 border border-green-500/30 rounded-xl backdrop-blur-sm">
                 <div className="flex items-center gap-3">
                   <div className="p-1 bg-green-500/30 rounded-full">
-                    <FaWhatsapp className="w-4 h-4 text-green-400" />
+                    <HiCheck className="w-4 h-4 text-green-400" />
                   </div>
                   <span className="text-green-400 font-light text-sm">
-                    ¡Perfecto! Te estamos redirigiendo a WhatsApp con tu mensaje.
+                    ¡Mensaje enviado! Te responderemos en menos de 24 horas.
                   </span>
                 </div>
               </div>
@@ -207,7 +195,7 @@ const Contact: React.FC<ContactProps> = ({ companyData }) => {
               </div>
             )}
 
-          
+
 
             {/* Form Fields */}
             <div className="space-y-4">
@@ -228,7 +216,7 @@ const Contact: React.FC<ContactProps> = ({ companyData }) => {
                   <p className="mt-1 text-sm text-red-400 font-light">Este campo es requerido</p>
                 )}
               </div>
-              
+
               {/* Email */}
               <div>
                 <label htmlFor="email" className={labelClasses}>
@@ -249,7 +237,7 @@ const Contact: React.FC<ContactProps> = ({ companyData }) => {
                   <p className="mt-1 text-sm text-red-400 font-light">Formato de email inválido</p>
                 )}
               </div>
-              
+
               {/* Inmobiliaria */}
               <div>
                 <label htmlFor="company" className={labelClasses}>
@@ -264,7 +252,7 @@ const Contact: React.FC<ContactProps> = ({ companyData }) => {
                   className={inputClasses}
                 />
               </div>
-              
+
               {/* Mensaje */}
               <div>
                 <label htmlFor="message" className={labelClasses}>
@@ -282,20 +270,15 @@ const Contact: React.FC<ContactProps> = ({ companyData }) => {
                   <p className="mt-1 text-sm text-red-400 font-light">Este campo es requerido</p>
                 )}
               </div>
-              
-              <Button 
-                size="lg" 
+
+              <Button
+                size="lg"
                 onClick={handleSubmitForm}
                 disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 text-white hover:shadow-lg text-sm py-6 font-medium shadow-lg hover:shadow-green-500/30 hover:shadow-xl transition-all duration-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed border border-green-400/30"
-                endContent={isSubmitting ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <FaWhatsapp className="w-5 h-5" />}
+                className="w-full bg-red-600 hover:bg-red-700 text-white text-sm py-6 font-medium shadow-lg hover:shadow-red-500/30 hover:shadow-xl transition-all duration-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed border border-red-500/30"
+                endContent={isSubmitting ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <HiPaperAirplane className="w-5 h-5" />}
               >
-                {isSubmitting ? 'Preparando WhatsApp...' : (
-                  <span className="flex items-center gap-2">
-                    <HiPaperAirplane className="w-4 h-4" />
-                    Enviar por WhatsApp
-                  </span>
-                )}
+                {isSubmitting ? 'Enviando...' : 'Enviar mensaje'}
               </Button>
             </div>
           </div>

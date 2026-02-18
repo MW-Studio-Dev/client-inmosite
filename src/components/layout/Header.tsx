@@ -9,16 +9,18 @@ interface HeaderProps {
   logoSrc?: string; // Prop opcional para la imagen del logo
 }
 
+const authEnabled = process.env.NEXT_PUBLIC_AUTH_ENABLED !== 'false';
+
 const Header: React.FC<HeaderProps> = ({ logoSrc }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
-  
-  const navItems = ['Características', 'Precios', 'Testimonios', 'Contacto'];
+
+  const navItems = ['Características', 'Precios'];
 
   // Detectar scroll para cambiar la transparencia
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
-    
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -30,7 +32,7 @@ const Header: React.FC<HeaderProps> = ({ logoSrc }) => {
     } else {
       document.body.style.overflow = 'unset';
     }
-    
+
     return () => {
       document.body.style.overflow = 'unset';
     };
@@ -56,7 +58,7 @@ const Header: React.FC<HeaderProps> = ({ logoSrc }) => {
   return (
     <>
       {/* Header fijo */}
-      <motion.header 
+      <motion.header
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -70,7 +72,7 @@ const Header: React.FC<HeaderProps> = ({ logoSrc }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo - Responsive */}
-            <motion.div 
+            <motion.div
               className="flex items-center"
               whileHover={{ scale: 1.02 }}
               transition={{ duration: 0.2 }}
@@ -78,9 +80,9 @@ const Header: React.FC<HeaderProps> = ({ logoSrc }) => {
               {logoSrc ? (
                 // Logo personalizado (imagen PNG) - Responsive
                 <div className="relative w-24 h-12 sm:w-32 sm:h-16 md:w-40 md:h-20 lg:w-48 lg:h-24">
-                  <Image 
-                    src={logoSrc} 
-                    alt="Logo" 
+                  <Image
+                    src={logoSrc}
+                    alt="Logo"
                     fill
                     className="object-contain drop-shadow-lg"
                     priority
@@ -98,7 +100,7 @@ const Header: React.FC<HeaderProps> = ({ logoSrc }) => {
                 </div>
               )}
             </motion.div>
-            
+
             {/* Navegación Desktop - Hidden en mobile */}
             <nav className="hidden lg:flex items-center space-x-8">
               {navItems.map((item, index) => (
@@ -113,27 +115,39 @@ const Header: React.FC<HeaderProps> = ({ logoSrc }) => {
               ))}
             </nav>
 
+            {/* Contacto — botón destacado */}
+            <motion.button
+              onClick={() => handleNavClick('contacto')}
+              className="hidden lg:flex items-center bg-red-600 hover:bg-red-700 text-white font-medium px-5 py-2 rounded-lg transition-all duration-200 font-inter text-sm border border-red-500/30"
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              Contacto
+            </motion.button>
+
             {/* Botones Desktop - Hidden en mobile */}
-            <div className="hidden lg:flex items-center space-x-4">
-              <motion.a
-                href='/login'
-                className="text-gray-200 hover:text-white font-medium px-4 py-2 rounded-lg border border-gray-500/50 hover:bg-gray-700/50 hover:border-gray-400/70 transition-all duration-200 font-poppins"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                Iniciar Sesión
-              </motion.a>
-              
-              <motion.a
-                href='/register'
-                className="bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 font-poppins border border-red-500/30"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                Prueba Gratis
-              </motion.a>
-            </div>
-            
+            {authEnabled && (
+              <div className="hidden lg:flex items-center space-x-4">
+                <motion.a
+                  href='/login'
+                  className="text-gray-200 hover:text-white font-medium px-4 py-2 rounded-lg border border-gray-500/50 hover:bg-gray-700/50 hover:border-gray-400/70 transition-all duration-200 font-poppins"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Iniciar Sesión
+                </motion.a>
+
+                <motion.a
+                  href='/register'
+                  className="bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 font-poppins border border-red-500/30"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Prueba Gratis
+                </motion.a>
+              </div>
+            )}
+
             {/* Botón de menú - Solo visible en mobile/tablet */}
             <div className="flex items-center lg:hidden">
               <button
@@ -180,38 +194,53 @@ const Header: React.FC<HeaderProps> = ({ logoSrc }) => {
                   </motion.button>
                 ))}
               </nav>
-              
-              {/* Botones de autenticación */}
-              <motion.div 
-                className="flex flex-col sm:flex-row items-center gap-4 w-full max-w-md"
+
+              {/* Contacto — botón destacado mobile */}
+              <motion.button
+                onClick={() => handleNavClick('contacto')}
+                className="bg-red-600 hover:bg-red-700 text-white text-xl sm:text-2xl font-medium px-8 py-3 rounded-xl transition-all duration-200 font-inter border border-red-500/30"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5, duration: 0.4 }}
+                transition={{ delay: 0.3, duration: 0.4 }}
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.97 }}
               >
-                <motion.a
-                  href='/login'
-                  onClick={() => setIsMenuOpen(false)}
-                  className="w-full sm:w-auto text-center text-base sm:text-lg font-medium px-6 py-3 rounded-lg border transition-all duration-200 text-gray-200 border-gray-500/50 hover:bg-gray-700/50 hover:text-white font-poppins"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                Contacto
+              </motion.button>
+
+              {/* Botones de autenticación */}
+              {authEnabled && (
+                <motion.div
+                  className="flex flex-col sm:flex-row items-center gap-4 w-full max-w-md"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5, duration: 0.4 }}
                 >
-                  Iniciar Sesión
-                </motion.a>
-                
-                <motion.a
-                  href='/register'
-                  onClick={() => setIsMenuOpen(false)}
-                  className="w-full sm:w-auto text-center bg-red-600 hover:bg-red-700 text-white text-base sm:text-lg font-medium px-6 py-3 rounded-lg transition-all duration-200 font-poppins border border-red-500/30"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Prueba Gratis
-                </motion.a>
-              </motion.div>
+                  <motion.a
+                    href='/login'
+                    onClick={() => setIsMenuOpen(false)}
+                    className="w-full sm:w-auto text-center text-base sm:text-lg font-medium px-6 py-3 rounded-lg border transition-all duration-200 text-gray-200 border-gray-500/50 hover:bg-gray-700/50 hover:text-white font-poppins"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Iniciar Sesión
+                  </motion.a>
+
+                  <motion.a
+                    href='/register'
+                    onClick={() => setIsMenuOpen(false)}
+                    className="w-full sm:w-auto text-center bg-red-600 hover:bg-red-700 text-white text-base sm:text-lg font-medium px-6 py-3 rounded-lg transition-all duration-200 font-poppins border border-red-500/30"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Prueba Gratis
+                  </motion.a>
+                </motion.div>
+              )}
             </div>
-            
+
             {/* Footer */}
-            <motion.footer 
+            <motion.footer
               className="p-4 sm:p-6 border-t border-gray-700/50"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
