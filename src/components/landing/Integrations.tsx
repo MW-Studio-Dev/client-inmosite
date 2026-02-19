@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import { HiClock, HiCheckCircle } from 'react-icons/hi2';
 
 interface Integration {
@@ -18,14 +17,11 @@ const Integrations: React.FC = () => {
         {
             name: 'Mercado Libre',
             logo: (
-                <div className="relative w-32 h-10">
-                    <Image
-                        src="/mercadolibre.png"
-                        alt="Mercado Libre"
-                        fill
-                        className="object-contain object-left"
-                        style={{ mixBlendMode: 'screen' }}
-                    />
+                <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-yellow-500/20 border border-yellow-500/30 flex items-center justify-center">
+                        <span className="text-yellow-400 font-bold text-sm">M</span>
+                    </div>
+                    <span className="text-lg font-semibold text-gray-300">Mercado <span className="text-yellow-400">Libre</span></span>
                 </div>
             ),
             description: 'Publicá tus propiedades directamente en el marketplace líder de Argentina.',
