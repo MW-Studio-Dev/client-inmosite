@@ -61,7 +61,7 @@ const Navbar: React.FC<NavbarProps> = ({
     showContactButton: true
   }
 }) => {
- 
+
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const pathname = usePathname();
 
@@ -145,11 +145,10 @@ const Navbar: React.FC<NavbarProps> = ({
     if (typeof logo === 'string') {
       return (
         <span
-          className={`flex items-center justify-center font-bold ${
-            context === 'navbar'
+          className={`flex items-center justify-center font-bold ${context === 'navbar'
               ? 'text-2xl sm:text-3xl lg:text-4xl'
               : 'text-xl sm:text-2xl'
-          }`}
+            }`}
           style={{ lineHeight: 1 }}
         >
           {logo}

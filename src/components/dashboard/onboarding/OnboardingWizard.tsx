@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   HiBuildingOffice,
@@ -18,6 +18,7 @@ import {
   HiExclamationTriangle
 } from 'react-icons/hi2'
 import { useAuth } from '@/providers/AuthProvider'
+import { useDashboardTheme } from '@/context/DashboardThemeContext'
 
 interface OnboardingData {
   company_name?: string
@@ -29,6 +30,7 @@ interface OnboardingData {
   province: string
   subdomain: string
   website_url?: string
+  templateId?: string
 }
 
 const COMPANY_TYPES = [
@@ -49,16 +51,21 @@ const PROVINCES = [
 
 export function OnboardingWizard() {
   const router = useRouter()
+  const { theme } = useDashboardTheme()
+  const isDark = theme === 'dark'
   const { user, updateUser, completeOnboarding } = useAuth()
   const [currentStep, setCurrentStep] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const isHandlingRef = useRef(false)
   const [accountType, setAccountType] = useState(user?.account_type || 'agente_independiente')
   const [formData, setFormData] = useState<OnboardingData>({
+    company_name: user?.company?.name || '',
     company_phone: user?.phone || '',
     city: '',
     province: 'Buenos Aires',
     subdomain: '',
-    website_url: ''
+    website_url: '',
+    templateId: 'classic'
   })
   const [notification, setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null)
 
@@ -115,16 +122,14 @@ export function OnboardingWizard() {
                     <button
                       key={type.value}
                       onClick={() => setAccountType(type.value)}
-                      className={`p-4 rounded-lg border-2 text-left transition-all ${
-                        accountType === type.value
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                      className={`p-4 rounded-lg border-2 text-left transition-all ${accountType === type.value
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                        }`}
                     >
                       <div className="flex items-start gap-3">
-                        <Icon className={`w-6 h-6 mt-1 ${
-                          accountType === type.value ? 'text-blue-600' : 'text-gray-400'
-                        }`} />
+                        <Icon className={`w-6 h-6 mt-1 ${accountType === type.value ? 'text-blue-600' : 'text-gray-400'
+                          }`} />
                         <div>
                           <h3 className="font-semibold text-gray-900">{type.label}</h3>
                           <p className="text-sm text-gray-600 mt-1">{type.description}</p>
@@ -160,11 +165,10 @@ export function OnboardingWizard() {
                   value={formData.company_phone}
                   onChange={(e) => setFormData({ ...formData, company_phone: e.target.value })}
                   placeholder="+54 11 1234-5678"
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    formData.company_phone && !validatePhone(formData.company_phone)
-                      ? 'border-red-300 focus:ring-red-500'
-                      : 'border-gray-300 focus:ring-blue-500'
-                  } focus:ring-2 focus:border-transparent`}
+                  className={`w-full px-4 py-3 rounded-lg border ${formData.company_phone && !validatePhone(formData.company_phone)
+                    ? 'border-red-300 focus:ring-red-500'
+                    : 'border-gray-300 focus:ring-blue-500'
+                    } focus:ring-2 focus:border-transparent`}
                 />
                 {formData.company_phone && !validatePhone(formData.company_phone) && (
                   <p className="mt-2 text-sm text-red-600">
@@ -243,11 +247,10 @@ export function OnboardingWizard() {
                     onChange={(e) => setFormData({ ...formData, cuit: e.target.value })}
                     placeholder="30123456789"
                     maxLength={11}
-                    className={`w-full px-4 py-3 rounded-lg border ${
-                      formData.cuit && !validateCUIT(formData.cuit)
-                        ? 'border-red-300 focus:ring-red-500'
-                        : 'border-gray-300 focus:ring-blue-500'
-                    } focus:ring-2 focus:border-transparent`}
+                    className={`w-full px-4 py-3 rounded-lg border ${formData.cuit && !validateCUIT(formData.cuit)
+                      ? 'border-red-300 focus:ring-red-500'
+                      : 'border-gray-300 focus:ring-blue-500'
+                      } focus:ring-2 focus:border-transparent`}
                   />
                   {formData.cuit && !validateCUIT(formData.cuit) && (
                     <p className="mt-2 text-sm text-red-600">
@@ -324,7 +327,37 @@ export function OnboardingWizard() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                  Elige una plantilla para tu sitio *
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  {[
+                    { id: 'classic', name: 'Clásico', icon: HiBuildingOffice, desc: 'Diseño clásico y elegante' },
+                    { id: 'modern', name: 'Moderno', icon: HiHomeModern, desc: 'Moderno y dinámico' },
+                    { id: 'elegant', name: 'Elegante', icon: HiBuildingStorefront, desc: 'Elegante y minimalista' }
+                  ].map(template => {
+                    const Icon = template.icon;
+                    const isSelected = formData.templateId === template.id;
+                    return (
+                      <button
+                        key={template.id}
+                        onClick={() => setFormData({ ...formData, templateId: template.id })}
+                        className={`p-4 rounded-lg border-2 text-left transition-all ${isSelected
+                          ? `border-blue-500 ${isDark ? 'bg-blue-900/20' : 'bg-blue-50'}`
+                          : `${isDark ? 'border-gray-700' : 'border-gray-200'} ${isDark ? 'hover:border-gray-500' : 'hover:border-gray-300'}`
+                          }`}
+                      >
+                        <Icon className={`w-8 h-8 mb-2 ${isSelected ? (isDark ? 'text-blue-400' : 'text-blue-600') : (isDark ? 'text-gray-500' : 'text-gray-400')}`} />
+                        <h4 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{template.name}</h4>
+                        <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{template.desc}</p>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
                   Subdominio para tu sitio *
                 </label>
                 <div className="flex">
@@ -336,11 +369,10 @@ export function OnboardingWizard() {
                       setFormData({ ...formData, subdomain: clean })
                     }}
                     placeholder="mi-negocio"
-                    className={`flex-1 px-4 py-3 rounded-l-lg border ${
-                      formData.subdomain && !validateSubdomain(formData.subdomain)
-                        ? 'border-red-300 focus:ring-red-500'
-                        : 'border-gray-300 focus:ring-blue-500'
-                    } focus:ring-2 focus:border-transparent`}
+                    className={`flex-1 px-4 py-3 rounded-l-lg border ${formData.subdomain && !validateSubdomain(formData.subdomain)
+                      ? 'border-red-300 focus:ring-red-500'
+                      : 'border-gray-300 focus:ring-blue-500'
+                      } focus:ring-2 focus:border-transparent`}
                   />
                   <span className="px-4 py-3 bg-gray-100 border border-l-0 border-gray-300 rounded-r-lg text-gray-600">
                     .inmosite.com
@@ -399,6 +431,8 @@ export function OnboardingWizard() {
   }
 
   const handleSubmit = async () => {
+    if (isHandlingRef.current) return
+    isHandlingRef.current = true
     setIsSubmitting(true)
 
     try {
@@ -422,6 +456,7 @@ export function OnboardingWizard() {
       showNotification('error', 'Error de conexión. Inténtalo nuevamente.')
     } finally {
       setIsSubmitting(false)
+      isHandlingRef.current = false
     }
   }
 
@@ -463,11 +498,10 @@ export function OnboardingWizard() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
       {/* Notification */}
       {notification && (
-        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg border flex items-center gap-3 animate-pulse ${
-          notification.type === 'success'
-            ? 'bg-green-50 border-green-200 text-green-800'
-            : 'bg-red-50 border-red-200 text-red-800'
-        }`}>
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg border flex items-center gap-3 animate-pulse ${notification.type === 'success'
+          ? 'bg-green-50 border-green-200 text-green-800'
+          : 'bg-red-50 border-red-200 text-red-800'
+          }`}>
           {notification.type === 'success' ? (
             <HiCheckCircle className="w-5 h-5 flex-shrink-0" />
           ) : (
@@ -515,11 +549,10 @@ export function OnboardingWizard() {
             <button
               onClick={handlePrevious}
               disabled={currentStep === 0}
-              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
-                currentStep === 0
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
+              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${currentStep === 0
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
             >
               <HiArrowLeft className="w-5 h-5" />
               Anterior
@@ -528,11 +561,10 @@ export function OnboardingWizard() {
             <button
               onClick={handleNext}
               disabled={!canProceed() || isSubmitting}
-              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
-                !canProceed() || isSubmitting
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
+              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${!canProceed() || isSubmitting
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
             >
               {isSubmitting ? (
                 <>

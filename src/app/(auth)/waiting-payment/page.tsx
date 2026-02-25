@@ -30,7 +30,7 @@ const WaitingPaymentPage = () => {
           const queryParams = new URLSearchParams();
           if (preference_id) queryParams.set('preapproval_id', preference_id);
           if (status) queryParams.set('status', status);
-          router.push(`/dashboard/subscription/success?${queryParams.toString()}`);
+          router.push(`/subscription/success?${queryParams.toString()}`);
         }, 2000);
       }
     } else if (collection_status === 'rejected' || status === 'rejected' || collection_status === 'cancelled') {

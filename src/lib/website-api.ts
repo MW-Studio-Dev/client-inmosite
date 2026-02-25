@@ -86,9 +86,8 @@ export async function fetchPublicProperties(
     }
   });
 
-  const url = `${API_BASE_URL}/properties/public/${subdomain}/properties/${
-    searchParams.toString() ? `?${searchParams.toString()}` : ''
-  }`;
+  const url = `${API_BASE_URL}/properties/public/${subdomain}/properties/${searchParams.toString() ? `?${searchParams.toString()}` : ''
+    }`;
 
   try {
     const response = await fetch(url, {
@@ -150,7 +149,7 @@ export interface WebsiteConfigResponse {
 export async function fetchPublicWebsiteConfig(
   subdomain: string
 ): Promise<WebsiteConfigResponse | null> {
-  const url = `${API_BASE_URL}/websites/configs/public/${subdomain}/`;
+  const url = `${API_BASE_URL}/websites/public/${subdomain}/`;
 
   try {
     const response = await fetch(url, {

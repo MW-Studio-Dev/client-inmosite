@@ -71,7 +71,6 @@ export default function CurrentSubscription() {
                             ? 'Gratis'
                             : `$${Number(subscription.current_price_ars).toLocaleString('es-AR')}`
                         }
-                        <span className="text-sm font-normal text-gray-500"> / mes</span>
                     </p>
                 </div>
 
@@ -95,7 +94,7 @@ export default function CurrentSubscription() {
             </div>
 
             {/* Acciones */}
-            {subscription.is_active && !subscription.cancel_at_period_end && subscription.status !== 'canceled' && (
+            {subscription.is_active && !subscription.cancel_at_period_end && subscription.status !== 'canceled' && !subscription.is_trial && (
                 <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-end">
                     {!showCancelConfirm ? (
                         <button

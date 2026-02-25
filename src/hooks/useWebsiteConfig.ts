@@ -107,9 +107,9 @@ export const useWebsiteConfig = (subdomain: string): UseWebsiteConfigReturn => {
       // Usar la URL de tu endpoint
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      console.log('Fetching config from:', `${apiUrl}/websites/configs/public/${subdomain}/`);
+      console.log('Fetching config from:', `${apiUrl}/websites/public/${subdomain}/`);
 
-      const response = await fetch(`${apiUrl}/websites/configs/public/${subdomain}/`, {
+      const response = await fetch(`${apiUrl}/websites/public/${subdomain}/`, {
         headers: {
           'Content-Type': 'application/json',
         },

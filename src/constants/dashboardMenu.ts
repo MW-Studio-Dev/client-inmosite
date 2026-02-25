@@ -100,10 +100,8 @@ export const dashboardMenuItems: MenuItem[] = [
     icon: HiDesktopComputer,
     description: 'Administrar sitio web',
     subItems: [
-      { name: 'Configuración General', href: '/dashboard/website/settings' },
-      { name: 'Personalización', href: '/dashboard/website/customization' },
+      { name: 'Editor del Sitio', href: '/dashboard/website' },
       { name: 'Vista Previa', href: '/dashboard/website/preview' },
-      { name: 'SEO y Analytics', href: '/dashboard/website/seo' },
     ]
   },
   {

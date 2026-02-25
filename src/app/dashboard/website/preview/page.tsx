@@ -6,19 +6,39 @@ import { useWebsiteAdmin } from '@/hooks/useWebsiteAdmin';
 
 type DeviceType = 'desktop' | 'tablet' | 'mobile';
 
+const TEMPLATES = [
+  { id: 'classic', name: 'Clásico', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
+  { id: 'modern', name: 'Moderno', icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z' },
+  { id: 'elegant', name: 'Elegante', icon: 'M5 3a2 2 0 00-2 2v2a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2v-6a2 2 0 00-2-2H5zM19 11a2 2 0 012 2v6a2 2 0 01-2 2h-2a2 2 0 01-2-2v-6a2 2 0 012-2h2z' }
+];
+
 export default function WebsitePreviewPage() {
   const router = useRouter();
-  const { config, loading } = useWebsiteAdmin();
+  const { config, loading, saveConfig, saving } = useWebsiteAdmin();
   const [device, setDevice] = useState<DeviceType>('desktop');
   const [previewUrl, setPreviewUrl] = useState<string>('');
 
   useEffect(() => {
-    if (config?.subdomain) {
-      // URL del preview basado en el subdominio
-      setPreviewUrl(`http://${config.subdomain}.localhost:3001`);
-    } else {
-      // URL de preview genérico si no hay subdominio
-      setPreviewUrl('http://localhost:3001/preview');
+    if (typeof window !== 'undefined') {
+      const protocol = window.location.protocol;
+      const host = window.location.hostname;
+      const port = window.location.port ? `:${window.location.port}` : '';
+
+      let baseHost = host;
+      if (host.includes('localhost') || host.includes('127.0.0.1')) {
+        baseHost = 'localhost';
+      } else {
+        const parts = host.split('.');
+        if (parts.length > 2) {
+          baseHost = parts.slice(-2).join('.');
+        }
+      }
+
+      if (config?.subdomain) {
+        setPreviewUrl(`${protocol}//${config.subdomain}.${baseHost}${port}`);
+      } else {
+        setPreviewUrl(`${protocol}//${host}${port}/preview`);
+      }
     }
   }, [config]);
 
@@ -26,6 +46,23 @@ export default function WebsitePreviewPage() {
     desktop: { width: '100%', height: '800px' },
     tablet: { width: '768px', height: '1024px' },
     mobile: { width: '375px', height: '667px' },
+  };
+
+  const handleTemplateChange = async (templateId: string) => {
+    if (config?.template === templateId) return;
+    try {
+      await saveConfig({ template: templateId });
+      // Force reload the iframe to ensure styles are updated
+      const iframe = document.getElementById('preview-iframe') as HTMLIFrameElement;
+      if (iframe) {
+        const url = new URL(previewUrl);
+        url.searchParams.set('t', Date.now().toString());
+        iframe.src = url.toString();
+      }
+    } catch (err) {
+      console.error('Error switching template:', err);
+      alert('Error cambiando la plantilla');
+    }
   };
 
   const handleOpenLive = () => {
@@ -86,61 +123,93 @@ export default function WebsitePreviewPage() {
         </div>
       </div>
 
-      {/* Device Selector */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-            Dispositivo
-          </h3>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setDevice('desktop')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                device === 'desktop'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                Desktop
-              </span>
-            </button>
-            <button
-              onClick={() => setDevice('tablet')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                device === 'tablet'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-                Tablet
-              </span>
-            </button>
-            <button
-              onClick={() => setDevice('mobile')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                device === 'mobile'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-                Móvil
-              </span>
-            </button>
+      {/* Controls */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Template Selector */}
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+              </svg>
+              Diseño
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {TEMPLATES.map(t => (
+                <button
+                  key={t.id}
+                  onClick={() => handleTemplateChange(t.id)}
+                  disabled={saving}
+                  className={`px-3 py-2 text-sm rounded-lg font-medium transition-colors border ${config?.template === t.id
+                    ? 'bg-blue-50 border-blue-200 text-blue-700'
+                    : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                    } ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <span className="flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d={t.icon} />
+                    </svg>
+                    {t.name}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Device Selector */}
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Dispositivo
+            </h3>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setDevice('desktop')}
+                className={`px-3 py-2 text-sm rounded-lg font-medium transition-colors border ${device === 'desktop'
+                  ? 'bg-blue-50 border-blue-200 text-blue-700'
+                  : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                  }`}
+              >
+                <span className="flex items-center gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Desktop
+                </span>
+              </button>
+              <button
+                onClick={() => setDevice('tablet')}
+                className={`px-3 py-2 text-sm rounded-lg font-medium transition-colors border ${device === 'tablet'
+                  ? 'bg-blue-50 border-blue-200 text-blue-700'
+                  : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                  }`}
+              >
+                <span className="flex items-center gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                  Tablet
+                </span>
+              </button>
+              <button
+                onClick={() => setDevice('mobile')}
+                className={`px-3 py-2 text-sm rounded-lg font-medium transition-colors border ${device === 'mobile'
+                  ? 'bg-blue-50 border-blue-200 text-blue-700'
+                  : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                  }`}
+              >
+                <span className="flex items-center gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                  Móvil
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -176,6 +245,7 @@ export default function WebsitePreviewPage() {
               }}
             >
               <iframe
+                id="preview-iframe"
                 src={previewUrl}
                 className="w-full h-full"
                 title="Website Preview"

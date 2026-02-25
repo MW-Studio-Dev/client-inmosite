@@ -2,7 +2,7 @@
 
 import React, { Suspense } from 'react';
 import { WebsiteConfigProvider } from '@/contexts/WebsiteConfigContext';
-import SharedLayout from '@/components/websites/templates/template_1/layout/SharedLayout';
+import DynamicSharedLayout from '@/components/websites/templates/DynamicSharedLayout';
 
 interface WebsiteConfigWrapperProps {
   subdomain: string;
@@ -31,9 +31,9 @@ export const WebsiteConfigWrapper: React.FC<WebsiteConfigWrapperProps> = ({
   return (
     <WebsiteConfigProvider subdomain={subdomain}>
       <Suspense fallback={<LoadingFallback />}>
-        <SharedLayout subdomain={subdomain}>
+        <DynamicSharedLayout subdomain={subdomain}>
           {children}
-        </SharedLayout>
+        </DynamicSharedLayout>
       </Suspense>
     </WebsiteConfigProvider>
   );

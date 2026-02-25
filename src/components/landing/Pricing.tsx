@@ -20,8 +20,11 @@ interface RawFeatures {
 }
 
 function buildFeaturesList(features: RawFeatures): { label: string; included: boolean }[] {
-  const fmt = (v: string | number | undefined) =>
-    v === 'unlimited' ? 'Ilimitados' : v !== undefined ? String(v) : '—';
+  const fmt = (v: string | number | undefined | null) => {
+    if (v === 'unlimited') return 'Ilimitados';
+    if (v === null || v === undefined) return 'Consultar';
+    return String(v);
+  };
 
   return [
     { label: `${fmt(features.properties)} propiedades`, included: true },
@@ -35,9 +38,14 @@ function buildFeaturesList(features: RawFeatures): { label: string; included: bo
   ];
 }
 
-function formatARS(value: string | number): string {
+function formatARS(value: string | number | null | undefined): string {
+  if (value === null || value === undefined) return 'Consultar';
+
   const num = typeof value === 'string' ? parseFloat(value) : value;
+
+  if (isNaN(num)) return 'Consultar';
   if (num === 0) return 'Gratis';
+
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
     currency: 'ARS',
@@ -70,6 +78,7 @@ const Pricing: React.FC = () => {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
 
   const fetchPlans = () => {
     setError(false);
@@ -105,6 +114,30 @@ const Pricing: React.FC = () => {
           </p>
         </div>
 
+        {/* Toggle Anual/Mensual */}
+        <div className="flex justify-center mb-12 relative z-10">
+          <div className="flex items-center p-1 rounded-full border bg-gray-900/80 border-gray-700/50 backdrop-blur-sm">
+            <button
+              onClick={() => setBillingCycle('monthly')}
+              className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${billingCycle === 'monthly'
+                ? 'bg-gradient-to-r from-red-500 to-red-700 text-white shadow-lg shadow-red-500/25'
+                : 'text-gray-400 hover:text-white'
+                }`}
+            >
+              Mensual
+            </button>
+            <button
+              onClick={() => setBillingCycle('yearly')}
+              className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${billingCycle === 'yearly'
+                ? 'bg-gradient-to-r from-red-500 to-red-700 text-white shadow-lg shadow-red-500/25'
+                : 'text-gray-400 hover:text-white'
+                }`}
+            >
+              Anual
+            </button>
+          </div>
+        </div>
+
         {/* Error state */}
         {error && (
           <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
@@ -128,7 +161,7 @@ const Pricing: React.FC = () => {
         {/* Plans grid */}
         {!loading && !error && plans.length > 0 && (
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {plans.map((plan) => {
+            {plans.filter(plan => plan.billing_cycle === billingCycle || plan.plan_type === 'trial').map((plan) => {
               const rawFeatures = (plan.features ?? {}) as RawFeatures;
               const featuresList = buildFeaturesList(rawFeatures);
               const arsPrice = formatARS(plan.price_ars);
@@ -144,14 +177,14 @@ const Pricing: React.FC = () => {
                   )}
 
                   <div className={`relative bg-gray-900/80 backdrop-blur-sm border rounded-2xl p-6 shadow-lg transition-all duration-500 h-full flex flex-col ${plan.is_popular
-                      ? 'border-red-500/60 ring-1 ring-red-500/30 shadow-red-500/20'
-                      : 'border-gray-700/50 hover:border-red-500/40 hover:shadow-red-500/10'
+                    ? 'border-red-500/60 ring-1 ring-red-500/30 shadow-red-500/20'
+                    : 'border-gray-700/50 hover:border-red-500/40 hover:shadow-red-500/10'
                     }`}>
 
                     {/* Hover glow */}
                     <div className={`absolute inset-0 rounded-2xl transition-opacity duration-500 ${plan.is_popular
-                        ? 'bg-gradient-to-br from-red-500/20 to-transparent opacity-60'
-                        : 'bg-gradient-to-br from-red-500/10 to-transparent opacity-0 group-hover:opacity-100'
+                      ? 'bg-gradient-to-br from-red-500/20 to-transparent opacity-60'
+                      : 'bg-gradient-to-br from-red-500/10 to-transparent opacity-0 group-hover:opacity-100'
                       }`} />
 
                     {/* Popular badge */}
@@ -173,17 +206,19 @@ const Pricing: React.FC = () => {
 
                     {/* Price */}
                     <div className="text-center mb-6 relative z-10">
-                      <div className={`text-3xl font-light transition-colors duration-300 ${plan.is_popular ? 'text-red-400' : 'text-gray-100 group-hover:text-red-400'
-                        }`}>
-                        {plan.price_display}
-                      </div>
-                      {!isFree && (
-                        <div className="text-sm text-gray-400 font-light mt-1">
-                          {arsPrice}<span className="text-gray-500">/mes</span>
+                      {arsPrice === 'Consultar' ? (
+                        <div className={`text-3xl font-light transition-colors duration-300 ${plan.is_popular ? 'text-red-400' : 'text-gray-100 group-hover:text-red-400'}`}>
+                          Consultar
                         </div>
-                      )}
-                      {isFree && (
-                        <div className="text-sm text-gray-400 font-light mt-1">30 días de prueba</div>
+                      ) : (
+                        <>
+                          <div className={`text-3xl font-light transition-colors duration-300 ${plan.is_popular ? 'text-red-400' : 'text-gray-100 group-hover:text-red-400'}`}>
+                            {arsPrice}
+                          </div>
+                          {isFree && (
+                            <div className="text-sm text-gray-400 font-light mt-1">30 días de prueba</div>
+                          )}
+                        </>
                       )}
                     </div>
 
@@ -192,8 +227,8 @@ const Pricing: React.FC = () => {
                       {featuresList.map((f, i) => (
                         <li key={i} className="flex items-center gap-2.5">
                           <div className={`flex-shrink-0 rounded-full p-0.5 ${f.included
-                              ? 'bg-red-500/20 border border-red-500/30'
-                              : 'bg-gray-700/30 border border-gray-600/30'
+                            ? 'bg-red-500/20 border border-red-500/30'
+                            : 'bg-gray-700/30 border border-gray-600/30'
                             }`}>
                             {f.included
                               ? <HiCheck className="w-3 h-3 text-red-400" />
@@ -212,8 +247,8 @@ const Pricing: React.FC = () => {
                       <button
                         onClick={scrollToWhitelist}
                         className={`w-full py-3 text-sm font-medium rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl relative overflow-hidden ${plan.is_popular
-                            ? 'bg-gradient-to-r from-red-500 to-red-700 text-white hover:shadow-red-500/40 border border-red-400/30'
-                            : 'bg-transparent border border-red-500/60 text-red-400 hover:bg-red-500 hover:text-white hover:border-red-400 hover:shadow-red-500/30'
+                          ? 'bg-gradient-to-r from-red-500 to-red-700 text-white hover:shadow-red-500/40 border border-red-400/30'
+                          : 'bg-transparent border border-red-500/60 text-red-400 hover:bg-red-500 hover:text-white hover:border-red-400 hover:shadow-red-500/30'
                           }`}
                       >
                         {isFree ? 'Empezar gratis' : plan.is_popular ? 'Empezar ahora' : 'Comenzar'}

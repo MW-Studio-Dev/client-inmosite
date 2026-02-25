@@ -64,7 +64,7 @@ export interface Hero {
 export interface AboutUs {
   title: string;
   description: string;
-  image:string;
+  image: string;
   phrases: string[];
   yearsExperience: number;
   propertiesSold: number;
@@ -333,12 +333,12 @@ export interface PropertyPrice {
   currency: string;
   period?: 'month' | 'year'; // para alquileres
 };
-export interface PropertyDetail{
+export interface PropertyDetail {
   id: number;
   title: string;
   type: 'house' | 'apartment' | 'land' | 'office' | 'field';
   status: 'sale' | 'rent' | 'sold' | 'rented';
-  price:PropertyPrice;
+  price: PropertyPrice;
   images: PropertyImage[];
   description: string;
   features: PropertyFeature[];
@@ -430,6 +430,7 @@ export interface Sections {
 }
 
 export interface TemplateConfig {
+  templateId?: string;
   colors: Colors;
   typography: Typography;
   company: Company;
@@ -439,7 +440,7 @@ export interface TemplateConfig {
   sections: Sections;
   team?: TeamMember[];
   projects?: Project[];
-  partners?: Partner[]; 
+  partners?: Partner[];
 }
 
 export interface SearchData {

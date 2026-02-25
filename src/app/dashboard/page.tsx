@@ -1,6 +1,7 @@
 // app/dashboard/page.tsx - Dashboard principal moderno
 'use client'
 
+import { useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { useDashboardTheme } from '@/context/DashboardThemeContext'
 import Image from 'next/image'
@@ -26,13 +27,11 @@ import {
   HiLightningBolt,
   HiDocumentText,
 } from 'react-icons/hi'
-
-import MessageCard from '@/components/dashboard/MessageCard'
-
 export default function AdminDashboard() {
   const { user, company } = useAuth()
   const { theme } = useDashboardTheme()
   const isDark = theme === 'dark'
+  const [showTrialBanner, setShowTrialBanner] = useState(true)
 
   // Calcular días restantes del trial
   const getTrialDaysLeft = () => {
@@ -60,6 +59,61 @@ export default function AdminDashboard() {
 
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
       <div className="space-y-4 sm:space-y-6">
+        {/* Alerta de plan/trial */}
+        {company?.subscription_plan === 'trial' && showTrialBanner && (
+          <div className={`rounded-lg p-3 sm:p-4 border relative ${isDark
+            ? 'bg-gray-800/50 border-gray-700'
+            : 'bg-gray-100 border-gray-300'
+            }`}>
+            <button
+              onClick={() => setShowTrialBanner(false)}
+              className={`absolute top-2 right-2 p-1 rounded-full transition-colors ${isDark ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-200 text-gray-500'}`}
+              aria-label="Cerrar"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pr-8">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${isTrialExpiringSoon
+                  ? 'bg-red-100 text-red-600'
+                  : 'bg-blue-100 text-blue-600'
+                  }`}>
+                  {isTrialExpiringSoon ? (
+                    <HiExclamationCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+                  ) : (
+                    <HiClock className="h-4 w-4 sm:h-5 sm:w-5" />
+                  )}
+                </div>
+                <div>
+                  <h3 className={`text-sm sm:text-base font-semibold ${isDark ? 'text-white' : 'text-gray-900'
+                    }`}>
+                    {isTrialExpiringSoon
+                      ? '¡Tu período de prueba está por expirar!'
+                      : 'Estás en período de prueba'
+                    }
+                  </h3>
+                  <p className={`text-xs sm:text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'
+                    }`}>
+                    Te quedan <strong>{trialDaysLeft} días</strong>. Actualiza tu plan para continuar usando todas las funciones.
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/admin/suscripcion"
+                className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-medium transition-colors flex items-center gap-2 text-sm whitespace-nowrap ${isDark
+                  ? 'bg-red-600 hover:bg-red-700 text-white'
+                  : 'bg-red-500 hover:bg-red-600 text-white'
+                  }`}
+              >
+                Ver Planes
+                <HiArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
+              </Link>
+            </div>
+          </div>
+        )}
+
         {/* Header simple y limpio - Responsive */}
         <div className={`rounded-xl p-4 sm:p-6 shadow-sm border ${isDark
           ? 'bg-gray-800 border-gray-700'
@@ -167,99 +221,6 @@ export default function AdminDashboard() {
                   }`}></div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Alerta de plan/trial - Más pequeño y con fondo claro */}
-        {company?.subscription_plan === 'trial' && (
-          <div className={`rounded-lg p-3 sm:p-4 border ${isDark
-            ? 'bg-gray-800/50 border-gray-700'
-            : 'bg-gray-100 border-gray-300'
-            }`}>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${isTrialExpiringSoon
-                  ? 'bg-red-100 text-red-600'
-                  : 'bg-blue-100 text-blue-600'
-                  }`}>
-                  {isTrialExpiringSoon ? (
-                    <HiExclamationCircle className="h-4 w-4 sm:h-5 sm:w-5" />
-                  ) : (
-                    <HiClock className="h-4 w-4 sm:h-5 sm:w-5" />
-                  )}
-                </div>
-                <div>
-                  <h3 className={`text-sm sm:text-base font-semibold ${isDark ? 'text-white' : 'text-gray-900'
-                    }`}>
-                    {isTrialExpiringSoon
-                      ? '¡Tu período de prueba está por expirar!'
-                      : 'Estás en período de prueba'
-                    }
-                  </h3>
-                  <p className={`text-xs sm:text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'
-                    }`}>
-                    Te quedan <strong>{trialDaysLeft} días</strong>. Actualiza tu plan para continuar usando todas las funciones.
-                  </p>
-                </div>
-              </div>
-              <Link
-                href="/admin/suscripcion"
-                className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-medium transition-colors flex items-center gap-2 text-sm ${isDark
-                  ? 'bg-red-600 hover:bg-red-700 text-white'
-                  : 'bg-red-500 hover:bg-red-600 text-white'
-                  }`}
-              >
-                Ver Planes
-                <HiArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {/* Estadísticas y Mensajes - Grid balanceado y responsive */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 animate-fade-in-up">
-          {/* Estadísticas principales - Grid responsive */}
-          <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <StatCard
-              title="Propiedades"
-              value={company?.properties_count?.toString() || '0'}
-              subtitle="Total activas"
-              icon={<HiHome className="h-5 w-5 sm:h-6 sm:w-6" />}
-              color="primary"
-              isDark={isDark}
-            />
-
-            <StatCard
-              title="Alquileres"
-              value="24"
-              subtitle="Este mes"
-              icon={<HiHome className="h-5 w-5 sm:h-6 sm:w-6" />}
-              color="success"
-              isDark={isDark}
-            />
-
-            <StatCard
-              title="Clientes"
-              value="156"
-              subtitle="Registrados"
-              icon={<HiUsers className="h-5 w-5 sm:h-6 sm:w-6" />}
-              color="info"
-              isDark={isDark}
-            />
-
-            <StatCard
-              title="Contratos Activos"
-              value="1,234"
-              subtitle="En vigor"
-              icon={<HiDocumentText className="h-5 w-5 sm:h-6 sm:w-6" />}
-              color="warning"
-              isDark={isDark}
-            />
-          </div>
-
-          {/* Tarjeta de mensajes - Responsive */}
-          <div className="lg:col-span-1">
-            <MessageCard isDark={isDark} />
           </div>
         </div>
 
@@ -401,7 +362,7 @@ export default function AdminDashboard() {
             </Link>
 
             <Link
-              href="/dashboard/subscription"
+              href="/subscription"
               className={`group relative overflow-hidden rounded-xl p-5 border transition-all duration-300 hover:scale-[1.02] hover:shadow-lg ${isDark
                 ? 'bg-gray-700/50 border-gray-600 hover:bg-gray-700/70'
                 : 'bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-200 hover:from-yellow-100 hover:to-amber-100'
@@ -474,92 +435,3 @@ function getPlanDisplayName(plan?: string) {
   return planNames[plan || ''] || 'Sin plan'
 }
 
-// Componente de tarjeta de estadística simplificado y consistente
-function StatCard({
-  title,
-  value,
-  subtitle,
-  icon,
-  color = 'primary',
-  variant = 'normal',
-  progress,
-  action,
-  isDark = false
-}: {
-  title: string
-  value: string
-  subtitle?: string
-  icon: React.ReactNode
-  color?: 'primary' | 'success' | 'info' | 'warning'
-  variant?: 'normal' | 'active' | 'inactive'
-  progress?: number
-  action?: React.ReactNode
-  isDark?: boolean
-}) {
-  const getIconColor = () => {
-    switch (color) {
-      case 'success':
-        return isDark ? 'text-green-400' : 'text-green-600'
-      case 'info':
-        return isDark ? 'text-blue-400' : 'text-blue-600'
-      case 'warning':
-        return isDark ? 'text-yellow-400' : 'text-yellow-600'
-      default:
-        return isDark ? 'text-red-400' : 'text-red-600'
-    }
-  }
-
-  const iconColor = getIconColor()
-
-  return (
-    <div className={`group relative overflow-hidden p-4 sm:p-6 rounded-xl border shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-200 cursor-pointer ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-      }`}>
-      <div className="relative z-10">
-        <div className="flex items-start justify-between mb-3 sm:mb-4">
-          <div className={`p-2 sm:p-3 rounded-lg ${isDark ? 'bg-gray-700' : 'bg-gray-100'} shadow-sm`}>
-            <div className={iconColor}>
-              {icon}
-            </div>
-          </div>
-          {action && (
-            <div className="mt-1">
-              {action}
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-1 sm:space-y-2">
-          <p className={`text-xs sm:text-sm font-semibold uppercase tracking-wider ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{title}</p>
-          <p className={`text-xl sm:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{value}</p>
-
-          {subtitle && (
-            <p className={`text-xs sm:text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{subtitle}</p>
-          )}
-
-          {progress !== undefined && (
-            <div className="mt-3 sm:mt-4 space-y-1 sm:space-y-2">
-              <div className={`flex justify-between text-xs font-semibold ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                <span>Uso actual</span>
-                <span>{Math.round(progress)}%</span>
-              </div>
-              <div className={`w-full rounded-full h-2 overflow-hidden ${isDark ? 'bg-gray-700' : 'bg-gray-200'
-                }`}>
-                <div
-                  className={`h-full rounded-full transition-all duration-700 ease-out ${progress > 90
-                    ? 'bg-red-500'
-                    : progress > 70
-                      ? 'bg-yellow-500'
-                      : iconColor.includes('green') ? 'bg-green-500' : iconColor.includes('blue') ? 'bg-blue-500' : iconColor.includes('yellow') ? 'bg-yellow-500' : 'bg-red-500'
-                    }`}
-                  style={{
-                    width: `${Math.min(progress, 100)}%`,
-                  }}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}

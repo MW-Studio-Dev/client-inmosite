@@ -21,8 +21,8 @@ export interface SubscriptionPlan {
   name: string
   plan_type: string
   billing_cycle: string
-  price_usd: number
-  price_ars: number
+  price_usd: number | string
+  price_ars: number | string
   price_display: string
   description: string
   features_list: string[]
@@ -37,17 +37,18 @@ export default function SubscriptionPage() {
   const [error, setError] = useState<string | null>(null)
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
-  const URL = process.env.NEXT_PUBLIC_API_URL 
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly')
+  const URL = process.env.NEXT_PUBLIC_API_URL
 
   const fetchPlans = async () => {
     try {
       setError(null)
       const response = await fetch(`${URL}/subscriptions/plans/`)
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-      
+
       const data = await response.json()
       if (data.success) {
         setPlans(data.data)
@@ -65,7 +66,7 @@ export default function SubscriptionPage() {
   useEffect(() => {
     fetchPlans()
   }, [])
-  
+
   // Calcular días restantes del trial
   const getTrialDaysLeft = () => {
     if (!company?.trial_end_date) return 0
@@ -197,6 +198,8 @@ export default function SubscriptionPage() {
     )
   }
 
+  const displayedPlans = plans.filter(p => p.billing_cycle === billingCycle || p.plan_type === 'trial')
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -223,7 +226,7 @@ export default function SubscriptionPage() {
                   Estado: {company?.subscription_active ? 'Activo' : 'Inactivo'}
                 </span>
               </div>
-              
+
               {company?.subscription_plan === 'trial' && (
                 <div className="flex items-center gap-2">
                   <HiClock className="h-5 w-5 text-orange-500" />
@@ -232,7 +235,7 @@ export default function SubscriptionPage() {
                   </span>
                 </div>
               )}
-              
+
               <div className="flex items-center gap-2">
                 <HiInformationCircle className="h-5 w-5 text-text-muted" />
                 <span className="text-text-secondary">
@@ -241,7 +244,7 @@ export default function SubscriptionPage() {
               </div>
             </div>
           </div>
-          
+
           {company?.subscription_plan === 'trial' && trialDaysLeft <= 7 && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
               <div className="flex items-center gap-2 text-red-800">
@@ -256,9 +259,28 @@ export default function SubscriptionPage() {
         </div>
       </div>
 
+      {/* Toggle Anual/Mensual */}
+      <div className="flex justify-center mt-6">
+        <div className="bg-gray-100 p-1 rounded-xl inline-flex relative">
+          <button
+            onClick={() => setBillingCycle('monthly')}
+            className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all ${billingCycle === 'monthly' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Mensual
+          </button>
+          <button
+            onClick={() => setBillingCycle('yearly')}
+            className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${billingCycle === 'yearly' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Anual
+            <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">15% OFF</span>
+          </button>
+        </div>
+      </div>
+
       {/* Planes disponibles */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {plans.map((plan) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+        {displayedPlans.map((plan) => (
           <PlanCard
             key={plan.id}
             plan={plan}
@@ -271,7 +293,7 @@ export default function SubscriptionPage() {
       </div>
 
       {/* Comparación de planes */}
-      {plans.length > 0 && (
+      {displayedPlans.length > 0 && (
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">
             Comparación de Planes
@@ -281,7 +303,7 @@ export default function SubscriptionPage() {
               <thead>
                 <tr className="border-b border-gray-200">
                   <th className="text-left py-3 px-4 font-semibold text-gray-700">Características</th>
-                  {plans.map((plan) => (
+                  {displayedPlans.map((plan) => (
                     <th key={plan.id} className="text-center py-3 px-4 font-semibold text-gray-700">
                       {plan.name}
                     </th>
@@ -290,18 +312,18 @@ export default function SubscriptionPage() {
               </thead>
               <tbody>
                 <tr className="border-b border-gray-100">
-                  <td className="py-3 px-4 text-gray-600">Precio mensual</td>
-                  {plans.map((plan) => (
+                  <td className="py-3 px-4 text-gray-600">Precio {billingCycle === 'yearly' ? 'anual' : 'mensual'}</td>
+                  {displayedPlans.map((plan) => (
                     <td key={plan.id} className="text-center py-3 px-4">
                       <span className="font-semibold text-blue-600">
-                        {plan.plan_type === 'trial' ? 'Gratis' : plan.price_display}
+                        {plan.plan_type === 'trial' ? 'Gratis' : plan.plan_type === 'enterprise' ? 'Consultar' : plan.price_display}
                       </span>
                     </td>
                   ))}
                 </tr>
                 <tr className="border-b border-gray-100">
                   <td className="py-3 px-4 text-gray-600">Duración</td>
-                  {plans.map((plan) => (
+                  {displayedPlans.map((plan) => (
                     <td key={plan.id} className="text-center py-3 px-4">
                       {plan.duration_days} días
                     </td>
@@ -309,14 +331,13 @@ export default function SubscriptionPage() {
                 </tr>
                 <tr className="border-b border-gray-100">
                   <td className="py-3 px-4 text-gray-600">Tipo de plan</td>
-                  {plans.map((plan) => (
+                  {displayedPlans.map((plan) => (
                     <td key={plan.id} className="text-center py-3 px-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        plan.plan_type === 'trial' ? 'bg-gray-100 text-gray-700' :
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${plan.plan_type === 'trial' ? 'bg-gray-100 text-gray-700' :
                         plan.plan_type === 'basic' ? 'bg-blue-100 text-blue-700' :
-                        plan.plan_type === 'premium' ? 'bg-purple-100 text-purple-700' :
-                        'bg-green-100 text-green-700'
-                      }`}>
+                          plan.plan_type === 'premium' ? 'bg-purple-100 text-purple-700' :
+                            'bg-green-100 text-green-700'
+                        }`}>
                         {plan.plan_type}
                       </span>
                     </td>
@@ -324,7 +345,7 @@ export default function SubscriptionPage() {
                 </tr>
                 <tr>
                   <td className="py-3 px-4 text-gray-600">Popular</td>
-                  {plans.map((plan) => (
+                  {displayedPlans.map((plan) => (
                     <td key={plan.id} className="text-center py-3 px-4">
                       {plan.is_popular ? (
                         <HiStar className="h-5 w-5 text-yellow-500 mx-auto" />
@@ -438,12 +459,12 @@ function getPlanDisplayName(plan?: string) {
 }
 
 // Componente de tarjeta de plan
-function PlanCard({ 
-  plan, 
-  features, 
-  isCurrentPlan, 
-  onSelect, 
-  disabled 
+function PlanCard({
+  plan,
+  features,
+  isCurrentPlan,
+  onSelect,
+  disabled
 }: {
   plan: SubscriptionPlan
   features: string[]
@@ -452,12 +473,13 @@ function PlanCard({
   disabled: boolean
 }) {
   const isPopular = plan.is_popular || plan.plan_type === 'premium'
-  
+  const isEnterprise = plan.plan_type === 'enterprise'
+
   return (
     <div className={`
       relative rounded-xl border transition-all duration-300 hover:scale-105 hover:shadow-xl
-      ${isPopular 
-        ? 'border-blue-500 shadow-lg bg-gradient-to-b from-blue-50 to-white' 
+      ${isPopular
+        ? 'border-blue-500 shadow-lg bg-gradient-to-b from-blue-50 to-white'
         : 'border-gray-200 bg-white hover:border-blue-300'
       }
       ${isCurrentPlan ? 'ring-2 ring-green-500 bg-green-50' : ''}
@@ -488,22 +510,26 @@ function PlanCard({
           <h3 className="text-xl font-bold text-text-primary mb-2">
             {plan.name}
           </h3>
-          
+
           <div className="mb-4">
             {plan.plan_type === 'trial' ? (
               <div>
                 <span className="text-3xl font-bold text-blue-600">Gratis</span>
-                <span className="text-gray-500"> / 30 días</span>
+                <span className="text-gray-500"> / {plan.duration_days} días</span>
+              </div>
+            ) : isEnterprise ? (
+              <div>
+                <span className="text-3xl font-bold text-blue-600">Consultar</span>
               </div>
             ) : (
               <div>
                 <span className="text-3xl font-bold text-blue-600">
                   {plan.price_display}
                 </span>
-                <span className="text-gray-500"> / mes</span>
-                {plan.price_ars > 0 && (
+                <span className="text-gray-500"> / {plan.billing_cycle === 'yearly' ? 'año' : 'mes'}</span>
+                {Number(plan.price_ars) > 0 && (
                   <div className="text-sm text-gray-500 mt-1">
-                    ARG ${plan.price_ars.toLocaleString()}
+                    ARG ${Number(plan.price_ars).toLocaleString()}
                   </div>
                 )}
               </div>
@@ -528,45 +554,54 @@ function PlanCard({
         </div>
 
         {/* Botón de acción */}
-        <button
-          onClick={onSelect}
-          disabled={disabled}
-          className={`
-            w-full py-3 px-4 rounded-lg font-semibold transition-all duration-300
-            ${isCurrentPlan
-              ? 'bg-green-100 text-green-700 cursor-default'
-              : isPopular
-                ? 'bg-blue-500 text-white hover:bg-blue-600 hover:shadow-lg transform hover:-translate-y-0.5'
-                : 'bg-gray-100 text-gray-700 border border-gray-300 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50'
-            }
-            ${disabled && !isCurrentPlan ? 'opacity-50 cursor-not-allowed' : ''}
-          `}
-        >
-          {isCurrentPlan ? (
-            <span className="flex items-center justify-center gap-2">
-              <HiCheck className="h-5 w-5" />
-              Plan Actual
-            </span>
-          ) : plan.plan_type === 'trial' ? (
-            'Comenzar Prueba'
-          ) : (
-            <span className="flex items-center justify-center gap-2">
-              Seleccionar Plan
-              <HiArrowRight className="h-4 w-4" />
-            </span>
-          )}
-        </button>
+        {isEnterprise ? (
+          <a
+            href="mailto:info@inmosite.com.ar?subject=Consulta Plan Enterprise"
+            className="w-full py-3 px-4 rounded-lg font-semibold transition-all duration-300 bg-gray-900 text-white hover:bg-black block text-center"
+          >
+            Consultar
+          </a>
+        ) : (
+          <button
+            onClick={onSelect}
+            disabled={disabled}
+            className={`
+              w-full py-3 px-4 rounded-lg font-semibold transition-all duration-300
+              ${isCurrentPlan
+                ? 'bg-green-100 text-green-700 cursor-default'
+                : isPopular
+                  ? 'bg-blue-500 text-white hover:bg-blue-600 hover:shadow-lg transform hover:-translate-y-0.5'
+                  : 'bg-gray-100 text-gray-700 border border-gray-300 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50'
+              }
+              ${disabled && !isCurrentPlan ? 'opacity-50 cursor-not-allowed' : ''}
+            `}
+          >
+            {isCurrentPlan ? (
+              <span className="flex items-center justify-center gap-2">
+                <HiCheck className="h-5 w-5" />
+                Plan Actual
+              </span>
+            ) : plan.plan_type === 'trial' ? (
+              'Comenzar Prueba'
+            ) : (
+              <span className="flex items-center justify-center gap-2">
+                Seleccionar
+                <HiArrowRight className="h-4 w-4" />
+              </span>
+            )}
+          </button>
+        )}
       </div>
     </div>
   )
 }
 
 // Modal de confirmación
-function ConfirmModal({ 
-  planName, 
-  price, 
-  onConfirm, 
-  onCancel 
+function ConfirmModal({
+  planName,
+  price,
+  onConfirm,
+  onCancel
 }: {
   planName: string
   price: string
@@ -631,4 +666,5 @@ function ConfirmModal({
         </div>
       </div>
     </div>
-  )}
+  )
+}

@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
 import { marketingService } from '@/services/marketingService';
+import ReCAPTCHA from 'react-google-recaptcha';
 import {
     HiArrowRight,
     HiCheck,
@@ -22,6 +23,7 @@ function WhitelistFormInner() {
     const [loading, setLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState('');
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
     // Capture UTM params into a cookie (30 days)
     useEffect(() => {
@@ -52,6 +54,11 @@ function WhitelistFormInner() {
             return;
         }
 
+        if (!captchaToken) {
+            setError('Por favor completá el captcha.');
+            return;
+        }
+
         setLoading(true);
         try {
             let metadata = {};
@@ -59,7 +66,7 @@ function WhitelistFormInner() {
             if (match) {
                 try { metadata = JSON.parse(match[2]); } catch { /* ignore */ }
             }
-            await marketingService.joinWhitelist(email, name, metadata);
+            await marketingService.joinWhitelist(email, name, metadata, captchaToken);
             setSubmitted(true);
         } catch (err) {
             console.error(err);
@@ -137,6 +144,19 @@ function WhitelistFormInner() {
                 )}
             </AnimatePresence>
 
+            {/* Captcha */}
+            <div className="flex justify-center my-5">
+                <div className="inline-block rounded-xl overflow-hidden border border-gray-700/60 shadow-md ring-1 ring-white/5 hover:border-gray-500/60 transition-colors duration-300">
+                    <div className="-m-[1px]"> {/* Pequeño margen negativo para ocultar el borde propio del iframe */}
+                        <ReCAPTCHA
+                            sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'}
+                            onChange={(val) => setCaptchaToken(val)}
+                            theme="dark"
+                        />
+                    </div>
+                </div>
+            </div>
+
             {/* Submit */}
             <motion.button
                 type="submit"
@@ -152,7 +172,7 @@ function WhitelistFormInner() {
                     </>
                 ) : (
                     <>
-                        <span>Quiero acceso anticipado</span>
+                        <span>Acceso anticipado</span>
                         <HiArrowRight className="w-4 h-4" />
                     </>
                 )}

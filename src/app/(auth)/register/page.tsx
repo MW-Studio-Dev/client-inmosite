@@ -111,6 +111,9 @@ const RegisterForm = () => {
         setSubmitStatus('success');
         setStatusMessage(result.message || '¡Registro exitoso! Revisa tu email y ingresa el código OTP.');
 
+        // Guardar email temporalmente para OTP verification
+        localStorage.setItem('verification_email', registerData.email);
+
         // Redirigir a verify-otp
         setTimeout(() => {
           router.push('/verify-otp');

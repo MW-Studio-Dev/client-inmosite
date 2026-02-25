@@ -204,7 +204,7 @@ export default function RentsPage() {
               </div>
             </div>
           ) : filteredRents.length > 0 ? (
-            <RentTable rents={filteredRents as Rental[]} />
+            <RentTable rents={filteredRents} />
           ) : (
             <div className={`rounded-lg border shadow-xl transition-colors duration-300 ${isDark
               ? 'border-slate-700/50 bg-slate-900'

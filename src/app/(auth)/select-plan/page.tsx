@@ -121,13 +121,12 @@ const SelectPlanPage = () => {
                 <div
                   key={plan.id}
                   onClick={() => handleSelectPlan(plan.slug)}
-                  className={`relative cursor-pointer rounded-2xl border-2 transition-all duration-300 hover:scale-105 ${
-                    selectedPlan === plan.slug
+                  className={`relative cursor-pointer rounded-2xl border-2 transition-all duration-300 hover:scale-105 ${selectedPlan === plan.slug
                       ? 'border-red-500 bg-gradient-to-b from-red-950/40 to-red-950/20 shadow-xl shadow-red-500/30 scale-105'
                       : plan.is_popular
-                      ? 'border-red-700/50 bg-gradient-to-b from-gray-800/60 to-gray-900/60 hover:border-red-600'
-                      : 'border-gray-700/50 bg-gradient-to-b from-gray-800/40 to-gray-900/40 hover:border-gray-600'
-                  }`}
+                        ? 'border-red-700/50 bg-gradient-to-b from-gray-800/60 to-gray-900/60 hover:border-red-600'
+                        : 'border-gray-700/50 bg-gradient-to-b from-gray-800/40 to-gray-900/40 hover:border-gray-600'
+                    }`}
                 >
                   {/* Badge Popular */}
                   {plan.is_popular && (
@@ -192,9 +191,8 @@ const SelectPlanPage = () => {
                       {plan.features_list && plan.features_list.length > 0 ? (
                         plan.features_list.map((feature, index) => (
                           <div key={index} className="flex items-start gap-2">
-                            <HiCheckCircle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
-                              selectedPlan === plan.slug ? 'text-red-400' : 'text-green-500'
-                            }`} />
+                            <HiCheckCircle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${selectedPlan === plan.slug ? 'text-red-400' : 'text-green-500'
+                              }`} />
                             <span className="text-sm text-gray-300 leading-relaxed">{feature}</span>
                           </div>
                         ))
@@ -210,13 +208,12 @@ const SelectPlanPage = () => {
                           e.stopPropagation();
                           handleSelectPlan(plan.slug);
                         }}
-                        className={`w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 ${
-                          selectedPlan === plan.slug
+                        className={`w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 ${selectedPlan === plan.slug
                             ? 'bg-red-500 text-white shadow-lg shadow-red-500/50'
                             : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
-                        }`}
+                          }`}
                       >
-                        {selectedPlan === plan.slug ? 'Seleccionado ✓' : 'Seleccionar Plan'}
+                        {selectedPlan === plan.slug ? 'Seleccionado ✓' : 'Seleccionar'}
                       </button>
                     </div>
                   </div>

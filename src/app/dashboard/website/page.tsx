@@ -8,6 +8,7 @@ import { ColorSchemeEditor } from '@/components/dashboard/website/ColorSchemeEdi
 import { HeroEditor } from '@/components/dashboard/website/HeroEditor';
 import { CompanyInfoEditor } from '@/components/dashboard/website/CompanyInfoEditor';
 import { SocialMediaEditor } from '@/components/dashboard/website/SocialMediaEditor';
+import { WebsiteOnboarding } from '@/components/dashboard/website/WebsiteOnboarding';
 
 export default function SitioWebPage() {
   const router = useRouter();
@@ -105,6 +106,29 @@ export default function SitioWebPage() {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-gray-600">Cargando configuración...</p>
         </div>
+      </div>
+    );
+  }
+
+  const isConfigured = config && config.company_name && config.company_name.trim().length > 0;
+
+  if (!isConfigured) {
+    return (
+      <div className="min-h-screen pt-4 pb-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <WebsiteOnboarding
+          initialConfig={localConfig}
+          onComplete={async (onboardingConfig) => {
+            try {
+              await saveConfig(onboardingConfig);
+              setShowSuccess(true);
+              // Redirect to preview to choose template and view changes
+              router.push('/dashboard/website/preview');
+            } catch (err) {
+              console.error(err);
+              alert("Error guardando la configuración inicial");
+            }
+          }}
+        />
       </div>
     );
   }

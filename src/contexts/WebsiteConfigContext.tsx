@@ -7,6 +7,7 @@ interface WebsiteConfigResponse {
   success: boolean;
   message: string;
   data: {
+    templateId?: string;
     colors: {
       primary: string;
       primaryDark: string;
@@ -113,174 +114,177 @@ function transformApiDataToTemplateConfig(apiData: WebsiteConfigResponse['data']
     return iconMap[key] || 'HomeIcon';
   };
 
+  const safeData = apiData || {} as any;
+
   return {
+    templateId: safeData.templateId || 'template_1',
     colors: {
-      primary: apiData.colors.primary,
-      primaryDark: apiData.colors.primaryDark,
-      primaryLight: apiData.colors.primaryLight,
-      secondary: apiData.colors.secondary,
-      accent: apiData.colors.accent,
-      background: apiData.colors.background,
-      surface: apiData.colors.surface,
-      text: apiData.colors.text,
-      textLight: apiData.colors.textLight,
-      success: apiData.colors.success,
-      warning: apiData.colors.warning,
-      error: apiData.colors.error,
+      primary: safeData.colors?.primary || '',
+      primaryDark: safeData.colors?.primaryDark || '',
+      primaryLight: safeData.colors?.primaryLight || '',
+      secondary: safeData.colors?.secondary || '',
+      accent: safeData.colors?.accent || '',
+      background: safeData.colors?.background || '',
+      surface: safeData.colors?.surface || '',
+      text: safeData.colors?.text || '',
+      textLight: safeData.colors?.textLight || '',
+      success: safeData.colors?.success || '',
+      warning: safeData.colors?.warning || '',
+      error: safeData.colors?.error || '',
     },
     typography: {
-      fontFamily: apiData.typography.fontFamily,
-      fontWeight: apiData.typography.fontWeight,
-      fontSize: apiData.typography.fontSize,
+      fontFamily: safeData.typography?.fontFamily || '',
+      fontWeight: safeData.typography?.fontWeight || {},
+      fontSize: safeData.typography?.fontSize || {},
     },
     company: {
-      name: apiData.company.name,
+      name: safeData.company?.name || '',
       logo: {
         type: 'image' as const,
-        src: apiData.company.logo.src,
-        alt: apiData.company.logo.alt,
-        width: apiData.company.logo.width,
-        height: apiData.company.logo.height,
+        src: safeData.company?.logo?.src || '',
+        alt: safeData.company?.logo?.alt || '',
+        width: safeData.company?.logo?.width || 0,
+        height: safeData.company?.logo?.height || 0,
       },
-      phone: apiData.company.phone,
-      email: apiData.company.email,
-      address: apiData.company.address,
-      whatsapp: apiData.company.whatsapp,
+      phone: safeData.company?.phone || '',
+      email: safeData.company?.email || '',
+      address: safeData.company?.address || '',
+      whatsapp: safeData.company?.whatsapp || '',
     },
     hero: {
-      title: apiData.hero.title,
-      subtitle: apiData.hero.subtitle,
-      backgroundImage: apiData.hero.backgroundImage,
-      ctaText: apiData.hero.ctaText,
-      showSearchBar: apiData.hero.showSearchBar,
-      backgroundVideoUrl: apiData.hero.backgroundVideoUrl,
+      title: safeData.hero?.title || '',
+      subtitle: safeData.hero?.subtitle || '',
+      backgroundImage: safeData.hero?.backgroundImage || '',
+      ctaText: safeData.hero?.ctaText || '',
+      showSearchBar: safeData.hero?.showSearchBar || false,
+      backgroundVideoUrl: safeData.hero?.backgroundVideoUrl || '',
     },
     sections: {
-      showRentSale: apiData.sections.showRentSale,
-      showTeam: apiData.sections.showTeam,
-      showProjects: apiData.sections.showProjects,
-      showContact: apiData.sections.showContact,
-      showPartners: apiData.sections.showPartners,
-      featuredCount: apiData.sections.featuredCount,
+      showRentSale: safeData.sections?.showRentSale || false,
+      showTeam: safeData.sections?.showTeam || false,
+      showProjects: safeData.sections?.showProjects || false,
+      showContact: safeData.sections?.showContact || false,
+      showPartners: safeData.sections?.showPartners || false,
+      featuredCount: safeData.sections?.featuredCount || 6,
       aboutUs: {
-        title: apiData.sections.aboutUs.title,
-        description: apiData.sections.aboutUs.description,
-        yearsExperience: apiData.sections.aboutUs.yearsExperience,
-        propertiesSold: apiData.sections.aboutUs.propertiesSold,
-        phrases: apiData.sections.aboutUs.phrases || [],
-        image: apiData.sections.aboutUs.image || null,
+        title: safeData.sections?.aboutUs?.title || '',
+        description: safeData.sections?.aboutUs?.description || '',
+        yearsExperience: safeData.sections?.aboutUs?.yearsExperience || 0,
+        propertiesSold: safeData.sections?.aboutUs?.propertiesSold || 0,
+        phrases: safeData.sections?.aboutUs?.phrases || [],
+        image: safeData.sections?.aboutUs?.image || null,
       },
       propertyTypes: {
         houses: {
-          enabled: apiData.sections.propertyTypes.houses.enabled,
-          title: apiData.sections.propertyTypes.houses.title,
-          description: apiData.sections.propertyTypes.houses.description,
+          enabled: safeData.sections?.propertyTypes?.houses?.enabled || false,
+          title: safeData.sections?.propertyTypes?.houses?.title || '',
+          description: safeData.sections?.propertyTypes?.houses?.description || '',
           icon: getPropertyTypeIcon('houses'),
         },
         apartments: {
-          enabled: apiData.sections.propertyTypes.apartments.enabled,
-          title: apiData.sections.propertyTypes.apartments.title,
-          description: apiData.sections.propertyTypes.apartments.description,
+          enabled: safeData.sections?.propertyTypes?.apartments?.enabled || false,
+          title: safeData.sections?.propertyTypes?.apartments?.title || '',
+          description: safeData.sections?.propertyTypes?.apartments?.description || '',
           icon: getPropertyTypeIcon('apartments'),
         },
         lands: {
-          enabled: apiData.sections.propertyTypes.lands.enabled,
-          title: apiData.sections.propertyTypes.lands.title,
-          description: apiData.sections.propertyTypes.lands.description,
+          enabled: safeData.sections?.propertyTypes?.lands?.enabled || false,
+          title: safeData.sections?.propertyTypes?.lands?.title || '',
+          description: safeData.sections?.propertyTypes?.lands?.description || '',
           icon: getPropertyTypeIcon('lands'),
         },
         offices: {
-          enabled: apiData.sections.propertyTypes.offices.enabled,
-          title: apiData.sections.propertyTypes.offices.title,
-          description: apiData.sections.propertyTypes.offices.description,
+          enabled: safeData.sections?.propertyTypes?.offices?.enabled || false,
+          title: safeData.sections?.propertyTypes?.offices?.title || '',
+          description: safeData.sections?.propertyTypes?.offices?.description || '',
           icon: getPropertyTypeIcon('offices'),
         },
         fields: {
-          enabled: apiData.sections.propertyTypes.fields.enabled,
-          title: apiData.sections.propertyTypes.fields.title,
-          description: apiData.sections.propertyTypes.fields.description,
+          enabled: safeData.sections?.propertyTypes?.fields?.enabled || false,
+          title: safeData.sections?.propertyTypes?.fields?.title || '',
+          description: safeData.sections?.propertyTypes?.fields?.description || '',
           icon: getPropertyTypeIcon('fields'),
         },
       },
       contact: {
-        title: apiData.sections.contact.title,
-        subtitle: apiData.sections.contact.subtitle,
+        title: safeData.sections?.contact?.title || '',
+        subtitle: safeData.sections?.contact?.subtitle || '',
         info: {
-          title: apiData.sections.contact.info.title,
+          title: safeData.sections?.contact?.info?.title || '',
           methods: {
             phone: {
-              title: apiData.sections.contact.info.methods.phone.title,
-              action: apiData.sections.contact.info.methods.phone.action,
+              title: safeData.sections?.contact?.info?.methods?.phone?.title || '',
+              action: safeData.sections?.contact?.info?.methods?.phone?.action || '',
             },
             email: {
-              title: apiData.sections.contact.info.methods.email.title,
-              action: apiData.sections.contact.info.methods.email.action,
+              title: safeData.sections?.contact?.info?.methods?.email?.title || '',
+              action: safeData.sections?.contact?.info?.methods?.email?.action || '',
             },
             whatsapp: {
-              title: apiData.sections.contact.info.methods.whatsapp.title,
-              value: apiData.sections.contact.info.methods.whatsapp.value,
-              action: apiData.sections.contact.info.methods.whatsapp.action,
-              message: apiData.sections.contact.info.methods.whatsapp.message,
+              title: safeData.sections?.contact?.info?.methods?.whatsapp?.title || '',
+              value: safeData.sections?.contact?.info?.methods?.whatsapp?.value || '',
+              action: safeData.sections?.contact?.info?.methods?.whatsapp?.action || '',
+              message: safeData.sections?.contact?.info?.methods?.whatsapp?.message || '',
             },
             office: {
-              title: apiData.sections.contact.info.methods.office.title,
-              action: apiData.sections.contact.info.methods.office.action,
+              title: safeData.sections?.contact?.info?.methods?.office?.title || '',
+              action: safeData.sections?.contact?.info?.methods?.office?.action || '',
             },
           },
           schedule: {
-            title: apiData.sections.contact.info.schedule.title,
-            hours: apiData.sections.contact.info.schedule.hours,
+            title: safeData.sections?.contact?.info?.schedule?.title || '',
+            hours: safeData.sections?.contact?.info?.schedule?.hours || '',
           },
         },
         form: {
-          title: apiData.sections.contact.form.title,
+          title: safeData.sections?.contact?.form?.title || '',
           fields: {
             name: {
-              label: apiData.sections.contact.form.fields.name.label,
-              placeholder: apiData.sections.contact.form.fields.name.placeholder,
+              label: safeData.sections?.contact?.form?.fields?.name?.label || '',
+              placeholder: safeData.sections?.contact?.form?.fields?.name?.placeholder || '',
             },
             email: {
-              label: apiData.sections.contact.form.fields.email.label,
-              placeholder: apiData.sections.contact.form.fields.email.placeholder,
+              label: safeData.sections?.contact?.form?.fields?.email?.label || '',
+              placeholder: safeData.sections?.contact?.form?.fields?.email?.placeholder || '',
             },
             phone: {
-              label: apiData.sections.contact.form.fields.phone.label,
-              placeholder: apiData.sections.contact.form.fields.phone.placeholder,
+              label: safeData.sections?.contact?.form?.fields?.phone?.label || '',
+              placeholder: safeData.sections?.contact?.form?.fields?.phone?.placeholder || '',
             },
             propertyType: {
-              label: apiData.sections.contact.form.fields.propertyType.label,
-              placeholder: apiData.sections.contact.form.fields.propertyType.placeholder,
-              options: apiData.sections.contact.form.fields.propertyType.options,
+              label: safeData.sections?.contact?.form?.fields?.propertyType?.label || '',
+              placeholder: safeData.sections?.contact?.form?.fields?.propertyType?.placeholder || '',
+              options: safeData.sections?.contact?.form?.fields?.propertyType?.options || [],
             },
             message: {
-              label: apiData.sections.contact.form.fields.message.label,
-              placeholder: apiData.sections.contact.form.fields.message.placeholder,
+              label: safeData.sections?.contact?.form?.fields?.message?.label || '',
+              placeholder: safeData.sections?.contact?.form?.fields?.message?.placeholder || '',
             },
           },
-          submitButton: apiData.sections.contact.form.submitButton,
+          submitButton: safeData.sections?.contact?.form?.submitButton || '',
         },
       },
       partners: {
-        enabled: apiData.sections.partners.enabled,
-        title: apiData.sections.partners.title,
-        subtitle: apiData.sections.partners.subtitle,
-        categories: apiData.sections.partners.categories,
-        carousel: apiData.sections.partners.carousel,
+        enabled: safeData.sections?.partners?.enabled || false,
+        title: safeData.sections?.partners?.title || '',
+        subtitle: safeData.sections?.partners?.subtitle || '',
+        categories: safeData.sections?.partners?.categories || [],
+        carousel: safeData.sections?.partners?.carousel || false,
       },
-      faq: apiData.sections.faq || {
+      faq: safeData.sections?.faq || {
         enabled: false,
         title: '',
         subtitle: '',
         questions: [],
       },
-      howItWorks: apiData.sections.howItWorks || {
+      howItWorks: safeData.sections?.howItWorks || {
         enabled: false,
         title: '',
         subtitle: '',
         description: '',
         image: '',
       },
-      whyInvest: apiData.sections.whyInvest || {
+      whyInvest: safeData.sections?.whyInvest || {
         enabled: false,
         title: '',
         subtitle: '',
@@ -288,16 +292,16 @@ function transformApiDataToTemplateConfig(apiData: WebsiteConfigResponse['data']
         image: '',
       },
     },
-    team: apiData.team || [],
-    projects: apiData.projects || [],
-    partners: apiData.partners || [],
-    seo: apiData.seo || {
+    team: safeData.team || [],
+    projects: safeData.projects || [],
+    partners: safeData.partners || [],
+    seo: safeData.seo || {
       metaTitle: '',
       metaDescription: '',
       metaKeywords: '',
       favicon: '',
     },
-    social: apiData.social || {
+    social: safeData.social || {
       facebook: '',
       instagram: '',
       linkedin: '',
@@ -319,7 +323,7 @@ export const WebsiteConfigProvider: React.FC<WebsiteConfigProviderProps> = ({ ch
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      const response = await fetch(`${apiUrl}/websites/configs/public/${subdomain}/`, {
+      const response = await fetch(`${apiUrl}/websites/public/${subdomain}/`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -358,7 +362,7 @@ export const WebsiteConfigProvider: React.FC<WebsiteConfigProviderProps> = ({ ch
 
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-        const response = await fetch(`${apiUrl}/websites/configs/public/${subdomain}/`, {
+        const response = await fetch(`${apiUrl}/websites/public/${subdomain}/`, {
           headers: {
             'Content-Type': 'application/json',
           },
